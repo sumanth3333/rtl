@@ -1,0 +1,108 @@
+/* ✅ Import Modern Premium Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Poppins:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme Variables */
+:root {
+  --background: theme(colors.zinc.50);
+  --foreground: theme(colors.zinc.900);
+  --muted: theme(colors.zinc.600);
+  --accent: theme(colors.blue.600);
+  --font-heading: "Poppins", sans-serif;
+  /* Change to 'Space Grotesk' for a futuristic feel */
+  --font-body: "Manrope", sans-serif;
+}
+
+/* ✅ Improved Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: theme(colors.zinc.850);
+    /* ✅ Softer dark mode */
+    --foreground: theme(colors.zinc.100);
+    --muted: theme(colors.zinc.400);
+    --accent: theme(colors.blue.400);
+  }
+}
+
+/* Global Styles */
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-body);
+}
+
+/* ✅ Modern, Premium Headings */
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: capitalize;
+}
+
+/* ✅ Inputs & Placeholders */
+input,
+textarea {
+  font-family: var(--font-body);
+  font-weight: 500;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--muted);
+  transition: all 0.3s ease-in-out;
+}
+
+::placeholder {
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+/* ✅ Subtle Grid Overlay (Only in Dark Mode) */
+@media (prefers-color-scheme: dark) {
+  .before\:bg-grid-light::before {
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 45px 45px;
+  }
+}
+
+/* ✅ Code Blocks */
+code,
+pre {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--accent);
+}
+
+/* ✅ Utility Classes */
+.text-muted {
+  color: var(--muted);
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+/* ✅ Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+  .dark\:bg-soft-dark {
+    background-color: theme(colors.zinc.850);
+  }
+
+  .dark\:shadow-muted {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+  }
+
+  .dark\:border-muted {
+    border-color: theme(colors.zinc.700);
+  }
+
+  .dark\:hover-bg {
+    background-color: theme(colors.zinc.800);
+    transition: background 0.3s ease-in-out;
+  }
+}
