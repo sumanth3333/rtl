@@ -12,7 +12,7 @@ export default function UnauthorizedPage() {
             <p className="text-gray-600 mt-2">You do not have permission to access this page.</p>
 
             {/* ✅ Pass a function instead of a string */}
-            <Button text="Go Back to Dashboard" onClick={() => router.push("/dashboard")} />
+            <Button onClick={() => router.push("/dashboard")} >Go Back to Dashboard</Button>
         </div>
     );
 }
