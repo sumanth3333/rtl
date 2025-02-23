@@ -6,9 +6,8 @@ import { validRoles } from "./constants/validRoles";
 export async function middleware(request: NextRequest) {
     console.log(`Inside Middleware.ts`);
     // ✅ Debugging cookies
-    console.log("🔍 Request Headers:", request.headers.get("cookie"));
-    const jwt = request.cookies.get("accessToken")?.value;
-    const refreshToken = request.cookies.get("refreshToken")?.value;
+    const jwt = request.nextUrl.searchParams.get("accessToken") || request.cookies.get("accessToken")?.value;
+    const refreshToken = request.nextUrl.searchParams.get("refreshToken") || request.cookies.get("refreshToken")?.value;
 
     if (!jwt && !refreshToken) {
         console.log("🚨 No tokens found. Redirecting to login.");
