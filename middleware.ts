@@ -5,7 +5,8 @@ import { validRoles } from "./constants/validRoles";
 
 export async function middleware(request: NextRequest) {
     console.log(`Inside Middleware.ts`);
-
+    // ✅ Debugging cookies
+    console.log("🔍 Request Headers:", request.headers.get("cookie"));
     const jwt = request.cookies.get("accessToken")?.value;
     const refreshToken = request.cookies.get("refreshToken")?.value;
 
