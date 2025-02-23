@@ -1,12 +1,13 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   experimental: {
     middlewarePrefetch: "strict", // ✅ Ensures cookies are passed to middleware
   },
   async headers() {
     return [
       {
-        source: "/api/:path*", // Apply headers to API routes
+        source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
           { key: "Access-Control-Allow-Origin", value: "https://rtl-drab.vercel.app" }, // ✅ Allow frontend
@@ -16,7 +17,7 @@ const nextConfig = {
       },
     ];
   },
-  reactStrictMode: true, // ✅ Optional, recommended for catching issues
+  reactStrictMode: true, // ✅ Recommended for debugging
 };
 
-module.exports = nextConfig;
+export default nextConfig;
