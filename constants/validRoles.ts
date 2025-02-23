@@ -1,0 +1,1 @@
+export const validRoles = ["ADMIN", "EMPLOYEE", "MANAGER", "OWNER"];

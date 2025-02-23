@@ -1,19 +1,28 @@
-import { metadata } from "@/config/metadata"; // ✅ Import metadata
-import { inter, jetbrainsMono } from "@/styles/theme"; // ✅ Import fonts
-import "@/styles/globals.css"; // ✅ Import global styles
-import AuthProvider from "@/contexts/AuthContext"; // ✅ Import global auth context
+import { metadata } from "@/config/metadata";
+import { inter, jetbrainsMono } from "@/styles/fonts";
+import "@/styles/globals.css";
+import AuthProvider from "@/contexts/AuthContext";
+import OwnerProvider from "@/contexts/OwnerContext";
+import { EmployeeProvider } from "@/contexts/EmployeeContext";
+import { ThemeProviderWrapper } from "./ThemeProviderWrapper";
 
-export { metadata }; // ✅ Use metadata globally
+export { metadata };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
-      <body suppressHydrationWarning={true} className="flex flex-col min-h-screen">
-        <AuthProvider> {/* ✅ Wrap children in authentication context */}
-          <main className="flex-grow">
-            {children}
-          </main>
-        </AuthProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased flex flex-col min-h-screen`}>
+        <ThemeProviderWrapper>
+          <AuthProvider>
+            <OwnerProvider>
+              <EmployeeProvider>
+                <main className="flex-grow">
+                  {children}
+                </main>
+              </EmployeeProvider>
+            </OwnerProvider>
+          </AuthProvider>
+        </ThemeProviderWrapper>
       </body>
     </html>
   );

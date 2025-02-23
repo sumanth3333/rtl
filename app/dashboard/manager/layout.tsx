@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import Sidebar from "@/components/ui/Sidebar";
-import Header from "@/components/ui/Header";
-import Footer from "@/components/ui/Footer";
+import Sidebar from "@/components/ui/sidebar/Sidebar";
+import Header from "@/components/ui/home/Header";
+import Footer from "@/components/ui/home/Footer";
 
 export default function ManagerLayout({ children }: { children: React.ReactNode }) {
     const [isCollapsed, setIsCollapsed] = useState(true); // Default to collapsed

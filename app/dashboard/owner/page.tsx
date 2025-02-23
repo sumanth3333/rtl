@@ -1,14 +1,11 @@
 "use client";
 
-import Card from "@/components/ui/Card";
+import Card from "@/components/ui/card/Card";
 import { dashboardCards, Role } from "@/config/roleConfig";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function OwnerDashboard() {
     const { role, isLoading } = useAuth();
-
-    console.log("🖥️ AdminDashboard: Role:", role, "Loading:", isLoading);
-
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -16,7 +13,6 @@ export default function OwnerDashboard() {
             </div>
         );
     }
-
     if (!role) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -24,9 +20,7 @@ export default function OwnerDashboard() {
             </div>
         );
     }
-
     const typedRole = role as Role;
-
     return (
         <div>
             <h2 className="text-2xl font-bold">Welcome to your {typedRole.charAt(0).toUpperCase() + typedRole.slice(1).toLowerCase()} Dashboard</h2>

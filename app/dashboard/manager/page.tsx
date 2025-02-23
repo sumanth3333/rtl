@@ -1,6 +1,6 @@
 "use client";
 
-import Card from "@/components/ui/Card";
+import Card from "@/components/ui/card/Card";
 import { dashboardCards, Role } from "@/config/roleConfig";
 import { useAuth } from "@/hooks/useAuth";
 
