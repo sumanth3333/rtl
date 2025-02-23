@@ -35,11 +35,14 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   // ✅ Logout Function
   const logout = async () => {
-    await apiLogout();
-    setIsAuthenticated(false);
-    setUsername(null);
-    setRole(null);
-    setIsLoading(false);
+    const response = await apiLogout();
+    if (response) {
+      setIsAuthenticated(false);
+      setUsername(null);
+      setRole(null);
+      setIsLoading(false);
+    }
+    return response;
   };
 
   return (

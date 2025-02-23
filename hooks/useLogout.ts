@@ -10,11 +10,12 @@ export function useLogout() {
     return async () => {
         try {
             console.log("🚀 Logging out...");
-            await logout(); // ✅ Clear user state in AuthContext
-            clearOwnerData();
-            console.log("✅ Logout successful. Redirecting...");
-
-            router.push("/auth/login"); // ✅ Redirect after logout
+            const response = await logout(); // ✅ Clear user state in AuthContext
+            if (response && response.status === 200) {
+                clearOwnerData();
+                console.log("✅ Logout successful. Redirecting...");
+                router.push("/auth/login"); // ✅ Redirect after logout
+            }
         } catch (error) {
             console.error("🚨 Logout failed:", error);
         }

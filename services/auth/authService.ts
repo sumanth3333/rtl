@@ -6,7 +6,7 @@ export const login = async (userName: string, password: string) => {
     try {
         const response = await apiClient.post("/auth/login", { userName, password });
         if (response.status === 200) {
-            console.log("✅ Login successful!");
+            console.log(response)
         }
         return response;
     } catch (error) {
@@ -38,7 +38,7 @@ export const refreshToken = async () => {
 export const getUserRoleFromToken = (): string | null => {
     try {
         const token = getAccessTokenFromCookie();
-        if (!token) {return null;}
+        if (!token) { return null; }
 
         const decoded: any = jwtDecode(token);
         return decoded?.ROLE || null;
@@ -58,16 +58,18 @@ const getAccessTokenFromCookie = (): string | null => {
 export const logout = async () => {
     console.log("🚀 Logging out...");
     try {
-        await apiClient.post("/auth/logout");
+        const response = await apiClient.post("/auth/logout");
         console.log("✅ Logout successful.");
+        return response;
     } catch (error) {
         console.error("🚨 Logout failed:", error);
+        return null;
     }
+
 };
 
 export const getUser = async () => {
     try {
-        console.log("🔄 Fetching user details...");
         const response = await fetch("/api/auth/me", {
             method: "GET",
             credentials: "include", // ✅ Ensures cookies are sent
@@ -81,7 +83,6 @@ export const getUser = async () => {
             return null;
         }
         const userData = await response.json();
-        console.log("✅ User data fetched:", userData);
         return userData;
     } catch (error) {
         console.error("❌ Error fetching user details:", error);

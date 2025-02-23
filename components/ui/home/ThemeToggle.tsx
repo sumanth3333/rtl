@@ -13,7 +13,7 @@ const ThemeToggle = () => {
         setMounted(true);
     }, []);
 
-    if (!mounted) {return <div className="w-10 h-10" />;} // Prevents hydration mismatch
+    if (!mounted) { return <div className="w-10 h-10" />; } // Prevents hydration mismatch
 
     // ✅ Retrieve persisted theme from localStorage
     const currentTheme = theme === "system" ? resolvedTheme : theme;

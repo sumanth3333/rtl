@@ -7,7 +7,7 @@ export interface AuthContextType {
     isAuthenticated: boolean;
     role: string | null;
     username: string | null;
-    logout: () => void;
+    logout: () => any;
     isLoading: boolean;
     refreshAuth: () => Promise<void>; // ✅ Added refreshAuth
 }

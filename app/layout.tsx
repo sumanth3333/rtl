@@ -11,7 +11,10 @@ export { metadata };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased flex flex-col min-h-screen`}>
+      <body
+        className={`${inter.variable} ${jetbrainsMono.variable} antialiased flex flex-col min-h-screen`}
+        suppressHydrationWarning
+      >
         <ThemeProviderWrapper>
           <AuthProvider>
             <OwnerProvider>

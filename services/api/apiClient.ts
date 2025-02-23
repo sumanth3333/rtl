@@ -5,7 +5,6 @@ const apiClient = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BASE_API_URL,
     headers: {
         "Content-Type": "application/json",
-        Accept: "application/json",
     },
     withCredentials: true, // ✅ Ensures HTTP-only cookies are sent with requests
 });
