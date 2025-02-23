@@ -14,7 +14,7 @@ export default function LoginPage() {
         if (isAuthenticated && role) {
             router.push(`/dashboard/${role.toLowerCase()}`);
         }
-    }, [isAuthenticated, role]);
+    }, [isAuthenticated, role, router]);
 
     if (isAuthenticated)
         return <div className="flex items-center justify-center min-h-screen text-gray-600 dark:text-gray-400">Redirecting...</div>;

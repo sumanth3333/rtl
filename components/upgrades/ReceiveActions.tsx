@@ -1,7 +1,7 @@
 import React from "react";
 
 interface ReceiveActionsProps {
-    selectedDevice: any;
+    selectedDevice: boolean;
     onActionClick: (actionType: string) => void;
 }
 
