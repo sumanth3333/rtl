@@ -1,8 +1,5 @@
 "use client";
 
-import UpgradePhonesLayout from "../layout";
-
-
 export default function InvoiceDetailsPage() {
     return (
         <div className="bg-white dark:bg-gray-900 shadow-lg rounded-lg p-6">

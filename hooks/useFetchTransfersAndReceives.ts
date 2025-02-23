@@ -12,7 +12,7 @@ export const useFetchTransfersAndReceives = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!store?.dealerStoreId) return;
+        if (!store?.dealerStoreId) {return;}
 
         const fetchData = async () => {
             setIsLoading(true);

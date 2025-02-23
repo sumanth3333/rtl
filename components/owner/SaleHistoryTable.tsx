@@ -35,7 +35,7 @@ export default function SaleHistoryTable({ saleHistory }: SaleHistoryTableProps)
     };
 
     const sortedData = [...saleHistory].sort((a, b) => {
-        if (!sortedField) return 0;
+        if (!sortedField) {return 0;}
         const aValue = a[sortedField as keyof SaleHistory];
         const bValue = b[sortedField as keyof SaleHistory];
 

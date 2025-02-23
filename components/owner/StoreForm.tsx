@@ -41,7 +41,7 @@ export default function StoreForm({ onSubmit }: StoreFormProps) {
     }, [companyName, setValue]);
 
     const handleConfirm = async () => {
-        if (!storeData) return;
+        if (!storeData) {return;}
         setLoading(true);
         console.log("🚀 Submitting store data:", storeData);
         try {

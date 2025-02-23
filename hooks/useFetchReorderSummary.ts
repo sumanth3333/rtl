@@ -10,7 +10,7 @@ export const useFetchReorderSummary = (companyName: string) => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!companyName) return;
+        if (!companyName) {return;}
 
         const fetchData = async () => {
             try {

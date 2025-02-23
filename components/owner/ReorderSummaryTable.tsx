@@ -20,7 +20,7 @@ export default function ReorderSummaryTable({ data }: ReorderSummaryTableProps) 
     const sortedData = data.map((storeData) => ({
         ...storeData,
         inventory: [...storeData.inventory].sort((a, b) => {
-            if (!sortedField) return 0;
+            if (!sortedField) {return 0;}
             const valA = a[sortedField as keyof typeof a];
             const valB = b[sortedField as keyof typeof b];
 

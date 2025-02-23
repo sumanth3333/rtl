@@ -14,7 +14,7 @@ export default function ManageStores() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!companyName) return;
+        if (!companyName) {return;}
 
         setLoading(true);
         Promise.all([getStores(companyName), getManagers(companyName)])
@@ -27,7 +27,7 @@ export default function ManageStores() {
     }, [companyName]);
 
     const handleAdd = async (newStore: Store) => {
-        if (!companyName) return;
+        if (!companyName) {return;}
         setLoading(true);
         const updatedStores = await addStore(companyName, newStore);
         setStores(updatedStores);

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import PaycheckNavbar from "@/components/owner/paycheck/PaycheckNavbar";
 
 export default function PaycheckPage() {
     const [activeSection, setActiveSection] = useState("generatePay");

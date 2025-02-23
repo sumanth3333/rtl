@@ -14,7 +14,7 @@ export default function AvailableDevicesPage() {
 
     // ✅ Ensure store is loaded before setting selectedStore
     useEffect(() => {
-        if (store) setSelectedStore(store.dealerStoreId);
+        if (store) {setSelectedStore(store.dealerStoreId);}
     }, [store]);
 
     // ✅ Exclude selected store from the stores list

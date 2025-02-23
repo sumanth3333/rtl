@@ -1,7 +1,5 @@
 import {
-    BuildingOfficeIcon, BuildingStorefrontIcon, DocumentTextIcon, CreditCardIcon, CalendarIcon, ChartBarIcon, ChartBarSquareIcon,
-    UserGroupIcon, UsersIcon, HomeIcon, CurrencyDollarIcon, ChartPieIcon, ArrowTrendingUpIcon, ClipboardDocumentListIcon,
-    CalendarDaysIcon, ArchiveBoxIcon, CheckCircleIcon, DevicePhoneMobileIcon, BanknotesIcon, ClipboardDocumentCheckIcon,
+    BuildingOfficeIcon, BuildingStorefrontIcon, DocumentTextIcon, CreditCardIcon, ChartBarIcon, ChartBarSquareIcon, UsersIcon, HomeIcon, CurrencyDollarIcon, ClipboardDocumentListIcon, ArchiveBoxIcon, DevicePhoneMobileIcon, BanknotesIcon, ClipboardDocumentCheckIcon,
     ClockIcon,
     DocumentMagnifyingGlassIcon,
     ArrowsRightLeftIcon

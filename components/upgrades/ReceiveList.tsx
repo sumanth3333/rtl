@@ -27,13 +27,13 @@ export default function ReceiveList({ receives, updateReceivesState }: ReceiveLi
     };
 
     const handleActionClick = (type: string) => {
-        if (!selectedDevice) return alert("Please select a device first.");
+        if (!selectedDevice) {return alert("Please select a device first.");}
         setActionType(type);
         setIsConfirmationModalOpen(true);
     };
 
     const handleConfirmAction = async () => {
-        if (!selectedDevice || !employee || !store) return;
+        if (!selectedDevice || !employee || !store) {return;}
 
         try {
             if (actionType === "receive") {

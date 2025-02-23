@@ -17,7 +17,7 @@ export default function SuccessModal({ isOpen, onClose, title, message }: Succes
         }
     }, [isOpen, onClose]);
 
-    if (!isOpen) return null;
+    if (!isOpen) {return null;}
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md z-50">

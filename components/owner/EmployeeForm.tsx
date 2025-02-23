@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import InputField from "@/components/ui/InputField";
 import AddressFields from "@/components/ui/addressFields/AddressFields";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { OwnerContext } from "@/contexts/OwnerContext";
 import { Employee, employeeSchema } from "@/types/employeeSchema";
 import Button from "@/components/ui/Button";
@@ -48,7 +48,7 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
     });
 
     const handleConfirm = async () => {
-        if (!employeeData) return;
+        if (!employeeData) {return;}
         setLoading(true);
         console.log("🚀 Submitting employee data:", employeeData);
         try {

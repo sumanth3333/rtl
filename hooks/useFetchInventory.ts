@@ -9,7 +9,7 @@ export function useFetchInventory(dealerStoreId: string) {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!dealerStoreId) return;
+        if (!dealerStoreId) {return;}
 
         const fetchAvailableInventory = async () => {
             try {

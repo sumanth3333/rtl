@@ -17,7 +17,7 @@ export default function LoginPage() {
     }, [isAuthenticated, role, router]);
 
     if (isAuthenticated)
-        return <div className="flex items-center justify-center min-h-screen text-gray-600 dark:text-gray-400">Redirecting...</div>;
+        {return <div className="flex items-center justify-center min-h-screen text-gray-600 dark:text-gray-400">Redirecting...</div>;}
 
     return (
         <div className="relative flex items-center justify-center min-h-screen px-6 md:px-12 

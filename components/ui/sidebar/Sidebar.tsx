@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import SidebarItem from "@/components/ui/sidebar/SidebarItem";
 import SidebarHeader from "@/components/ui/sidebar/SidebarHeader";
 import SidebarFooter from "@/components/ui/sidebar/SidebarFooter"; // ✅ Import Sidebar Footer
@@ -19,7 +18,7 @@ export default function Sidebar({
     const { role } = useAuth();
     console.log(`Role in sidebar: ${role}`);
 
-    if (!role) return <div className="text-gray-600 dark:text-gray-300 p-4">Loading...</div>;
+    if (!role) {return <div className="text-gray-600 dark:text-gray-300 p-4">Loading...</div>;}
     const typedRole = role as Role;
 
     return (

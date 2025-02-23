@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import PaycheckLayout from "../layout";
 
 export default function CompanyCommissionPage() {
     const [paymentFrequency, setPaymentFrequency] = useState<string>("weekly");

@@ -26,7 +26,7 @@ export default function CreateInvoicePage() {
         watch,
         setValue,
         reset, // ✅ Import reset function
-        formState: { errors },
+        formState: { },
     } = useForm<CreateInvoiceFormValues>({
         resolver: zodResolver(createInvoiceSchema),
         defaultValues: {

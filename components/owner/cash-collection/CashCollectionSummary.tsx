@@ -1,6 +1,5 @@
 "use client";
 
-import { BanknotesIcon } from "@heroicons/react/24/outline";
 import { CashCollectionData } from "@/types/cashCollectionTypes";
 import { useState } from "react";
 import CashSummary from "../CashSummary";

@@ -17,7 +17,7 @@ export default function Home() {
   }, [isAuthenticated, role, router]);
 
   // ✅ Prevent rendering login form if already logged in
-  if (isAuthenticated) return <div>Redirecting...</div>;
+  if (isAuthenticated) {return <div>Redirecting...</div>;}
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gradient-to-br from-blue-100 via-blue-300 to-blue-500 dark:from-gray-900 dark:via-gray-800 dark:to-gray-950">

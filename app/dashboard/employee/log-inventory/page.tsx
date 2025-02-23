@@ -15,27 +15,27 @@ export default function InventoryPage() {
 
     // ✅ Fetch Inventory on Page Load
     useEffect(() => {
-        if (!store) return;
+        if (!store) {return;}
         const loadInventory = async () => {
             try {
                 const data = await fetchInventory(dealerStoreId);
                 setInventory(data);
             } catch (err) {
-                setError("Failed to load inventory.");
+                setError("Failed to load inventory." + err);
             } finally {
                 setLoading(false);
             }
         };
         loadInventory();
-    }, [dealerStoreId]);
+    }, [dealerStoreId, store]);
 
     // ✅ Handle Save Action
-    const handleSave = async (updatedProducts: any) => {
+    const handleSave = async (updatedProducts: { id: number; productName: string; quantity: number }[]) => {
         try {
             await updateInventory(dealerStoreId, updatedProducts);
             setInventory(updatedProducts);
         } catch (error) {
-            setError("Failed to update inventory.");
+            setError("Failed to update inventory." + error);
         }
     };
 

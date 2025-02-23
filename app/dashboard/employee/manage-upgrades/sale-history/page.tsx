@@ -1,7 +1,6 @@
 "use client";
 
 import PreviouslySoldDevicesTable from "@/components/upgrades/PreviouslySoldDevicesTable";
-import UpgradePhonesLayout from "../layout";
 import SaleHistoryFilters from "@/components/upgrades/SaleHistoryFilters";
 import { useState } from "react";
 import { useFetchSoldDevices } from "@/hooks/useFetchSoldDevices";

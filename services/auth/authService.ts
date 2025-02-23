@@ -38,7 +38,7 @@ export const refreshToken = async () => {
 export const getUserRoleFromToken = (): string | null => {
     try {
         const token = getAccessTokenFromCookie();
-        if (!token) return null;
+        if (!token) {return null;}
 
         const decoded: any = jwtDecode(token);
         return decoded?.ROLE || null;

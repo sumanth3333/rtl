@@ -25,13 +25,13 @@ export default function ConfirmationModal({
 }: ConfirmationModalProps) {
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Escape") onClose();
+            if (event.key === "Escape") {onClose();}
         };
-        if (isOpen) window.addEventListener("keydown", handleKeyDown);
+        if (isOpen) {window.addEventListener("keydown", handleKeyDown);}
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isOpen, onClose]);
 
-    if (!isOpen) return null;
+    if (!isOpen) {return null;}
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md z-50">

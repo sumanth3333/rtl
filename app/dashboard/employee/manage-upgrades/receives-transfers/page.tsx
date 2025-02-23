@@ -1,7 +1,6 @@
 "use client";
 
 import TransferList from "@/components/upgrades/TransferList";
-import UpgradePhonesLayout from "../layout";
 import { useFetchTransfersAndReceives } from "@/hooks/useFetchTransfersAndReceives";
 import ReceiveList from "@/components/upgrades/ReceiveList";
 
@@ -12,8 +11,8 @@ export default function TransfersAndReceivesPage() {
         setReceives((prevReceives) => prevReceives.filter((device) => device.imei !== updatedDeviceImei));
     };
 
-    if (isLoading) return <p className="text-center text-gray-700">Loading...</p>;
-    if (error) return <p className="text-red-500 text-center">Error: {error}</p>;
+    if (isLoading) {return <p className="text-center text-gray-700">Loading...</p>;}
+    if (error) {return <p className="text-red-500 text-center">Error: {error}</p>;}
 
     return (
         <div className="p-6 bg-white dark:bg-gray-900 shadow-lg rounded-lg">

@@ -43,8 +43,8 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
             localStorage.setItem("clockinLocation", clockinLocation || "N/A");
             localStorage.setItem("clockinTime", clockinTime || "N/A");
 
-            if (employee) localStorage.setItem("employeeData", JSON.stringify(employee));
-            if (store) localStorage.setItem("storeData", JSON.stringify(store));
+            if (employee) {localStorage.setItem("employeeData", JSON.stringify(employee));}
+            if (store) {localStorage.setItem("storeData", JSON.stringify(store));}
         }
     }, [isClockin, clockinLocation, clockinTime, employee, store]);
 

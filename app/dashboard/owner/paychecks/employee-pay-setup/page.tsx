@@ -1,6 +1,5 @@
 "use client";
 
-import PaycheckLayout from "../layout";
 
 export default function EmployeePaySetupPage() {
     return (
