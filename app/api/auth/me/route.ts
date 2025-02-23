@@ -20,7 +20,6 @@ export async function GET() {
                 accessToken, // ✅ Include token if needed for further API calls
             });
         } catch (error) {
-            console.log(error);
             return NextResponse.json({ loginEmail: null, role: null, accessToken: null }); // ✅ Return null instead of 401
         }
     } catch (error) {

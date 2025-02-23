@@ -2,7 +2,8 @@
 
 import apiClient from "../api/apiClient";
 import { useEmployee } from "@/hooks/useEmployee";
-import { InvoiceData, SaleRequest, TransferRequest } from "@/types/upgradePhoneTypes";
+import { InvoiceData } from "@/types/invoiceTypes";
+import { SaleRequest, TransferRequest } from "@/types/upgradePhoneTypes";
 
 const useUpgradePhonesService = () => {
     const { employee, store } = useEmployee();

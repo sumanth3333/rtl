@@ -14,7 +14,7 @@ export default function NotFoundPage() {
         } else {
             router.replace("/auth/login"); // ✅ Redirect unauthenticated users
         }
-    }, [isAuthenticated, role]);
+    }, [isAuthenticated, role, router]);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen text-center">

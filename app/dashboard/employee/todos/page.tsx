@@ -13,7 +13,6 @@ export default function TodosPage() {
     // ✅ Wait for store data to be available before setting storeId
     useEffect(() => {
         if (store?.dealerStoreId) {
-            console.log("Store ID Loaded:", store.dealerStoreId);
             setStoreId(store.dealerStoreId);
         }
     }, [store]);
@@ -21,11 +20,6 @@ export default function TodosPage() {
     // ✅ Fetch todos only when storeId is available
     const { todos = [], setTodos, loading } = useFetchTodos(storeId ?? "");
     const { updateStatus } = useUpdateTodoStatus(setTodos);
-
-    useEffect(() => {
-        console.log("Store Updated:", store);
-        console.log("Todos Updated:", todos);
-    }, [store, todos]);
 
     return (
         <main className="w-full min-h-screen px-6 sm:px-10 md:px-16 lg:px-32 py-10 md:py-14 
