@@ -6,14 +6,7 @@ import { validRoles } from "./constants/validRoles";
 export async function middleware(request: NextRequest) {
     console.log(`Inside Middleware.ts`);
 
-    // ✅ First, check if the token is in the Authorization header
-    let jwt = request.headers.get("Authorization")?.split(" ")[1];
-
-    // ✅ Fallback to checking in cookies (works in dev but not production)
-    if (!jwt) {
-        jwt = request.cookies.get("accessToken")?.value;
-    }
-
+    const jwt = request.cookies.get("accessToken")?.value;
     const refreshToken = request.cookies.get("refreshToken")?.value;
 
     if (!jwt && !refreshToken) {
@@ -22,8 +15,8 @@ export async function middleware(request: NextRequest) {
     }
 
     if (!jwt && refreshToken) {
-        console.log("🔄 Access token missing, but refreshToken exists. Let Axios handle refresh.");
-        return NextResponse.next(); // ✅ Allow frontend to refresh token
+        console.log("🔄 Access token missing, allowing frontend to refresh...");
+        return NextResponse.next(); // ✅ Let Axios handle refresh
     }
 
     try {
@@ -41,8 +34,8 @@ export async function middleware(request: NextRequest) {
         console.error("🚨 JWT verification failed:", error);
 
         if (refreshToken) {
-            console.log("🔄 JWT expired but refreshToken exists. Let Axios handle refresh.");
-            return NextResponse.next();
+            console.log("🔄 JWT expired but refreshToken exists. Allowing frontend to refresh...");
+            return NextResponse.next(); // ✅ Let Axios handle it
         }
 
         const response = NextResponse.redirect(new URL("/auth/login", request.url));
