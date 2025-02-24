@@ -1,38 +1,70 @@
 import { jwtDecode } from "jwt-decode";
 import apiClient from "../api/apiClient";
+import axios from "axios";
+import Cookies from "js-cookie";
 
-// ✅ Login Function (Backend Handles Cookie Storage)
 export const login = async (userName: string, password: string) => {
     try {
+        console.log("🔑 Logging in...");
         const response = await apiClient.post("/auth/login", { userName, password });
+
         if (response.status === 200) {
-            console.log(response)
+            const authHeader = response.headers["authorization"];
+            if (authHeader) {
+                const accessToken = authHeader.split(" ")[1];
+
+                // ✅ Store accessToken in a cookie (Middleware can read it)
+                Cookies.set("accessToken", accessToken, { expires: 1, secure: true, sameSite: "Lax" });
+
+                console.log("✅ Login successful, token stored.");
+            }
         }
+
+        // window.location.href = "/dashboard"; // ✅ Redirect after login
         return response;
+
     } catch (error) {
         console.error("🚨 Login request failed:", error);
         throw error;
     }
 };
 
-// ✅ Calls API to refresh token (cookie gets updated automatically)
 export const refreshToken = async () => {
     try {
         console.log("🔄 Calling refresh token API...");
-        const response = await apiClient.post("/auth/refreshToken");
+
+        // ✅ Use separate axios instance to prevent recursion
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_BASE_API_URL}/auth/refreshToken`,
+            {},
+            { withCredentials: true } // ✅ Ensures refreshToken cookie is sent
+        );
 
         if (response.status === 200) {
-            console.log("✅ Token refreshed successfully (HttpOnly cookie updated).");
-            return true;
+            const newAccessToken = response.headers["authorization"]?.split(" ")[1];
+
+            if (newAccessToken) {
+                // ✅ Store in sessionStorage for frontend use
+                sessionStorage.setItem("accessToken", newAccessToken);
+                // ✅ Store in cookies for middleware use
+                Cookies.set("accessToken", newAccessToken, { expires: 1, secure: true, sameSite: "Lax" });
+
+                console.log("✅ Token refreshed and stored in cookies.");
+                return newAccessToken;
+            }
+
+            console.warn("⚠️ No new accessToken found in response headers.");
+            return null;
         }
 
         console.warn("⚠️ Refresh token request failed.");
-        return false;
+        return null;
     } catch (error) {
         console.error("❌ Refresh token request failed:", error);
-        return false;
+        return null;
     }
 };
+
 
 // ✅ Extract user role from `accessToken` stored in HttpOnly cookie
 export const getUserRoleFromToken = (): string | null => {

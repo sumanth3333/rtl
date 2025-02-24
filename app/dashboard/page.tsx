@@ -9,19 +9,14 @@ export default async function DashboardMain() {
     switch (role) {
         case "admin":
             redirect("/dashboard/admin");
-            break;
         case "employee":
             redirect("/dashboard/employee");
-            break;
         case "manager":
             redirect("/dashboard/manager");
-            break;
         case "owner":
             redirect("/dashboard/owner");
-            break;
         default:
             redirect("/auth/login"); // ✅ Redirect unauthenticated users
     }
 
-    return null; // ✅ Ensures nothing renders
 }
