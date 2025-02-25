@@ -35,7 +35,9 @@ export default function ReceiveList({ receives, updateReceivesState }: ReceiveLi
     };
 
     const handleConfirmAction = async () => {
-        if (!selectedDevice || !employee || !store) return;
+        if (!selectedDevice || !employee || !store) {
+            return;
+        }
         try {
             if (actionType === "receive") {
                 const payload = {
