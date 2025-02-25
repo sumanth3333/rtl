@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { getUser, logout as apiLogout } from "@/services/auth/authService";
+import { getUser, logoutAPI } from "@/services/auth/authService";
 import { AuthContextType } from "@/types/authTypes";
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,7 +35,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   // ✅ Logout Function
   const logout = async () => {
-    const response = await apiLogout();
+    const response = await logoutAPI();
     if (response) {
       setIsAuthenticated(false);
       setUsername(null);

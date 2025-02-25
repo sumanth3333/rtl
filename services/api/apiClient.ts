@@ -1,10 +1,13 @@
 import axios from "axios";
 import { handleApiError } from "./errorHandler";
 
+const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 const apiClient = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BASE_API_URL,
     headers: {
         "Content-Type": "application/json",
+        "Timezone": userTimezone
     },
     withCredentials: true, // ✅ Ensures HTTP-only cookies are sent with requests
 });
