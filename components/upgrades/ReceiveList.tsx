@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import SuccessModal from "@/components/ui/modals/SuccessModal";
 import { useReceiveActions } from "@/hooks/useReceiveActions";
-import { useEmployee } from "@/hooks/useEmployee"; // ✅ Using Employee Context
+import { useEmployee } from "@/hooks/useEmployee";
 import ReceiveRow from "./ReceiveRow";
 import { Receive } from "@/types/transferTypes";
 
@@ -19,7 +19,7 @@ export default function ReceiveList({ receives, updateReceivesState }: ReceiveLi
     const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const { handleReceive, handleCancel } = useReceiveActions();
-    const { employee, store } = useEmployee(); // ✅ Fetch Employee & Store Details
+    const { employee, store } = useEmployee();
     const [successMessage, setSuccessMessage] = useState("");
 
     const handleRowSelection = (device: Receive) => {
@@ -27,29 +27,28 @@ export default function ReceiveList({ receives, updateReceivesState }: ReceiveLi
     };
 
     const handleActionClick = (type: string) => {
-        if (!selectedDevice) {return alert("Please select a device first.");}
+        if (!selectedDevice) {
+            return alert("Please select a device first.");
+        }
         setActionType(type);
         setIsConfirmationModalOpen(true);
     };
 
     const handleConfirmAction = async () => {
-        if (!selectedDevice || !employee || !store) {return;}
-
+        if (!selectedDevice || !employee || !store) return;
         try {
             if (actionType === "receive") {
                 const payload = {
-                    employeeNtid: employee.employeeNtid, // ✅ Get from context
-                    receivingDealerStoreId: store.dealerStoreId, // ✅ Get from context
+                    employeeNtid: employee.employeeNtid,
+                    receivingDealerStoreId: store.dealerStoreId,
                     imei: selectedDevice.imei,
                 };
-
                 await handleReceive(payload);
                 setSuccessMessage("Device successfully received!");
             } else {
                 await handleCancel(selectedDevice.imei);
                 setSuccessMessage("Transfer successfully canceled!");
             }
-
             updateReceivesState(selectedDevice.imei);
             setSelectedDevice(null);
             setIsSuccessModalOpen(true);
@@ -62,19 +61,31 @@ export default function ReceiveList({ receives, updateReceivesState }: ReceiveLi
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded shadow-md p-4">
-            <table className="w-full border border-gray-300">
-                <thead>
-                    <tr className="bg-gray-700 text-white">
-                        <th className="border px-4 py-2">Select</th>
-                        <th className="border px-4 py-2">Device Name</th>
-                        <th className="border px-4 py-2">IMEI</th>
-                        <th className="border px-4 py-2">Transferred From</th>
-                        <th className="border px-4 py-2">Transferred By</th>
-                        <th className="border px-4 py-2">Date</th>
+        <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+                <thead className="bg-gray-700">
+                    <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            Select
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            Device Name
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            IMEI
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            Transferred From
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            Transferred By
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            Date
+                        </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-200">
                     {receives.length > 0 ? (
                         receives.map((receive) => (
                             <ReceiveRow
@@ -86,7 +97,7 @@ export default function ReceiveList({ receives, updateReceivesState }: ReceiveLi
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={6} className="text-center py-4 text-gray-500">
+                            <td colSpan={6} className="px-4 py-4 text-center text-gray-500">
                                 No pending receives.
                             </td>
                         </tr>
@@ -94,13 +105,11 @@ export default function ReceiveList({ receives, updateReceivesState }: ReceiveLi
                 </tbody>
             </table>
 
-            {/* ✅ Action Buttons */}
-            <div className="flex justify-center mt-4 space-x-4">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row justify-center mt-4 space-y-2 sm:space-y-0 sm:space-x-4">
                 <button
                     onClick={() => handleActionClick("receive")}
-                    className={`px-4 py-2 rounded-lg font-medium text-white transition ${selectedDevice
-                            ? "bg-green-600 hover:bg-green-700"
-                            : "bg-gray-400 cursor-not-allowed"
+                    className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium text-white transition ${selectedDevice ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
                         }`}
                     disabled={!selectedDevice}
                 >
@@ -108,9 +117,7 @@ export default function ReceiveList({ receives, updateReceivesState }: ReceiveLi
                 </button>
                 <button
                     onClick={() => handleActionClick("cancel")}
-                    className={`px-4 py-2 rounded-lg font-medium text-white transition ${selectedDevice
-                            ? "bg-red-600 hover:bg-red-700"
-                            : "bg-gray-400 cursor-not-allowed"
+                    className={`w-full sm:w-auto px-4 py-2 rounded-lg font-medium text-white transition ${selectedDevice ? "bg-red-600 hover:bg-red-700" : "bg-gray-400 cursor-not-allowed"
                         }`}
                     disabled={!selectedDevice}
                 >
@@ -118,7 +125,7 @@ export default function ReceiveList({ receives, updateReceivesState }: ReceiveLi
                 </button>
             </div>
 
-            {/* ✅ Modals */}
+            {/* Modals */}
             <ConfirmationModal
                 isOpen={isConfirmationModalOpen}
                 onConfirm={handleConfirmAction}

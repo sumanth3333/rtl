@@ -79,7 +79,7 @@ export default function ActionForm({ formType, device, storeIds, closeForm }: Ac
     };
 
     return (
-        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+        <div className="bg-gray-100 dark:bg-gray-800 p-4 sm:p-6 rounded-lg">
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && <p className="text-red-500 text-sm">{error}</p>}
                 {success && <p className="text-green-500 text-sm">{success}</p>}
@@ -87,24 +87,28 @@ export default function ActionForm({ formType, device, storeIds, closeForm }: Ac
                 {formType === "sale" && (
                     <>
                         <div>
-                            <label className="block text-gray-700 dark:text-gray-300 font-medium">Customer Phone</label>
+                            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                                Customer Phone
+                            </label>
                             <input
                                 type="text"
                                 name="customerPhone"
                                 value={formData.customerPhone}
                                 onChange={handleChange}
-                                className="w-full border px-4 py-2 rounded-md text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-gray-900"
+                                className="w-full border border-gray-300 dark:border-gray-600 px-3 py-2 sm:px-4 sm:py-2 rounded-md text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-700 dark:text-gray-300 font-medium">Price</label>
+                            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                                Price
+                            </label>
                             <input
                                 type="number"
                                 name="price"
                                 value={formData.price}
                                 onChange={handleChange}
-                                className="w-full border px-4 py-2 rounded-md text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-gray-900"
+                                className="w-full border border-gray-300 dark:border-gray-600 px-3 py-2 sm:px-4 sm:py-2 rounded-md text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                                 required
                             />
                         </div>
@@ -113,12 +117,14 @@ export default function ActionForm({ formType, device, storeIds, closeForm }: Ac
 
                 {formType === "transfer" && (
                     <div>
-                        <label className="block text-gray-700 dark:text-gray-300 font-medium">Transfer To</label>
+                        <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                            Transfer To
+                        </label>
                         <select
                             name="transferTo"
                             value={formData.transferTo}
                             onChange={handleChange}
-                            className="w-full border px-4 py-2 rounded-md text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-gray-900"
+                            className="w-full border border-gray-300 dark:border-gray-600 px-3 py-2 sm:px-4 sm:py-2 rounded-md text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                             required
                         >
                             <option value="">Select Store</option>
@@ -131,10 +137,11 @@ export default function ActionForm({ formType, device, storeIds, closeForm }: Ac
                     </div>
                 )}
 
-                <div className="flex justify-end space-x-2">
+                <div className="flex flex-col sm:flex-row justify-end sm:space-x-2 space-y-2 sm:space-y-0">
                     <button
                         type="submit"
-                        className={`px-4 py-2 rounded text-white ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}`}
+                        className={`w-full sm:w-auto px-4 py-2 rounded text-white transition-colors ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+                            }`}
                         disabled={loading}
                     >
                         {loading ? "Processing..." : "Submit"}
@@ -142,7 +149,7 @@ export default function ActionForm({ formType, device, storeIds, closeForm }: Ac
                     <button
                         type="button"
                         onClick={closeForm}
-                        className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                        className="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
                     >
                         Cancel
                     </button>

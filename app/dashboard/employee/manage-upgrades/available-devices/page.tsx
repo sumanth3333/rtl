@@ -12,12 +12,14 @@ export default function AvailableDevicesPage() {
     const { devices, stores, isLoading, error } = useFetchAvailableDevices();
     const [selectedStore, setSelectedStore] = useState<string | null>(null);
 
-    // ✅ Ensure store is loaded before setting selectedStore
+    // Set the selected store once employee store is loaded
     useEffect(() => {
-        if (store) {setSelectedStore(store.dealerStoreId);}
+        if (store) {
+            setSelectedStore(store.dealerStoreId);
+        }
     }, [store]);
 
-    // ✅ Exclude selected store from the stores list
+    // Exclude selected store from the stores list
     const otherStores = stores.filter((s) => s.dealerStoreId !== selectedStore);
 
     return (
@@ -25,26 +27,26 @@ export default function AvailableDevicesPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="w-full min-h-screen px-6 sm:px-10 md:px-16 lg:px-32 py-10 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-200 transition-all duration-300 flex flex-col"
+            className="w-full min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-200 transition-all duration-300 flex flex-col items-center px-4 py-8 sm:px-6 md:px-10 lg:px-32"
         >
-            {/* ✅ Page Title */}
+            {/* Page Title */}
             <motion.h1
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-3xl sm:text-4xl font-bold text-center tracking-tight mb-8"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold text-center tracking-tight mb-6"
             >
                 📱 Available Devices
             </motion.h1>
 
-            {/* ✅ Content Section */}
+            {/* Content Section */}
             <motion.section
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
                 className="w-full max-w-5xl mx-auto"
             >
-                {/* ✅ Store Selector */}
+                {/* Store Selector */}
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -57,7 +59,9 @@ export default function AvailableDevicesPage() {
                         disabled={!selectedStore}
                         className="w-full max-w-md border border-gray-300 dark:border-gray-700 px-4 py-2 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition"
                     >
-                        <option value="" disabled>Select a Store</option>
+                        <option value="" disabled>
+                            Select a Store
+                        </option>
                         {stores.map((store: Store) => (
                             <option key={store.dealerStoreId} value={store.dealerStoreId}>
                                 {store.storeName} - {store.dealerStoreId}
@@ -66,7 +70,7 @@ export default function AvailableDevicesPage() {
                     </select>
                 </motion.div>
 
-                {/* ✅ Table or Loading/Error Message */}
+                {/* Table or Loading/Error Message */}
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -78,8 +82,9 @@ export default function AvailableDevicesPage() {
                         <p className="text-center text-red-500">{error}</p>
                     ) : (
                         <AvailableDevicesTable
-                            devices={devices.filter(d => d.storeId === selectedStore)}
+                            devices={devices.filter((d) => d.storeId === selectedStore)}
                             storeIds={otherStores}
+                            selectedStore={selectedStore}
                         />
                     )}
                 </motion.div>

@@ -6,7 +6,7 @@ export default function UpgradePhonesLayout({ children }: { children: React.Reac
     return (
         <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
             <UpgradesNavBar />
-            <main className="flex-grow container mx-auto p-6 mt-16 overflow-y-auto">
+            <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-20 pb-4 overflow-y-auto">
                 {children}
             </main>
         </div>

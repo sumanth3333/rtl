@@ -9,9 +9,9 @@ import {
     ClockIcon,
     BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
-import { useAuth } from "@/hooks/useAuth"; // ✅ Import authentication hook
-import { useOwner } from "@/hooks/useOwner"; // ✅ Import owner-specific hook
-import { useEmployee } from "@/hooks/useEmployee"; // ✅ Import Employee context
+import { useAuth } from "@/hooks/useAuth";
+import { useOwner } from "@/hooks/useOwner";
+import { useEmployee } from "@/hooks/useEmployee";
 
 interface SidebarHeaderProps {
     isCollapsed: boolean;
@@ -24,79 +24,111 @@ export default function SidebarHeader({ isCollapsed, setIsCollapsed }: SidebarHe
     const { employee, store, clockinTime, clockinLocation, isClockin } = useEmployee();
 
     return (
-        <div className={`relative flex items-center justify-between px-4 py-5 border-b 
-            bg-white/60 dark:bg-gray-900/60 backdrop-blur-lg shadow-md dark:shadow-lg 
-            border-gray-200 dark:border-gray-700 transition-all duration-300
-            ${isCollapsed ? "py-3 px-2" : "py-5 px-4"}`}>
-
-            {/* ✅ Employee View */}
-            {!isCollapsed && role === "EMPLOYEE" && employee && store && (
-                <div className="flex flex-col gap-3">
-                    {/* Employee Name */}
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 flex items-center justify-center rounded-full bg-teal-600 text-white font-semibold uppercase">
-                            {employee.employeeName.charAt(0)}
-                        </div>
-                        <div className="flex flex-col">
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{employee.employeeName}</h2>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                                <IdentificationIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                                {employee.employeeNtid}
-                            </p>
-                        </div>
+        <div
+            className={`flex flex-col border-b transition-all duration-300 ${isCollapsed ? "px-2 py-3" : "px-4 py-5"
+                } bg-white/60 dark:bg-gray-900/60 backdrop-blur-lg shadow-md dark:shadow-lg border-gray-200 dark:border-gray-700`}
+        >
+            {/* Identity Row with Collapse Button */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-teal-600 text-white font-semibold uppercase">
+                        {role === "EMPLOYEE" && employee
+                            ? employee.employeeName.charAt(0)
+                            : username
+                                ? username.charAt(0)
+                                : <UserCircleIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />}
                     </div>
-
-                    {/* Store & Clock-in Details */}
-                    <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg shadow-md flex flex-col gap-2">
-                        <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                            <BriefcaseIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                            Store: <span className="font-medium">{store?.storeName || "N/A"}</span>
-                        </p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                            <MapPinIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                            Store ID: <span className="font-medium">{store?.dealerStoreId || "N/A"}</span>
-                        </p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                            <ClockIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                            Clock-in: <span className="font-medium">{isClockin ? clockinTime : "N/A"}</span>
-                        </p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                            Clock-in Location: <span className="font-medium">{isClockin ? clockinLocation : "N/A"}</span>
-                        </p>
-                    </div>
-                </div>
-            )}
-
-            {/* ✅ Owner/Admin View */}
-            {!isCollapsed && (role === "OWNER" || role === "ADMIN") && (
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold uppercase">
-                            {username ? username.charAt(0) : <UserCircleIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />}
-                        </div>
-                        <div className="flex flex-col">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{username || "User"}</h2>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{role}</p>
-                        </div>
-                    </div>
-
-                    {isOwner && companyName && (
-                        <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-md">
-                            <BuildingOfficeIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                            <span>{companyName}</span>
+                    {/* Render identity details only when not collapsed */}
+                    {!isCollapsed && (
+                        <div>
+                            {role === "EMPLOYEE" && employee ? (
+                                <>
+                                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                                        {employee.employeeName}
+                                    </h2>
+                                    <p className="flex items-center text-xs text-gray-600 dark:text-gray-400 gap-1">
+                                        <IdentificationIcon className="w-4 h-4" />
+                                        {employee.employeeNtid}
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                        {username || "User"}
+                                    </h2>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">{role}</p>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
-            )}
+                {/* Collapse Button */}
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-transform duration-300 transform"
+                    aria-label="Toggle Sidebar"
+                >
+                    <ChevronLeftIcon
+                        className={`w-4 h-4 text-gray-900 dark:text-white transition-transform duration-300 ${isCollapsed ? "rotate-180" : "rotate-0"}`}
+                    />
+                </button>
+            </div>
 
-            {/* ✅ Collapse Button */}
-            <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className={`p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700
-                    transition-all duration-300 transform ${isCollapsed ? "rotate-180" : "rotate-0"}`}
-            >
-                <ChevronLeftIcon className="w-4 h-4 text-gray-900 dark:text-white" />
-            </button>
+            {/* Additional Details in a Table-like Grid */}
+            {!isCollapsed && (
+                <>
+                    {role === "EMPLOYEE" && employee && store && (
+                        <div className="mt-3">
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-100 dark:bg-gray-800 p-2 rounded shadow">
+                                <div className="flex items-center gap-1">
+                                    <BriefcaseIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                    <span className="font-medium text-xs text-gray-700 dark:text-gray-300">Store:</span>
+                                </div>
+                                <div className="text-xs text-gray-700 dark:text-gray-300">
+                                    {store?.storeName || "N/A"}
+                                </div>
+
+                                <div className="flex items-center gap-1">
+                                    <MapPinIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                    <span className="font-medium text-xs text-gray-700 dark:text-gray-300">Store ID:</span>
+                                </div>
+                                <div className="text-xs text-gray-700 dark:text-gray-300">
+                                    {store?.dealerStoreId || "N/A"}
+                                </div>
+
+                                <div className="flex items-center gap-1">
+                                    <ClockIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                    <span className="font-medium text-xs text-gray-700 dark:text-gray-300">Clock-in:</span>
+                                </div>
+                                <div className="text-xs text-gray-700 dark:text-gray-300">
+                                    {isClockin ? clockinTime : "N/A"}
+                                </div>
+
+                                <div className="flex items-center gap-1">
+                                    <span className="font-medium text-xs text-gray-700 dark:text-gray-300">Clock-in At:</span>
+                                </div>
+                                <div className="text-xs text-gray-700 dark:text-gray-300">
+                                    {isClockin ? clockinLocation : "N/A"}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {(role === "OWNER" || role === "ADMIN") && (
+                        <div className="mt-3">
+                            {isOwner && companyName && (
+                                <div className="grid grid-cols-2 items-center gap-x-4 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-xs text-gray-700 dark:text-gray-300">
+                                    <div className="flex items-center gap-1">
+                                        <BuildingOfficeIcon className="w-4 h-4" />
+                                        <span className="font-medium">Company Name:</span>
+                                    </div>
+                                    <div>{companyName}</div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </>
+            )}
         </div>
     );
 }

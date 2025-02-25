@@ -7,11 +7,10 @@ import InputField from "@/components/ui/InputField";
 import Button from "@/components/ui/Button";
 import { useEmployee } from "@/hooks/useEmployee";
 import { submitEodReport } from "@/services/employee/employeeService";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmationModal from "../ui/modals/ConfirmationModal";
 import SuccessModal from "../ui/modals/SuccessModal";
-import { useEffect } from "react";
 
 export default function EodForm() {
     const { employee, store } = useEmployee();
@@ -31,7 +30,7 @@ export default function EodForm() {
         reset,
     } = useForm<EodReport>({
         resolver: zodResolver(eodReportSchema),
-        mode: "onChange", // ✅ Live validation updates
+        mode: "onChange",
         defaultValues: {
             store: { dealerStoreId: store?.dealerStoreId },
             employee: { employeeNtid: employee?.employeeNtid },
@@ -69,16 +68,11 @@ export default function EodForm() {
         }
     }, [store, employee, reset]);
 
-    console.log("Form Errors:", errors);
-    console.log("Is form valid?", isValid);
-
-
-    // ✅ Watch form values to dynamically calculate differences
+    // Watch form values to dynamically calculate differences
     const actualCash = Number(watch("actualCash"));
     const systemCash = Number(watch("systemCash"));
     const actualCard = Number(watch("actualCard"));
     const systemCard = Number(watch("systemCard"));
-    const systemAccessories = Number(watch("systemAccessories"));
 
     const cashDifference = actualCash - systemCash;
     const cardDifference = actualCard - systemCard;
@@ -103,7 +97,7 @@ export default function EodForm() {
             expenseReason: hasExpense ? data.expenseReason : "NONE",
         };
         setFormData(formattedData);
-        setShowConfirm(true); // ✅ Open confirmation modal
+        setShowConfirm(true);
     };
 
     const handleConfirm = async () => {
@@ -121,52 +115,138 @@ export default function EodForm() {
 
     return (
         <>
-            <form onSubmit={handleSubmit(onSubmit)} className="p-6 bg-white dark:bg-gray-900 shadow-lg rounded-lg">
-                {/* ✅ Three fields per row layout (Actual, System, Difference) */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <InputField label="Actual Cash" type="number" {...register("actualCash", { valueAsNumber: true })} error={errors.actualCash?.message} />
-                    <InputField label="System Cash" type="number" {...register("systemCash", { valueAsNumber: true })} error={errors.systemCash?.message} />
-                    <InputField label="Cash Difference" type="text" value={`$${cashDifference.toFixed(2)}`} readOnly />
+            <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6 bg-white dark:bg-gray-900 shadow-lg rounded-lg">
+                {/* Cash Group */}
+                <div className="mt-4">
+                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-2">Cash</h3>
+                    <div className="grid grid-cols-3 gap-2 md:gap-4">
+                        <InputField
+                            label="Actual"
+                            type="number"
+                            {...register("actualCash", { valueAsNumber: true })}
+                            error={errors.actualCash?.message}
+                        />
+                        <InputField
+                            label="System"
+                            type="number"
+                            {...register("systemCash", { valueAsNumber: true })}
+                            error={errors.systemCash?.message}
+                        />
+                        <InputField
+                            label="Difference"
+                            type="text"
+                            value={`$${cashDifference.toFixed(2)}`}
+                            readOnly
+                        />
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <InputField label="Actual Card" type="number" {...register("actualCard", { valueAsNumber: true })} error={errors.actualCard?.message} />
-                    <InputField label="System Card" type="number" {...register("systemCard", { valueAsNumber: true })} error={errors.systemCard?.message} />
-                    <InputField label="Card Difference" type="text" value={`$${cardDifference.toFixed(2)}`} readOnly />
+                {/* Card Group */}
+                <div className="mt-4">
+                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-2">Card</h3>
+                    <div className="grid grid-cols-3 gap-2 md:gap-4">
+                        <InputField
+                            label="Actual"
+                            type="number"
+                            {...register("actualCard", { valueAsNumber: true })}
+                            error={errors.actualCard?.message}
+                        />
+                        <InputField
+                            label="System"
+                            type="number"
+                            {...register("systemCard", { valueAsNumber: true })}
+                            error={errors.systemCard?.message}
+                        />
+                        <InputField
+                            label="Difference"
+                            type="text"
+                            value={`$${cardDifference.toFixed(2)}`}
+                            readOnly
+                        />
+                    </div>
                 </div>
 
-                {/* ✅ System Accessories Field */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <InputField label="System Accessories" type="number" {...register("systemAccessories", { valueAsNumber: true })} error={errors.systemAccessories?.message} />
+                {/* System Accessories Field */}
+                <div className="grid grid-cols-2 gap-2 md:gap-4 mt-4">
+                    <InputField
+                        label="System Accessories"
+                        type="number"
+                        {...register("systemAccessories", { valueAsNumber: true })}
+                        error={errors.systemAccessories?.message}
+                    />
                 </div>
 
-                {/* ✅ Sales Data Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                    <InputField label="Total Boxes Sold(incl. HSI & BTS)" type="number" {...register("boxesSold", { valueAsNumber: true })} error={errors.boxesSold?.message} />
-                    <InputField label="HSI Sold" type="number" {...register("hsiSold", { valueAsNumber: true })} error={errors.hsiSold?.message} />
-                    <InputField label="Tablets Sold" type="number" {...register("tabletsSold", { valueAsNumber: true })} error={errors.tabletsSold?.message} />
-                    <InputField label="Watches Sold" type="number" {...register("watchesSold", { valueAsNumber: true })} error={errors.watchesSold?.message} />
+                {/* Sales Data Fields */}
+                <div className="grid grid-cols-2 gap-2 md:gap-4 mt-6">
+                    <InputField
+                        label="Total Boxes Sold (incl. HSI & BTS)"
+                        type="number"
+                        {...register("boxesSold", { valueAsNumber: true })}
+                        error={errors.boxesSold?.message}
+                    />
+                    <InputField
+                        label="HSI Sold"
+                        type="number"
+                        {...register("hsiSold", { valueAsNumber: true })}
+                        error={errors.hsiSold?.message}
+                    />
+                    <InputField
+                        label="Tablets Sold"
+                        type="number"
+                        {...register("tabletsSold", { valueAsNumber: true })}
+                        error={errors.tabletsSold?.message}
+                    />
+                    <InputField
+                        label="Watches Sold"
+                        type="number"
+                        {...register("watchesSold", { valueAsNumber: true })}
+                        error={errors.watchesSold?.message}
+                    />
                 </div>
 
-                {/* ✅ Toggle Expense Fields */}
+                {/* Toggle Expense Fields */}
                 <div className="mt-4 flex items-center gap-2">
-                    <input type="checkbox" id="hasExpense" checked={hasExpense} onChange={() => setHasExpense(!hasExpense)} className="w-4 h-4" />
-                    <label htmlFor="hasExpense" className="text-gray-800 dark:text-gray-300 text-sm">Add reason for expense or short</label>
+                    <input
+                        type="checkbox"
+                        id="hasExpense"
+                        checked={hasExpense}
+                        onChange={() => setHasExpense(!hasExpense)}
+                        className="w-4 h-4"
+                    />
+                    <label htmlFor="hasExpense" className="text-gray-800 dark:text-gray-300 text-sm">
+                        Add reason for expense or short
+                    </label>
                 </div>
 
-                {/* ✅ Show Expense Fields if Checkbox is Selected */}
+                {/* Expense Fields if Selected */}
                 {hasExpense && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                        <InputField label="Expense Amount" type="number" {...register("cashExpense", { valueAsNumber: true })} error={errors.cashExpense?.message} />
-                        <InputField label="Expense Reason" type="text" {...register("expenseReason")} error={errors.expenseReason?.message} />
+                    <div className="grid grid-cols-2 gap-2 md:gap-4 mt-3">
+                        <InputField
+                            label="Expense Amount"
+                            type="number"
+                            {...register("cashExpense", { valueAsNumber: true })}
+                            error={errors.cashExpense?.message}
+                        />
+                        <InputField
+                            label="Expense Reason"
+                            type="text"
+                            {...register("expenseReason")}
+                            error={errors.expenseReason?.message}
+                        />
                     </div>
                 )}
 
-                {/* ✅ Confirm Clock-Out */}
+                {/* Confirm Clock-Out */}
                 <div className="my-6 flex items-center gap-2">
-                    <input type="checkbox" id="confirmClockOut" checked={confirmClockOut} onChange={() => setConfirmClockOut(!confirmClockOut)} className="w-4 h-4" />
+                    <input
+                        type="checkbox"
+                        id="confirmClockOut"
+                        checked={confirmClockOut}
+                        onChange={() => setConfirmClockOut(!confirmClockOut)}
+                        className="w-4 h-4"
+                    />
                     <label htmlFor="confirmClockOut" className="text-gray-800 dark:text-gray-300 text-sm">
-                        I understand that submitting this form will **automatically clock me out**.
+                        I understand that submitting this form will <strong>automatically clock me out</strong>.
                     </label>
                 </div>
 
@@ -175,11 +255,23 @@ export default function EodForm() {
                 </Button>
             </form>
 
-            {/* ✅ Confirmation Modal */}
-            <ConfirmationModal isOpen={showConfirm} onClose={() => setShowConfirm(false)} onConfirm={handleConfirm} title="Confirm Submission" message="Are you sure you want to submit this EOD report?" confirmText="Submit" />
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={showConfirm}
+                onClose={() => setShowConfirm(false)}
+                onConfirm={handleConfirm}
+                title="Confirm Submission"
+                message="Are you sure you want to submit this EOD report?"
+                confirmText="Submit"
+            />
 
-            {/* ✅ Success Modal */}
-            <SuccessModal isOpen={showSuccess} onClose={() => setShowSuccess(false)} title="EOD Report Submitted!" message="Your report has been successfully recorded." />
+            {/* Success Modal */}
+            <SuccessModal
+                isOpen={showSuccess}
+                onClose={() => setShowSuccess(false)}
+                title="EOD Report Submitted!"
+                message="Your report has been successfully recorded."
+            />
         </>
     );
 }

@@ -9,20 +9,24 @@ export default function EmployeeDashboard() {
 
     console.log("🖥️ EmployeeDashboard: Role:", role, "Loading:", isLoading);
 
-    // ✅ Show loading state until authentication is fully resolved
+    // Loading state until authentication is fully resolved
     if (isLoading || role === undefined) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <p className="text-gray-500 text-lg animate-pulse">Loading dashboard...</p>
+                <p className="text-gray-500 text-base sm:text-lg animate-pulse">
+                    Loading dashboard...
+                </p>
             </div>
         );
     }
 
-    // ✅ Prevent false negative by ensuring role is checked AFTER loading
+    // If user is not authenticated
     if (!role) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <p className="text-gray-500 text-lg">Please log in to access the dashboard.</p>
+                <p className="text-gray-500 text-base sm:text-lg">
+                    Please log in to access the dashboard.
+                </p>
             </div>
         );
     }
@@ -30,15 +34,26 @@ export default function EmployeeDashboard() {
     const typedRole = role as Role;
 
     return (
-        <div>
-            <h2 className="text-2xl font-bold">Welcome to {typedRole.charAt(0).toUpperCase() + typedRole.slice(1).toLowerCase()} Dashboard</h2>
-            <p className="text-gray-600">Manage Tasks, inventory, EOD Report and more.</p>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <header className="mb-4">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                    Welcome to {typedRole.charAt(0).toUpperCase() + typedRole.slice(1).toLowerCase()} Dashboard
+                </h2>
+                <p className="mt-1 text-sm sm:text-base md:text-lg text-gray-600">
+                    Manage Tasks, Inventory, EOD Report and more.
+                </p>
+            </header>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {dashboardCards[typedRole]?.map((card) => (
-                    <Card key={card.link} title={card.title} description={card.description} link={card.link} />
+                    <Card
+                        key={card.link}
+                        title={card.title}
+                        description={card.description}
+                        link={card.link}
+                    />
                 ))}
-            </div>
-        </div>
+            </section>
+        </main>
     );
 }

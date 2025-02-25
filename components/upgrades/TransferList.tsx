@@ -1,7 +1,9 @@
+"use client";
+
 import React from "react";
 
 interface Transfer {
-    id?: string; // Made optional in case it's missing
+    id?: string;
     deviceName: string;
     imei: string;
     transferTo: string;
@@ -14,36 +16,45 @@ interface TransferListProps {
 }
 
 export default function TransferList({ transfers }: TransferListProps) {
-    console.log(transfers);
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <table className="w-full border border-gray-300 rounded-md">
-                <thead>
-                    <tr className="bg-gray-700 text-white text-left">
-                        <th className="border px-4 py-3">Device Name</th>
-                        <th className="border px-4 py-3">IMEI</th>
-                        <th className="border px-4 py-3">Transferred To</th>
-                        <th className="border px-4 py-3">Transferred By</th>
-                        <th className="border px-4 py-3">Date</th>
+        <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+                <thead className="bg-gray-700">
+                    <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            Device Name
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            IMEI
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            Transferred To
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            Transferred By
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            Date
+                        </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-200">
                     {transfers.length > 0 ? (
                         transfers.map((transfer) => (
                             <tr
-                                key={transfer.id || transfer.imei || Math.random().toString()} // Ensuring unique key
-                                className="hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-300"
+                                key={transfer.id || transfer.imei || Math.random().toString()}
+                                className="hover:bg-gray-50 text-gray-900"
                             >
-                                <td className="border px-4 py-3">{transfer.deviceName}</td>
-                                <td className="border px-4 py-3">{transfer.imei}</td>
-                                <td className="border px-4 py-3">{transfer.transferTo}</td>
-                                <td className="border px-4 py-3">{transfer.transferedBy}</td>
-                                <td className="border px-4 py-3">{transfer.date}</td>
+                                <td className="px-4 py-3 text-sm">{transfer.deviceName}</td>
+                                <td className="px-4 py-3 text-sm">{transfer.imei}</td>
+                                <td className="px-4 py-3 text-sm">{transfer.transferTo}</td>
+                                <td className="px-4 py-3 text-sm">{transfer.transferedBy}</td>
+                                <td className="px-4 py-3 text-sm">{transfer.date}</td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={5} className="text-center py-6 text-gray-500">
+                            <td colSpan={5} className="px-4 py-4 text-center text-gray-500">
                                 No pending transfers.
                             </td>
                         </tr>

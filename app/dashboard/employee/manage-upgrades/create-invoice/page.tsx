@@ -19,14 +19,12 @@ export default function CreateInvoicePage() {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-
     const {
         control,
         handleSubmit,
         watch,
         setValue,
-        reset, // ✅ Import reset function
-        formState: { },
+        reset,
     } = useForm<CreateInvoiceFormValues>({
         resolver: zodResolver(createInvoiceSchema),
         defaultValues: {
@@ -35,7 +33,7 @@ export default function CreateInvoicePage() {
             accountNumber: 0,
             activatedDate: "",
             amount: 0,
-            products: [], // ✅ Ensure products is initialized as an empty array
+            products: [],
         },
     });
 
@@ -47,8 +45,7 @@ export default function CreateInvoicePage() {
             imei: "",
             phoneNumber: "",
         }));
-
-        setValue("products", updatedProducts as CreateInvoiceFormValues["products"]); // ✅ Ensures correct typing
+        setValue("products", updatedProducts as CreateInvoiceFormValues["products"]);
     };
 
     const onSubmit = async (data: CreateInvoiceFormValues) => {
@@ -56,7 +53,6 @@ export default function CreateInvoicePage() {
             if (data.products.length === 0) {
                 throw new Error("At least one product is required.");
             }
-
             const payload = {
                 employeeNtid: data.employeeNtid,
                 dealerStoreId: data.dealerStoreId,
@@ -68,10 +64,10 @@ export default function CreateInvoicePage() {
 
             await createNewInvoice(payload);
 
-            // ✅ Reset form fields to default values after successful submission
+            // Reset form but preserve employee/store IDs
             reset({
-                employeeNtid: data.employeeNtid, // ✅ Preserve employee ID
-                dealerStoreId: data.dealerStoreId, // ✅ Preserve store ID
+                employeeNtid: data.employeeNtid,
+                dealerStoreId: data.dealerStoreId,
                 accountNumber: 0,
                 activatedDate: "",
                 amount: 0,
@@ -86,24 +82,28 @@ export default function CreateInvoicePage() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto mt-10 p-8 bg-white dark:bg-gray-900 shadow-xl rounded-lg">
-            <h2 className="text-2xl font-semibold text-center text-gray-900 dark:text-gray-200 mb-6">📜 Create Invoice</h2>
+        <div className="max-w-5xl mx-auto mt-10 p-6 sm:p-8 bg-white dark:bg-gray-900 shadow-sm rounded-lg">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-center text-gray-900 dark:text-gray-200 mb-6">
+                📜 Create Invoice
+            </h2>
 
             <form onSubmit={handleSubmit(() => setIsConfirmModalOpen(true))} className="space-y-6">
-                {/* ✅ Invoice Fields in a Responsive Grid */}
+                {/* Invoice Fields in a Responsive Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <Controller
                         name="accountNumber"
                         control={control}
                         render={({ field }) => (
                             <div>
-                                <label className="text-gray-700 dark:text-gray-300 font-medium">Account Number</label>
+                                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                                    Account Number
+                                </label>
                                 <input
                                     {...field}
                                     type="number"
                                     onChange={(e) => field.onChange(Number(e.target.value))}
                                     placeholder="Enter Account Number"
-                                    className="w-full border rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                                 />
                             </div>
                         )}
@@ -114,11 +114,13 @@ export default function CreateInvoicePage() {
                         control={control}
                         render={({ field }) => (
                             <div>
-                                <label className="text-gray-700 dark:text-gray-300 font-medium">Activated Date</label>
+                                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                                    Activated Date
+                                </label>
                                 <input
                                     {...field}
                                     type="date"
-                                    className="w-full border rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                                 />
                             </div>
                         )}
@@ -129,13 +131,15 @@ export default function CreateInvoicePage() {
                         control={control}
                         render={({ field }) => (
                             <div>
-                                <label className="text-gray-700 dark:text-gray-300 font-medium">Amount</label>
+                                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                                    Amount
+                                </label>
                                 <input
                                     {...field}
                                     type="number"
                                     onChange={(e) => field.onChange(Number(e.target.value))}
                                     placeholder="Enter Amount"
-                                    className="w-full border rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                                 />
                             </div>
                         )}
@@ -146,7 +150,9 @@ export default function CreateInvoicePage() {
                         control={control}
                         render={({ field }) => (
                             <div>
-                                <label className="text-gray-700 dark:text-gray-300 font-medium">Number of Phones</label>
+                                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                                    Number of Phones
+                                </label>
                                 <select
                                     {...field}
                                     onChange={(e) => {
@@ -154,7 +160,7 @@ export default function CreateInvoicePage() {
                                         field.onChange(newCount);
                                         handlePhoneCountChange(newCount);
                                     }}
-                                    className="w-full border rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                                 >
                                     {[0, 1, 2, 3, 4, 5].map((num) => (
                                         <option key={num} value={num}>
@@ -165,10 +171,9 @@ export default function CreateInvoicePage() {
                             </div>
                         )}
                     />
-
                 </div>
 
-                {/* ✅ Dynamically Show PhoneDetails Based on Selected Count */}
+                {/* Dynamically Show PhoneDetails Based on Selected Count */}
                 {formValues.products.length > 0 && (
                     <PhoneDetails control={control} setValue={setValue} inventory={inventory} formValues={formValues} />
                 )}
@@ -177,7 +182,7 @@ export default function CreateInvoicePage() {
                 <div className="mt-6 flex justify-center">
                     <button
                         type="submit"
-                        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+                        className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? "Creating..." : "Create Invoice"}

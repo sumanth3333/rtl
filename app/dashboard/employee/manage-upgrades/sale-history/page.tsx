@@ -13,9 +13,13 @@ export default function SaleHistoryPage() {
     const { soldDevices, isLoading, error } = useFetchSoldDevices(selectedStore, startDate, endDate);
 
     return (
-        <div className="bg-white dark:bg-gray-900 shadow-lg rounded-lg p-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">⏳ Sale History</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">Review past upgrade sales and transactions.</p>
+        <div className="w-full max-w-3xl mx-auto px-4 py-6 bg-white dark:bg-gray-900 transition-colors duration-300">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 text-center">
+                ⏳ Sale History
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2 text-center">
+                Review past upgrade sales and transactions.
+            </p>
 
             {/* Filters */}
             <SaleHistoryFilters
@@ -28,9 +32,15 @@ export default function SaleHistoryPage() {
             />
 
             {/* Display Sale History */}
-            {isLoading && <p className="text-blue-500">Loading sold devices...</p>}
-            {error && <p className="text-red-500">Error: {error}</p>}
-            {!isLoading && !error && <PreviouslySoldDevicesTable soldDevices={soldDevices} />}
+            {isLoading && (
+                <p className="mt-4 text-center text-blue-500">Loading sold devices...</p>
+            )}
+            {error && (
+                <p className="mt-4 text-center text-red-500">Error: {error}</p>
+            )}
+            {!isLoading && !error && (
+                <PreviouslySoldDevicesTable soldDevices={soldDevices} />
+            )}
         </div>
     );
 }

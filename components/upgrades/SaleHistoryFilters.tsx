@@ -23,14 +23,16 @@ export default function SaleHistoryFilters({
     const currentDate = new Date().toISOString().split("T")[0];
 
     return (
-        <div className="flex flex-wrap gap-4 my-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-4">
             {/* Store Selection */}
             <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Select Store</label>
+                <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-1">
+                    Select Store
+                </label>
                 <select
                     value={selectedStore}
                     onChange={(e) => setSelectedStore(e.target.value)}
-                    className="border rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                     disabled={isLoading}
                 >
                     <option value="">-- Select a Store --</option>
@@ -46,30 +48,34 @@ export default function SaleHistoryFilters({
                         </option>
                     )}
                 </select>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
             </div>
 
             {/* Start Date */}
             <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Start Date</label>
+                <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-1">
+                    Start Date
+                </label>
                 <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     max={currentDate}
-                    className="border rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 />
             </div>
 
             {/* End Date */}
             <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">End Date</label>
+                <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-1">
+                    End Date
+                </label>
                 <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     max={currentDate}
-                    className="border rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 />
             </div>
         </div>
