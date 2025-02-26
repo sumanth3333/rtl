@@ -25,14 +25,16 @@ export default function CreateInvoicePage() {
         watch,
         setValue,
         reset,
+        formState: { errors },
     } = useForm<CreateInvoiceFormValues>({
         resolver: zodResolver(createInvoiceSchema),
         defaultValues: {
             employeeNtid: employee?.employeeNtid || "",
             dealerStoreId: store?.dealerStoreId || "",
-            accountNumber: 0,
+            accountNumber: "", // ✅ Fix for uncontrolled input issue
             activatedDate: "",
-            amount: 0,
+            amount: 0, // ✅ Fix for uncontrolled input issue
+            numberOfPhones: 0, // ✅ Ensure dropdown starts at 1
             products: [],
         },
     });
@@ -53,6 +55,7 @@ export default function CreateInvoicePage() {
             if (data.products.length === 0) {
                 throw new Error("At least one product is required.");
             }
+
             const payload = {
                 employeeNtid: data.employeeNtid,
                 dealerStoreId: data.dealerStoreId,
@@ -64,13 +67,13 @@ export default function CreateInvoicePage() {
 
             await createNewInvoice(payload);
 
-            // Reset form but preserve employee/store IDs
             reset({
                 employeeNtid: data.employeeNtid,
                 dealerStoreId: data.dealerStoreId,
-                accountNumber: 0,
+                accountNumber: "",
                 activatedDate: "",
                 amount: 0,
+                numberOfPhones: 0,
                 products: [],
             });
 
@@ -88,7 +91,7 @@ export default function CreateInvoicePage() {
             </h2>
 
             <form onSubmit={handleSubmit(() => setIsConfirmModalOpen(true))} className="space-y-6">
-                {/* Invoice Fields in a Responsive Grid */}
+                {/* Invoice Fields */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <Controller
                         name="accountNumber"
@@ -100,14 +103,20 @@ export default function CreateInvoicePage() {
                                 </label>
                                 <input
                                     {...field}
-                                    type="number"
-                                    onChange={(e) => field.onChange(Number(e.target.value))}
-                                    placeholder="Enter Account Number"
-                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="\d{9}"
+                                    placeholder="Enter 9-digit Account Number"
+                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                                    onChange={(e) => field.onChange(e.target.value.replace(/\D/g, "").slice(0, 9))}
                                 />
+                                {errors.accountNumber && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.accountNumber.message}</p>
+                                )}
                             </div>
                         )}
                     />
+
 
                     <Controller
                         name="activatedDate"
@@ -120,8 +129,11 @@ export default function CreateInvoicePage() {
                                 <input
                                     {...field}
                                     type="date"
-                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
                                 />
+                                {errors.activatedDate && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.activatedDate.message}</p>
+                                )}
                             </div>
                         )}
                     />
@@ -136,14 +148,21 @@ export default function CreateInvoicePage() {
                                 </label>
                                 <input
                                     {...field}
-                                    type="number"
-                                    onChange={(e) => field.onChange(Number(e.target.value))}
-                                    placeholder="Enter Amount"
-                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                                    type="text"
+                                    inputMode="decimal"
+                                    pattern="^\d+(\.\d{1,2})?$"
+                                    placeholder="Enter Amount (e.g., 99.99)"
+                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                                    onChange={(e) => field.onChange(e.target.value.replace(/[^0-9.]/g, ""))}
                                 />
+                                {errors.amount && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.amount.message}</p>
+                                )}
                             </div>
                         )}
                     />
+
+
 
                     <Controller
                         name="numberOfPhones"
@@ -155,12 +174,12 @@ export default function CreateInvoicePage() {
                                 </label>
                                 <select
                                     {...field}
+                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
                                     onChange={(e) => {
                                         const newCount = Number(e.target.value);
                                         field.onChange(newCount);
                                         handlePhoneCountChange(newCount);
                                     }}
-                                    className="w-full border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                                 >
                                     {[0, 1, 2, 3, 4, 5].map((num) => (
                                         <option key={num} value={num}>
@@ -171,11 +190,12 @@ export default function CreateInvoicePage() {
                             </div>
                         )}
                     />
+
                 </div>
 
-                {/* Dynamically Show PhoneDetails Based on Selected Count */}
+                {/* Show PhoneDetails if Phones are Selected */}
                 {formValues.products.length > 0 && (
-                    <PhoneDetails control={control} setValue={setValue} inventory={inventory} formValues={formValues} />
+                    <PhoneDetails control={control} setValue={setValue} inventory={inventory} formValues={formValues} errors={errors} />
                 )}
 
                 {/* Submit Button */}

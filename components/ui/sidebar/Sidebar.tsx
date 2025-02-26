@@ -5,7 +5,8 @@ import SidebarHeader from "@/components/ui/sidebar/SidebarHeader";
 import SidebarFooter from "@/components/ui/sidebar/SidebarFooter";
 import { sidebarLinks, Role } from "@/config/roleConfig";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { refreshToken } from "@/services/auth/authService"; // ✅ Import refresh token function
 
 export default function Sidebar({
     isCollapsed,
@@ -16,10 +17,29 @@ export default function Sidebar({
     setIsCollapsed: (value: boolean) => void;
     isMobile: boolean;
 }) {
-    const { role } = useAuth();
-    console.log(`Role in sidebar: ${role}`);
+    const { role, refreshAuth } = useAuth();
+    const [loading, setLoading] = useState(true);
 
-    // Prevent background from scrolling when sidebar is open on mobile
+    // ✅ Try refreshing token if role is null
+    useEffect(() => {
+        const fetchRole = async () => {
+            if (!role) {
+                try {
+                    const refreshed = await refreshToken(); // ✅ Refresh Token API Call
+                    if (refreshed) {
+                        await refreshAuth(); // ✅ Fetch user details again
+                    }
+                } catch (error) {
+                    console.error("Failed to refresh token:", error);
+                }
+            }
+            setLoading(false);
+        };
+
+        fetchRole();
+    }, [role, refreshAuth]);
+
+    // ✅ Prevent background scrolling when sidebar is open on mobile
     useEffect(() => {
         if (isMobile && !isCollapsed) {
             document.body.style.overflow = "hidden";
@@ -31,8 +51,9 @@ export default function Sidebar({
         };
     }, [isMobile, isCollapsed]);
 
-    if (!role) {
-        return <div className="text-gray-600 dark:text-gray-300 p-4">Loading...</div>;
+    // ✅ Show loading state until role is available
+    if (loading || !role) {
+        return <div className="text-gray-600 dark:text-gray-300 p-4">Loading Sidebar...</div>;
     }
 
     const typedRole = role as Role;

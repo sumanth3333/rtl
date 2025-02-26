@@ -35,15 +35,36 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   // ✅ Logout Function
   const logout = async () => {
-    const response = await logoutAPI();
-    if (response) {
-      setIsAuthenticated(false);
-      setUsername(null);
-      setRole(null);
-      setIsLoading(false);
+    try {
+      // ✅ Call API to logout (clears HttpOnly cookie on the server)
+      const response = await logoutAPI();
+
+      if (response) {
+        // ✅ Clear Local Storage & Session Storage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // ✅ Clear all non-HttpOnly cookies
+        document.cookie.split(";").forEach((cookie) => {
+          document.cookie = cookie
+            .replace(/^ +/, "")
+            .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+
+        // ✅ Reset Authentication State
+        setIsAuthenticated(false);
+        setUsername(null);
+        setRole(null);
+        setIsLoading(false);
+
+        // ✅ Redirect to Login Page (if needed)
+        window.location.href = "/login";
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
     }
-    return response;
   };
+
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, role, username, logout, isLoading, refreshAuth: fetchUser }}>

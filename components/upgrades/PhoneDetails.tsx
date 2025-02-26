@@ -1,4 +1,4 @@
-import { Controller, Control, UseFormSetValue } from "react-hook-form";
+import { Controller, Control, UseFormSetValue, FieldErrors } from "react-hook-form";
 import InputField from "../ui/InputField";
 import { CreateInvoiceFormValues } from "@/types/createInvoiceSchema";
 
@@ -7,9 +7,10 @@ interface PhoneDetailsProps {
     setValue: UseFormSetValue<CreateInvoiceFormValues>;
     inventory: { productName: string }[];
     formValues: CreateInvoiceFormValues;
+    errors: FieldErrors<CreateInvoiceFormValues>;
 }
 
-export default function PhoneDetails({ control, setValue, inventory, formValues }: PhoneDetailsProps) {
+export default function PhoneDetails({ control, setValue, inventory, formValues, errors }: PhoneDetailsProps) {
     const phoneList = formValues.products ?? [];
 
     return (
@@ -20,9 +21,9 @@ export default function PhoneDetails({ control, setValue, inventory, formValues 
                     className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 shadow-sm"
                 >
                     <div className="space-y-4">
-                        {/* Product Name Dropdown */}
+                        {/* ✅ Product Name Dropdown */}
                         <Controller
-                            name={`products.${index}.productName` as const}
+                            name={`products.${index}.productName`}
                             control={control}
                             render={({ field }) => (
                                 <div>
@@ -44,25 +45,50 @@ export default function PhoneDetails({ control, setValue, inventory, formValues 
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.products?.[index]?.productName && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {errors.products[index]?.productName?.message}
+                                        </p>
+                                    )}
                                 </div>
                             )}
                         />
 
-                        {/* IMEI Input */}
+                        {/* ✅ IMEI Input (Restricted to 15 digits) */}
                         <Controller
-                            name={`products.${index}.imei` as const}
+                            name={`products.${index}.imei`}
                             control={control}
                             render={({ field }) => (
-                                <InputField {...field} label="IMEI" placeholder="Enter IMEI" />
+                                <InputField
+                                    {...field}
+                                    label="IMEI"
+                                    placeholder="Enter IMEI (15 digits)"
+                                    maxLength={15}
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/\D/g, "").slice(0, 15);
+                                        field.onChange(value);
+                                    }}
+                                    error={errors.products?.[index]?.imei?.message}
+                                />
                             )}
                         />
 
-                        {/* Phone Number Input */}
+                        {/* ✅ Phone Number Input (Restricted to 10 digits) */}
                         <Controller
-                            name={`products.${index}.phoneNumber` as const}
+                            name={`products.${index}.phoneNumber`}
                             control={control}
                             render={({ field }) => (
-                                <InputField {...field} label="Phone Number" placeholder="Enter Phone Number" />
+                                <InputField
+                                    {...field}
+                                    label="Phone Number"
+                                    placeholder="Enter Phone Number (10 digits)"
+                                    maxLength={10}
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                        field.onChange(value);
+                                    }}
+                                    error={errors.products?.[index]?.phoneNumber?.message}
+                                />
                             )}
                         />
                     </div>
