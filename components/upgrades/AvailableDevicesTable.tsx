@@ -67,7 +67,7 @@ export default function AvailableDevicesTable({ devices, storeIds, selectedStore
                     }
                     .responsive-table tr {
                         margin-bottom: 1rem;
-                        border: 1px solid #e5e7eb;
+                        border: 1px solid #fff;
                         border-radius: 0.5rem;
                         overflow: hidden;
                     }
@@ -78,7 +78,6 @@ export default function AvailableDevicesTable({ devices, storeIds, selectedStore
                         padding-left: 50%;
                         text-align: left;
                         font-size: 0.875rem;
-                        color: #374151;
                     }
                     .responsive-table td:before {
                         position: absolute;
@@ -89,7 +88,6 @@ export default function AvailableDevicesTable({ devices, storeIds, selectedStore
                         white-space: nowrap;
                         font-weight: 600;
                         font-size: 0.75rem;
-                        color: #111827;
                     }
                     .responsive-table td:nth-of-type(1):before { content: "Device Name"; }
                     .responsive-table td:nth-of-type(2):before { content: "IMEI"; }
