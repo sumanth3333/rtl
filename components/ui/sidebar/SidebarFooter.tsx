@@ -30,11 +30,10 @@ export default function SidebarFooter({ isCollapsed }: { isCollapsed: boolean })
     };
 
     const isEligibleRole = role === "EMPLOYEE" || role === "MANAGER";
-
-    if (!isEligibleRole) { return null; }
+    if (!isEligibleRole) return null;
 
     return (
-        <div className={`p-4 mt-auto border-t border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-800`}>
+        <div className="p-4 border-t border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-800">
             {!isCollapsed && (
                 <button
                     className={`w-full py-2 px-4 text-white rounded-lg transition-all duration-300 ${isClockedIn ? "bg-green-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"

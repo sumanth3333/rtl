@@ -19,14 +19,13 @@ export default function Sidebar({
     const { role } = useAuth();
     console.log(`Role in sidebar: ${role}`);
 
-    // Prevent background content from scrolling when sidebar is open on mobile
+    // Prevent background from scrolling when sidebar is open on mobile
     useEffect(() => {
         if (isMobile && !isCollapsed) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "";
         }
-
         return () => {
             document.body.style.overflow = "";
         };
@@ -76,8 +75,10 @@ export default function Sidebar({
                         ))}
                     </nav>
 
-                    {/* Sidebar Footer - Scrolls with Content */}
-                    <SidebarFooter isCollapsed={isCollapsed} />
+                    {/* Sidebar Footer - Now Scrolls with Sidebar */}
+                    <div className="mt-auto">
+                        <SidebarFooter isCollapsed={isCollapsed} />
+                    </div>
                 </div>
             </aside>
 
