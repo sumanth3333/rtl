@@ -29,6 +29,32 @@ body {
   font-family: var(--font-body);
 }
 
+/* ✅ Make the App Fullscreen and Prevent Browser UI */
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
+}
+
+/* ✅ Ensures smooth scrolling when needed */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ✅ Prevents iOS bounce effect */
+body {
+  overflow-y: hidden;
+  overscroll-behavior-y: contain;
+}
+
+
 /* ✅ Modern, Premium Headings */
 h1,
 h2,

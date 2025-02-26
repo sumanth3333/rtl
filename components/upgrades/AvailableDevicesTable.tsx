@@ -51,7 +51,7 @@ export default function AvailableDevicesTable({ devices, storeIds, selectedStore
 
             {/* Responsive Table Styles */}
             <style jsx global>{`
-                @media (max-width: 640px) {
+                @media (max-width: 940px) {
                     .responsive-table,
                     .responsive-table thead,
                     .responsive-table tbody,
