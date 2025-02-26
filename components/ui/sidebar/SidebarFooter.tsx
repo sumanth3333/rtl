@@ -30,7 +30,7 @@ export default function SidebarFooter({ isCollapsed }: { isCollapsed: boolean })
     };
 
     const isEligibleRole = role === "EMPLOYEE" || role === "MANAGER";
-    if (!isEligibleRole) return null;
+    if (!isEligibleRole) { return null };
 
     return (
         <div className="p-4 border-t border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-800">
