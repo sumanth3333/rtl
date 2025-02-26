@@ -97,7 +97,7 @@ export default function Sidebar({
                     </nav>
 
                     {/* Sidebar Footer - Now Scrolls with Sidebar */}
-                    <div className="mt-auto">
+                    <div className="">
                         <SidebarFooter isCollapsed={isCollapsed} />
                     </div>
                 </div>
