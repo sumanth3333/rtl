@@ -35,7 +35,7 @@ export default function TableRow<T extends Record<string, any>>({
                 </td>
             ))}
             <td className="py-4 px-6 flex justify-center space-x-2">
-                <Button onClick={() => onEdit(item)} variant="primary">Update</Button>
+                {/* <Button onClick={() => onEdit(item)} variant="primary">Update</Button> */}
                 <Button onClick={() => onDelete(item.employeeNtid)} variant="danger">Deactivate</Button>
             </td>
         </tr>

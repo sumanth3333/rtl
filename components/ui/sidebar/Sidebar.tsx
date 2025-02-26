@@ -2,14 +2,14 @@
 
 import SidebarItem from "@/components/ui/sidebar/SidebarItem";
 import SidebarHeader from "@/components/ui/sidebar/SidebarHeader";
-import SidebarFooter from "@/components/ui/sidebar/SidebarFooter"; // ✅ Import Sidebar Footer
+import SidebarFooter from "@/components/ui/sidebar/SidebarFooter";
 import { sidebarLinks, Role } from "@/config/roleConfig";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Sidebar({
     isCollapsed,
     setIsCollapsed,
-    isMobile, // ✅ Added prop
+    isMobile,
 }: {
     isCollapsed: boolean;
     setIsCollapsed: (value: boolean) => void;
@@ -27,8 +27,8 @@ export default function Sidebar({
         <>
             {/* Sidebar - Hidden when collapsed on mobile */}
             <aside
-                className={`h-screen flex flex-col justify-between transition-transform duration-300 ease-in-out z-50
-          ${isMobile
+                className={`h-screen flex flex-col transition-transform duration-300 ease-in-out z-50
+                    ${isMobile
                         ? isCollapsed
                             ? "hidden"
                             : "fixed top-0 left-0 w-64 transform translate-x-0"
@@ -36,39 +36,41 @@ export default function Sidebar({
                             ? "w-16 hidden sm:flex"
                             : "w-64 flex"
                     }
-          bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700
-          border-r border-gray-300 dark:border-gray-700 shadow-xl`}
+                    bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700
+                    border-r border-gray-300 dark:border-gray-700 shadow-xl`}
             >
                 {/* Sidebar Header */}
                 <SidebarHeader isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
-                {/* Sidebar Links with scrollable container */}
-                <nav className="flex flex-col space-y-2 mt-4 flex-1 overflow-y-auto">
-                    {sidebarLinks[typedRole]?.map((link) => (
-                        <SidebarItem
-                            key={link.path}
-                            name={link.name}
-                            path={link.path}
-                            icon={link.icon}
-                            isCollapsed={isCollapsed}
-                            onClick={() => {
-                                if (isMobile) {
-                                    setIsCollapsed(true);
-                                }
-                            }}
-                        />
-                    ))}
-                </nav>
+                {/* Sidebar Content - Scrollable Container */}
+                <div className="flex flex-col flex-1 overflow-y-auto scrollbar-hide">
+                    <nav className="flex flex-col space-y-2 mt-4">
+                        {sidebarLinks[typedRole]?.map((link) => (
+                            <SidebarItem
+                                key={link.path}
+                                name={link.name}
+                                path={link.path}
+                                icon={link.icon}
+                                isCollapsed={isCollapsed}
+                                onClick={() => {
+                                    if (isMobile) {
+                                        setIsCollapsed(true);
+                                    }
+                                }}
+                            />
+                        ))}
+                    </nav>
 
-                {/* Sidebar Footer (Clock-In Button) */}
-                <SidebarFooter isCollapsed={isCollapsed} />
+                    {/* Sidebar Footer moves with content */}
+                    <SidebarFooter isCollapsed={isCollapsed} />
+                </div>
             </aside>
 
             {/* Overlay - Click to Collapse Sidebar on Mobile */}
             {isMobile && !isCollapsed && (
                 <div
                     className="fixed inset-0 bg-black/50 backdrop-blur-md z-40"
-                    onClick={() => setIsCollapsed(true)} // Click outside to close sidebar
+                    onClick={() => setIsCollapsed(true)}
                 ></div>
             )}
         </>
