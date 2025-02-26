@@ -56,10 +56,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         setUsername(null);
         setRole(null);
         setIsLoading(false);
-
-        // ✅ Redirect to Login Page (if needed)
-        window.location.href = "/login";
       }
+      return response;
     } catch (error) {
       console.error("Logout failed:", error);
     }
