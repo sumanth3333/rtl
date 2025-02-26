@@ -5,6 +5,7 @@ import SidebarHeader from "@/components/ui/sidebar/SidebarHeader";
 import SidebarFooter from "@/components/ui/sidebar/SidebarFooter";
 import { sidebarLinks, Role } from "@/config/roleConfig";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 
 export default function Sidebar({
     isCollapsed,
@@ -18,14 +19,28 @@ export default function Sidebar({
     const { role } = useAuth();
     console.log(`Role in sidebar: ${role}`);
 
+    // Prevent background content from scrolling when sidebar is open on mobile
+    useEffect(() => {
+        if (isMobile && !isCollapsed) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isMobile, isCollapsed]);
+
     if (!role) {
         return <div className="text-gray-600 dark:text-gray-300 p-4">Loading...</div>;
     }
+
     const typedRole = role as Role;
 
     return (
         <>
-            {/* Sidebar - Hidden when collapsed on mobile */}
+            {/* Sidebar */}
             <aside
                 className={`h-screen flex flex-col transition-transform duration-300 ease-in-out z-50
                     ${isMobile
@@ -42,8 +57,8 @@ export default function Sidebar({
                 {/* Sidebar Header */}
                 <SidebarHeader isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
-                {/* Sidebar Content - Scrollable Container */}
-                <div className="flex flex-col flex-1 overflow-y-auto scrollbar-hide">
+                {/* Sidebar Content - Scrollable */}
+                <div className="flex flex-col flex-1 overflow-y-auto overscroll-contain scrollbar-hide">
                     <nav className="flex flex-col space-y-2 mt-4">
                         {sidebarLinks[typedRole]?.map((link) => (
                             <SidebarItem
@@ -61,7 +76,7 @@ export default function Sidebar({
                         ))}
                     </nav>
 
-                    {/* Sidebar Footer moves with content */}
+                    {/* Sidebar Footer - Scrolls with Content */}
                     <SidebarFooter isCollapsed={isCollapsed} />
                 </div>
             </aside>
