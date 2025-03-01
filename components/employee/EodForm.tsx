@@ -84,17 +84,17 @@ export default function EodForm() {
         }
         const formattedData = {
             ...data,
-            actualCash: Number(data.actualCash) || 0,
-            systemCash: Number(data.systemCash) || 0,
-            actualCard: Number(data.actualCard) || 0,
-            systemCard: Number(data.systemCard) || 0,
-            systemAccessories: Number(data.systemAccessories) || 0,
-            boxesSold: Number(data.boxesSold) || 0,
-            hsiSold: Number(data.hsiSold) || 0,
-            tabletsSold: Number(data.tabletsSold) || 0,
-            watchesSold: Number(data.watchesSold) || 0,
-            cashExpense: hasExpense ? Number(data.cashExpense) || 0 : 0,
-            expenseReason: hasExpense ? data.expenseReason : "NONE",
+            actualCash: parseFloat((data.actualCash ?? 0).toFixed(2)),
+            systemCash: parseFloat((data.systemCash ?? 0).toFixed(2)),
+            actualCard: parseFloat((data.actualCard ?? 0).toFixed(2)),
+            systemCard: parseFloat((data.systemCard ?? 0).toFixed(2)),
+            systemAccessories: parseFloat((data.systemAccessories ?? 0).toFixed(2)),
+            boxesSold: parseFloat((data.boxesSold ?? 0).toFixed(2)),
+            hsiSold: parseFloat((data.hsiSold ?? 0).toFixed(2)),
+            tabletsSold: parseFloat((data.tabletsSold ?? 0).toFixed(2)),
+            watchesSold: parseFloat((data.watchesSold ?? 0).toFixed(2)),
+            cashExpense: hasExpense ? parseFloat((data.cashExpense ?? 0).toFixed(2)) : 0,
+            expenseReason: hasExpense ? data.expenseReason ?? "NONE" : "NONE",
         };
         setFormData(formattedData);
         setShowConfirm(true);
@@ -123,12 +123,14 @@ export default function EodForm() {
                         <InputField
                             label="Actual"
                             type="number"
+                            step="0.01"
                             {...register("actualCash", { valueAsNumber: true })}
                             error={errors.actualCash?.message}
                         />
                         <InputField
                             label="System"
                             type="number"
+                            step="0.01"
                             {...register("systemCash", { valueAsNumber: true })}
                             error={errors.systemCash?.message}
                         />
@@ -148,12 +150,14 @@ export default function EodForm() {
                         <InputField
                             label="Actual"
                             type="number"
+                            step="0.01"
                             {...register("actualCard", { valueAsNumber: true })}
                             error={errors.actualCard?.message}
                         />
                         <InputField
                             label="System"
                             type="number"
+                            step="0.01"
                             {...register("systemCard", { valueAsNumber: true })}
                             error={errors.systemCard?.message}
                         />
@@ -171,6 +175,7 @@ export default function EodForm() {
                     <InputField
                         label="System Accessories"
                         type="number"
+                        step="0.01"
                         {...register("systemAccessories", { valueAsNumber: true })}
                         error={errors.systemAccessories?.message}
                     />
@@ -224,6 +229,7 @@ export default function EodForm() {
                         <InputField
                             label="Expense Amount"
                             type="number"
+                            step="0.01"
                             {...register("cashExpense", { valueAsNumber: true })}
                             error={errors.cashExpense?.message}
                         />

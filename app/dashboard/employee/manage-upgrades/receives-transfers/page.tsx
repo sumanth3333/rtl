@@ -30,7 +30,7 @@ export default function TransfersAndReceivesPage() {
             {/* Transfers List */}
             <div className="mt-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                    📤 Pending Transfers
+                    Pending Transfers
                 </h2>
                 <TransferList transfers={transfers} />
             </div>
@@ -38,7 +38,7 @@ export default function TransfersAndReceivesPage() {
             {/* Receives List */}
             <div className="mt-6">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                    📥 Pending Receives
+                    Pending Receives
                 </h2>
                 <ReceiveList receives={receives} updateReceivesState={updateReceivesState} />
             </div>

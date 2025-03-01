@@ -17,7 +17,7 @@ export default function Home() {
   }, [isAuthenticated, role, router]);
 
   // ✅ Prevent rendering login form if already logged in
-  if (isAuthenticated) {return <div>Redirecting...</div>;}
+  if (isAuthenticated) { return <div>Redirecting...</div>; }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gradient-to-br from-blue-100 via-blue-300 to-blue-500 dark:from-gray-900 dark:via-gray-800 dark:to-gray-950">
@@ -49,7 +49,7 @@ export default function Home() {
       >
         <Link href="/dashboard" className="px-6 py-3 text-lg font-semibold text-white bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 
                         rounded-lg shadow-lg transition-all duration-300">Go to Dashboard</Link>
-        <Link href="/auth/login" className="px-6 py-3 text-lg font-semibold text-gray-900 bg-white hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 
+        <Link href="/auth/login" className="px-6 py-3 text-lg font-semibold text-gray-900 bg-white hover:bg-gray-200 dark:bg-gray-300 dark:hover:bg-slate-200 
                         rounded-lg shadow-lg transition-all duration-300">Login</Link>
       </motion.div>
     </div>

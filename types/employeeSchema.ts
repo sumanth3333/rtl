@@ -13,8 +13,8 @@ export const employeeSchema = z.object({
         zipcode: z.string().length(5, "Zipcode must be 5 digits."),
     }),
     employeePayRatePerHour: z.number().min(1, "Please enter pay rate per hour"),
-    commissionPercentage: z.number().min(1, "Please enter accessories commision %"),
-    perBoxCommission: z.number().min(1, "Please enter commision per box"),
+    commissionPercentage: z.number().min(1, "Please enter accessories commission %"),
+    perBoxCommission: z.number().min(1, "Please enter commission per box"),
     company: z.object({
         companyName: z.string(),
     }),
