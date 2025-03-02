@@ -184,7 +184,7 @@ export default function EodForm() {
                 {/* Sales Data Fields */}
                 <div className="grid grid-cols-2 gap-2 md:gap-4 mt-6">
                     <InputField
-                        label="Total Boxes Sold (Acts, Reacts & Upgrades)"
+                        label="Total Boxes Sold (Donot include BTS & HSI)"
                         type="number"
                         {...register("boxesSold", { valueAsNumber: true })}
                         error={errors.boxesSold?.message}
