@@ -40,6 +40,30 @@ export const submitEodReport = async (data: EodReport) => {
     }
 };
 
+export const getEodDetails = async (dealerStoreId: string, employeeNtid: string) => {
+    try {
+        const response = await apiClient.get("/sale/fetchSubmittedSale", {
+            params: {
+                dealerStoreId,
+            }
+        });
+        return response.data; // Return the API response if needed
+    } catch (error: unknown) {
+        let errorMessage = "An unknown error occurred";
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        } else if (typeof error === "string") {
+            errorMessage = error;
+        } else if (error && typeof error === "object" && "response" in error) {
+            errorMessage =
+                (error as any).response?.data?.message || "API request failed";
+        }
+        console.error("❌ Failed to fetch EOD Report details:", errorMessage);
+        throw new Error(errorMessage); // Re-throw error for UI handling
+    }
+};
+
 export const fetchTodos = async (storeId: string) => {
     try {
         const response = await apiClient.get(`/todos/getAssinedTodos?dealerStoreId=${storeId}`);
@@ -86,3 +110,4 @@ export const getAuthorizedStoresAPI = async (employeeNtid: string) => {
         throw error.response?.data || "An error occurred while fetching stores.";
     }
 };
+

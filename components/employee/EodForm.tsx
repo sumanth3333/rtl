@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import ConfirmationModal from "../ui/modals/ConfirmationModal";
 import SuccessModal from "../ui/modals/SuccessModal";
 
-export default function EodForm() {
+export default function EodForm({ initialValues }: { initialValues: EodReport }) {
     const { employee, store } = useEmployee();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
@@ -31,21 +31,7 @@ export default function EodForm() {
     } = useForm<EodReport>({
         resolver: zodResolver(eodReportSchema),
         mode: "onChange",
-        defaultValues: {
-            store: { dealerStoreId: store?.dealerStoreId },
-            employee: { employeeNtid: employee?.employeeNtid },
-            actualCash: 0,
-            systemCash: 0,
-            actualCard: 0,
-            systemCard: 0,
-            systemAccessories: 0,
-            cashExpense: 0,
-            expenseReason: "NONE",
-            boxesSold: 0,
-            hsiSold: 0,
-            tabletsSold: 0,
-            watchesSold: 0,
-        },
+        defaultValues: initialValues,
     });
 
     useEffect(() => {
@@ -53,20 +39,21 @@ export default function EodForm() {
             reset({
                 store: { dealerStoreId: store.dealerStoreId },
                 employee: { employeeNtid: employee.employeeNtid },
-                actualCash: 0,
-                systemCash: 0,
-                actualCard: 0,
-                systemCard: 0,
-                systemAccessories: 0,
-                cashExpense: 0,
-                expenseReason: "NONE",
-                boxesSold: 0,
-                hsiSold: 0,
-                tabletsSold: 0,
-                watchesSold: 0,
+                actualCash: initialValues.actualCash ?? 0,
+                systemCash: initialValues.systemCash ?? 0,
+                actualCard: initialValues.actualCard ?? 0,
+                systemCard: initialValues.systemCard ?? 0,
+                systemAccessories: initialValues.systemAccessories ?? 0,
+                lastTransactionTime: initialValues.lastTransactionTime ?? "10:00:00",
+                cashExpense: initialValues.cashExpense ?? 0,
+                expenseReason: initialValues.expenseReason ?? "NONE",
+                boxesSold: initialValues.boxesSold ?? 0,
+                hsiSold: initialValues.hsiSold ?? 0,
+                tabletsSold: initialValues.tabletsSold ?? 0,
+                watchesSold: initialValues.watchesSold ?? 0,
             });
         }
-    }, [store, employee, reset]);
+    }, [store, employee, reset, initialValues]);
 
     // Watch form values to dynamically calculate differences
     const actualCash = Number(watch("actualCash"));
@@ -89,6 +76,7 @@ export default function EodForm() {
             actualCard: parseFloat((data.actualCard ?? 0).toFixed(2)),
             systemCard: parseFloat((data.systemCard ?? 0).toFixed(2)),
             systemAccessories: parseFloat((data.systemAccessories ?? 0).toFixed(2)),
+            lastTransactionTime: data.lastTransactionTime,
             boxesSold: parseFloat((data.boxesSold ?? 0).toFixed(2)),
             hsiSold: parseFloat((data.hsiSold ?? 0).toFixed(2)),
             tabletsSold: parseFloat((data.tabletsSold ?? 0).toFixed(2)),
@@ -107,6 +95,11 @@ export default function EodForm() {
             await submitEodReport(formData as EodReport);
             setShowSuccess(true);
             reset();
+
+            setTimeout(() => {
+                router.push("/dashboard");
+            }, 3000);
+
         } catch (error) {
             alert("❌ Failed to submit EOD report.");
         }
@@ -177,6 +170,14 @@ export default function EodForm() {
                         type="number"
                         step="0.01"
                         {...register("systemAccessories", { valueAsNumber: true })}
+                        error={errors.systemAccessories?.message}
+                    />
+                    <InputField
+                        label="Last transaction at?(refer Invoice Listing)"
+                        type="time"
+                        step="1"
+                        placeholder="HH:mm:ss"
+                        {...register("lastTransactionTime")}
                         error={errors.systemAccessories?.message}
                     />
                 </div>
@@ -252,7 +253,8 @@ export default function EodForm() {
                         className="w-4 h-4"
                     />
                     <label htmlFor="confirmClockOut" className="text-gray-800 dark:text-gray-300 text-sm">
-                        I understand that submitting this form will <strong>automatically clock me out</strong>.
+                        I understand that, any inaccurate information provided leads to <strong>loss of pay (or) termination </strong>
+                        & submitting this form <strong>automatically clocks me out</strong>.
                     </label>
                 </div>
 
@@ -276,7 +278,7 @@ export default function EodForm() {
                 isOpen={showSuccess}
                 onClose={() => setShowSuccess(false)}
                 title="EOD Report Submitted!"
-                message="Your report has been successfully recorded."
+                message="Your report has been successfully recorded & you'll be redirected to dashboard in 3 seconds."
             />
         </>
     );
