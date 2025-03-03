@@ -36,12 +36,12 @@ export default function SidebarFooter({ isCollapsed }: { isCollapsed: boolean })
         <div className="p-4 border-t border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-800">
             {!isCollapsed && (
                 <button
-                    className={`w-full py-2 px-4 text-white rounded-lg transition-all duration-300 ${isClockedIn ? "bg-green-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                    className={`w-full py-2 px-4 text-white rounded-lg transition-all duration-300 ${isClockedIn ? "bg-slate-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
                         }`}
                     onClick={handleClockIn}
                     disabled={isClockedIn}
                 >
-                    {isClockedIn ? "Clocked In" : "Clock In"}
+                    {isClockedIn ? "Already Clocked In" : "Click Here to Clock In"}
                 </button>
             )}
         </div>
