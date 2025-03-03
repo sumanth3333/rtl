@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmationModal from "../ui/modals/ConfirmationModal";
 import SuccessModal from "../ui/modals/SuccessModal";
+import { useLogout } from "@/hooks/useLogout";
 
 export default function EodForm({ initialValues }: { initialValues: EodReport }) {
     const { employee, store } = useEmployee();
@@ -21,6 +22,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const [showConfirm, setShowConfirm] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [formData, setFormData] = useState<EodReport | null>(null);
+    const logout = useLogout();
 
     const {
         register,
@@ -97,7 +99,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             reset();
 
             setTimeout(() => {
-                router.push("/dashboard");
+                logout();
             }, 3000);
 
         } catch (error) {
@@ -278,7 +280,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 isOpen={showSuccess}
                 onClose={() => setShowSuccess(false)}
                 title="EOD Report Submitted!"
-                message="Your report has been successfully recorded & you'll be redirected to dashboard in 3 seconds."
+                message="Your report has been successfully recorded & you'll be Logged out in 3 seconds."
             />
         </>
     );
