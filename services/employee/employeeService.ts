@@ -45,6 +45,7 @@ export const getEodDetails = async (dealerStoreId: string, employeeNtid: string)
         const response = await apiClient.get("/sale/fetchSubmittedSale", {
             params: {
                 dealerStoreId,
+                employeeNtid
             }
         });
         return response.data; // Return the API response if needed
