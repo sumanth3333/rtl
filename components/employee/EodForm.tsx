@@ -36,6 +36,8 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         defaultValues: initialValues,
     });
 
+    console.log("Last transaction time - ", initialValues.lastTransactionTime);
+
     useEffect(() => {
         if (store?.dealerStoreId && employee?.employeeNtid) {
             reset({
