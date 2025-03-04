@@ -66,6 +66,10 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const cashDifference = actualCash - systemCash;
     const cardDifference = actualCard - systemCard;
 
+    console.log("isValid:", isValid);
+    console.log("confirmClockOut:", confirmClockOut);
+    console.log("Errors:", errors);
+
     const onSubmit = async (data: EodReport) => {
         if (!confirmClockOut) {
             alert("⚠️ You must confirm clock-out before submitting.");
@@ -180,7 +184,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                         step="1"
                         placeholder="HH:mm:ss"
                         {...register("lastTransactionTime")}
-                        error={errors.systemAccessories?.message}
+                        error={errors.lastTransactionTime?.message}
                     />
                 </div>
 
@@ -251,7 +255,10 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                         type="checkbox"
                         id="confirmClockOut"
                         checked={confirmClockOut}
-                        onChange={() => setConfirmClockOut(!confirmClockOut)}
+                        onChange={() => {
+                            setConfirmClockOut(!confirmClockOut);
+                        }
+                        }
                         className="w-4 h-4"
                     />
                     <label htmlFor="confirmClockOut" className="text-gray-800 dark:text-gray-300 text-sm">
