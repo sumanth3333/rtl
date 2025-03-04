@@ -16,8 +16,7 @@ export default function LoginPage() {
         }
     }, [isAuthenticated, role, router]);
 
-    if (isAuthenticated)
-        {return <div className="flex items-center justify-center min-h-screen text-gray-600 dark:text-gray-400">Redirecting...</div>;}
+    if (isAuthenticated) { return <div className="flex items-center justify-center min-h-screen text-gray-600 dark:text-gray-400">Redirecting...</div>; }
 
     return (
         <div className="relative flex items-center justify-center min-h-screen px-6 md:px-12 
@@ -43,7 +42,7 @@ export default function LoginPage() {
                     variants={{ hidden: { opacity: 0, y: -10 }, visible: { opacity: 1, y: 0 } }}
                     className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white text-center drop-shadow-lg"
                 >
-                    Welcome to <span className="text-blue-900 dark:text-blue-300">EasyDoers</span>
+                    Welcome to <span className="text-blue-900 dark:text-blue-300">OneClick</span>
                 </motion.h1>
 
                 <motion.p
