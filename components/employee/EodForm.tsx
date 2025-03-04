@@ -66,7 +66,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const cashDifference = actualCash - systemCash;
     const cardDifference = actualCard - systemCard;
 
-    console.log("isValid:", isValid);
     console.log("confirmClockOut:", confirmClockOut);
     console.log("Errors:", errors);
 
@@ -267,7 +266,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                     </label>
                 </div>
 
-                <Button type="submit" variant="primary" isLoading={loading} fullWidth disabled={!isValid || !confirmClockOut}>
+                <Button type="submit" variant="primary" isLoading={loading} fullWidth disabled={!confirmClockOut}>
                     Submit Report
                 </Button>
             </form>
