@@ -98,3 +98,15 @@ export const updateEmployee = async (companyName: string, employee: Employee): P
         return [];
     }
 }
+
+export const getWhoIsWorking = async (companyName: string) => {
+    try {
+        const response = await apiClient.get("/company/whoIsWorking", {
+            params: { companyName },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching working employees:", error);
+        return [];
+    }
+};
