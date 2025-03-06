@@ -1,7 +1,7 @@
 "use client";
 
 interface EodSummary {
-    storeId: string
+    dealerStoreId: string
     employeeName: string;
     boxesSold: string;
     accessories: string;
@@ -35,7 +35,7 @@ export default function LatestEodList({ eodList }: LatestEodListProps) {
                     {eodList.map((eod, index) => (
                         <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300">
                             <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">{eod.saleDate}</td>
-                            <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{eod.storeId}</td>
+                            <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{eod.dealerStoreId}</td>
                             <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{eod.employeeName}</td>
                             <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{eod.boxesSold}</td>
                             <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{eod.hsiSold}</td>

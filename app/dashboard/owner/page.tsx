@@ -58,7 +58,7 @@ export default function OwnerDashboard() {
             <main className="space-y-6">
                 {/* Who is Working Section */}
                 <section>
-                    <h2 className="text-xl md:text-2xl font-extrabold uppercase tracking-wide text-gray-900 dark:text-white border-b-4 border-gray-300 dark:border-gray-700 pt-4 pb-2">
+                    <h2 className="text-xl md:text-2xl font-bold uppercase tracking-wide text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 pt-4 pb-2">
                         WHO IS WORKING
                     </h2>
 
@@ -73,7 +73,7 @@ export default function OwnerDashboard() {
 
                 {/* Additional Widgets Section */}
                 <section>
-                    <h2 className="text-xl md:text-2xl font-extrabold uppercase tracking-wide text-gray-900 dark:text-white border-b-4 border-gray-300 dark:border-gray-700 pt-4 pb-2">
+                    <h2 className="text-xl md:text-2xl font-bold uppercase tracking-wide text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 pt-4 pb-2">
                         LATEST EOD SUMMARY
                     </h2>
                     {loadingEod ? (
@@ -81,7 +81,7 @@ export default function OwnerDashboard() {
                     ) : latestEod.length > 0 ? (
                         <LatestEodList eodList={latestEod} />
                     ) : (
-                        <p className="text-gray-500">No employees currently working.</p>
+                        <p className="text-gray-500">No EOD Report Available.</p>
                     )}
 
                 </section>

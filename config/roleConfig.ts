@@ -130,6 +130,16 @@ export const sidebarLinks: Record<Role, {
             icon: ClipboardDocumentCheckIcon,
         },
         // {
+        //     name: "Assign ToDos",
+        //     path: "/dashboard/owner/targets",
+        //     icon: ClipboardDocumentCheckIcon,
+        // },
+        // {
+        //     name: "Monthly Targets",
+        //     path: "/dashboard/owner/targets",
+        //     icon: ClipboardDocumentCheckIcon,
+        // },
+        // {
         //     name: "Manage Expenses",
         //     path: "/dashboard/owner/manage-expenses",
         //     icon: ChartPieIcon
