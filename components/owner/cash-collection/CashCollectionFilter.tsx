@@ -12,7 +12,7 @@ interface CashCollectionFilterProps {
     setStartDate: (date: string) => void;
     setEndDate: (date: string) => void;
     selectedStoreId: string
-    setSelectedStoreId: (store: string) => void;
+    setSelectedStoreId: (dealerStoreId: string) => void;
 }
 
 export default function CashCollectionFilter({ storesList, companyName, startDate, endDate, setStartDate, setEndDate, selectedStoreId,
@@ -33,7 +33,6 @@ export default function CashCollectionFilter({ storesList, companyName, startDat
                     icon={<BuildingOfficeIcon className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500" />}
                 />
 
-                {/* Stores Dropdown */}
                 {/* Stores Dropdown */}
                 <div className="flex flex-col">
                     <label className="text-gray-700 dark:text-gray-300 font-medium flex items-center">

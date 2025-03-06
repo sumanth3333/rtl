@@ -47,7 +47,7 @@ export default function CashCollectionPage() {
 
             {/* Conditional Rendering */}
             <div className="mt-6">
-                {!companyName || !startDate || !endDate || !selectedStoreId ? (
+                {!companyName || !startDate || !endDate ? (
                     <p className="text-gray-500 text-center">Select a store and date range to view cash collection.</p>
                 ) : isLoading ? (
                     <p className="text-center text-gray-600">Loading...</p>

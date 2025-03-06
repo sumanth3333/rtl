@@ -28,7 +28,7 @@ export const useFetchCashCollection = (companyName: string, startDate: string, e
         };
 
         fetchData();
-    }, [companyName, startDate, endDate]);
+    }, [companyName, startDate, endDate, dealerStoreId]);
 
     return { cashData, isLoading, error };
 };
