@@ -4,13 +4,14 @@ import apiClient from "../api/apiClient";
 export const fetchCashCollectionAPI = async (
     companyName: string,
     startDate: string,
-    endDate: string
+    endDate: string,
+    dealerStoreId: string,
 ): Promise<CashCollectionData[]> => {
     try {
-        console.log(`Fetching cash collection from: ${apiClient.defaults.baseURL}/v1/company/cashCollection?companyName=${companyName}&startDate=${startDate}&endDate=${endDate}`);
+        console.log(`Fetching cash collection from: ${apiClient.defaults.baseURL}/company/cashCollection?companyName=${companyName}&startDate=${startDate}&endDate=${endDate}&dealerStoreId=${dealerStoreId}`);
 
         const response = await apiClient.get(`/company/cashCollection`, {
-            params: { companyName, startDate, endDate },
+            params: { companyName, dealerStoreId, startDate, endDate },
         });
 
         console.log("API Response:", response);

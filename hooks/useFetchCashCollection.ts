@@ -4,7 +4,7 @@ import { fetchCashCollectionAPI } from "@/services/owner/cashCollectionService";
 import { CashCollectionData } from "@/types/cashCollectionTypes";
 import { useState, useEffect } from "react";
 
-export const useFetchCashCollection = (companyName: string, startDate: string, endDate: string) => {
+export const useFetchCashCollection = (companyName: string, startDate: string, endDate: string, dealerStoreId: string) => {
     const [cashData, setCashData] = useState<CashCollectionData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -17,7 +17,7 @@ export const useFetchCashCollection = (companyName: string, startDate: string, e
 
         const fetchData = async () => {
             try {
-                const data = await fetchCashCollectionAPI(companyName, startDate, endDate);
+                const data = await fetchCashCollectionAPI(companyName, startDate, endDate, dealerStoreId);
                 setCashData(Array.isArray(data) ? data : []); // ✅ Ensure array
             } catch (err) {
                 setError("Failed to fetch cash collection data.");
