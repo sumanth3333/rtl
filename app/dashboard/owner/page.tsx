@@ -3,15 +3,18 @@
 import { useEffect, useState } from "react";
 import SkeletonTable from "@/components/ui/skeletons/SkeletonTable";
 import { useAuth } from "@/hooks/useAuth";
-import { getWhoIsWorking } from "@/services/owner/ownerService";
+import { getLatestEodDetails, getWhoIsWorking } from "@/services/owner/ownerService";
 import EmployeeList from "@/components/owner/EmployeeList";
 import { useOwner } from "@/hooks/useOwner";
+import LatestEodList from "@/components/owner/LatestEodList";
 
 export default function OwnerDashboard() {
     const { role, isLoading } = useAuth();
     const { companyName } = useOwner();
     const [workingEmployees, setWorkingEmployees] = useState([]);
     const [loadingEmployees, setLoadingEmployees] = useState(true);
+    const [loadingEod, setLoadingEod] = useState(false);
+    const [latestEod, setLatestEod] = useState([]);
 
     useEffect(() => {
         if (companyName) {
@@ -19,6 +22,11 @@ export default function OwnerDashboard() {
                 .then((data) => setWorkingEmployees(data))
                 .catch((error) => console.error("Failed to fetch employees:", error))
                 .finally(() => setLoadingEmployees(false));
+
+            getLatestEodDetails(companyName)
+                .then((eodDetails) => setLatestEod(eodDetails))
+                .catch((error) => console.error("Failed to fetch employees:", error))
+                .finally(() => setLoadingEod(false));
         }
     }, [companyName]);
 
@@ -66,9 +74,15 @@ export default function OwnerDashboard() {
                 {/* Additional Widgets Section */}
                 <section>
                     <h2 className="text-xl md:text-2xl font-extrabold uppercase tracking-wide text-gray-900 dark:text-white border-b-4 border-gray-300 dark:border-gray-700 pt-4 pb-2">
-                        EOD SUMMARY (COMING SOON)
+                        LATEST EOD SUMMARY
                     </h2>
-                    <SkeletonTable rows={6} />
+                    {loadingEod ? (
+                        <SkeletonTable rows={4} />
+                    ) : latestEod.length > 0 ? (
+                        <LatestEodList eodList={latestEod} />
+                    ) : (
+                        <p className="text-gray-500">No employees currently working.</p>
+                    )}
 
                 </section>
                 <section>

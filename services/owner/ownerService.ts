@@ -1,5 +1,5 @@
 import apiClient from "@/services/api/apiClient";
-import { Employee } from "@/types/employeeSchema";
+import { Employee, EodReport } from "@/types/employeeSchema";
 import { Store } from "@/schemas/storeSchema";
 
 // ✅ Fetch all stores
@@ -108,5 +108,29 @@ export const getWhoIsWorking = async (companyName: string) => {
     } catch (error) {
         console.error("Error fetching working employees:", error);
         return [];
+    }
+};
+
+export const getLatestEodDetails = async (companyName: string) => {
+    try {
+        const response = await apiClient.get("/sale/fetchSubmittedSales", {
+            params: {
+                companyName
+            }
+        });
+        return response.data; // Return the API response if needed
+    } catch (error: unknown) {
+        let errorMessage = "An unknown error occurred";
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        } else if (typeof error === "string") {
+            errorMessage = error;
+        } else if (error && typeof error === "object" && "response" in error) {
+            errorMessage =
+                (error as any).response?.data?.message || "API request failed";
+        }
+        console.error("❌ Failed to fetch EOD Report details:", errorMessage);
+        throw new Error(errorMessage); // Re-throw error for UI handling
     }
 };
