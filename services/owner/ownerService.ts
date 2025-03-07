@@ -1,6 +1,7 @@
 import apiClient from "@/services/api/apiClient";
 import { Employee, EodReport } from "@/types/employeeSchema";
 import { Store } from "@/schemas/storeSchema";
+import { AssignedTodo } from "@/types/todosTypes";
 
 // ✅ Fetch all stores
 export const getStores = async (companyName: string): Promise<Store[]> => {
@@ -132,5 +133,15 @@ export const getLatestEodDetails = async (companyName: string) => {
         }
         console.error("❌ Failed to fetch EOD Report details:", errorMessage);
         throw new Error(errorMessage); // Re-throw error for UI handling
+    }
+};
+
+export const getAssignedTodosForStore = async (dealerStoreId: string): Promise<{ todos: AssignedTodo[] }> => {
+    try {
+        const response = await apiClient.get("/todos/getAssinedTodos", { params: { dealerStoreId } });
+        return response.data;
+    } catch (error) {
+        console.error("❌ Error fetching assigned todos:", error);
+        return { todos: [] };
     }
 };

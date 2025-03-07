@@ -1,20 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Store } from "@/types/todosTypes";
+import { Store, AssignedTodo } from "@/types/todosTypes";
 import Button from "@/components/ui/Button";
 import { toast } from "react-toastify";
-import { getStores } from "@/services/owner/ownerService";
+import { getStores, getAssignedTodosForStore } from "@/services/owner/ownerService";
 import { assignTodosToStore } from "@/services/owner/todosService";
 import StoreSelector from "@/components/owner/todos/StoreSelector";
+import TodoInput from "@/components/owner/todos/TodosInput";
 import AssignTodosTable from "@/components/owner/todos/AssignTodosTable";
+import AssignedTodosList from "@/components/owner/todos/AssignedTodosList";
 import { useOwner } from "@/hooks/useOwner";
-import TodosInput from "@/components/owner/todos/TodosInput";
 
 export default function AssignTodos() {
     const [stores, setStores] = useState<Store[]>([]);
     const [selectedStores, setSelectedStores] = useState<string[]>([]);
     const [todos, setTodos] = useState<string[]>([]);
+    const [assignedTodos, setAssignedTodos] = useState<Record<string, AssignedTodo[]>>({});
     const [loading, setLoading] = useState(false);
     const { companyName } = useOwner();
 
@@ -26,6 +28,27 @@ export default function AssignTodos() {
         }
         fetchStores();
     }, [companyName]);
+
+    // ✅ Fetch Assigned Todos for Selected Stores
+    useEffect(() => {
+        async function fetchAssignedTodos() {
+            const assignedTodosMap: Record<string, AssignedTodo[]> = {};
+            for (const storeId of selectedStores) {
+                try {
+                    const data = await getAssignedTodosForStore(storeId);
+                    assignedTodosMap[storeId] = data.todos;
+                } catch (error) {
+                    console.error(`❌ Error fetching assigned todos for store ${storeId}:`, error);
+                    assignedTodosMap[storeId] = [];
+                }
+            }
+            setAssignedTodos(assignedTodosMap);
+        }
+
+        if (selectedStores.length > 0) {
+            fetchAssignedTodos();
+        }
+    }, [selectedStores]);
 
     // ✅ Handle Todo Assignment
     const handleAssignTodos = async () => {
@@ -56,10 +79,12 @@ export default function AssignTodos() {
             <StoreSelector stores={stores} selectedStores={selectedStores} setSelectedStores={setSelectedStores} />
 
             {/* ✅ Add ToDos */}
-            <TodosInput todos={todos} setTodos={setTodos} />
+            <TodoInput todos={todos} setTodos={setTodos} />
 
             {/* ✅ Display Assigned Todos */}
-            <AssignTodosTable selectedStores={selectedStores} todos={todos} />
+            {selectedStores.map((storeId) => (
+                <AssignedTodosList key={storeId} storeId={storeId} todos={assignedTodos[storeId] || []} />
+            ))}
 
             {/* ✅ Submit Button */}
             <div className="flex justify-end">

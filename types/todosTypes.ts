@@ -9,3 +9,9 @@ export interface AssignTodosRequest {
     dealerStoreId: string;
     todos: string[];
 }
+
+export interface AssignedTodo {
+    id: number;
+    completed: boolean;
+    todoDescription: string;
+}
