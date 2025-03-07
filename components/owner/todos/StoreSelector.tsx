@@ -35,3 +35,4 @@ export default function StoreSelector({ stores, selectedStores, setSelectedStore
         </div>
     );
 }
+

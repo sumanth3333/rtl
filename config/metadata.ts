@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "RTB Logging",
+    title: "OneClick By Easydoers",
     description: "Business Management App By EasyDoers",
     openGraph: {
-        title: "RTBL - Real-Time Business Logging",
-        description: "Streamline your business operations with EasyDoers.",
+        title: "OneClick",
+        description: "Streamline your business operations with OneClick today.",
         type: "website",
     },
 };
