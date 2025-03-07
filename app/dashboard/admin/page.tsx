@@ -7,8 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 export default function AdminDashboard() {
     const { role, isLoading } = useAuth();
 
-    console.log("🖥️ AdminDashboard: Role:", role, "Loading:", isLoading);
-
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen">

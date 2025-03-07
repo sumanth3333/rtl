@@ -2,7 +2,8 @@ import {
     BuildingOfficeIcon, BuildingStorefrontIcon, DocumentTextIcon, CreditCardIcon, ChartBarIcon, ChartBarSquareIcon, UsersIcon, HomeIcon, CurrencyDollarIcon, ClipboardDocumentListIcon, ArchiveBoxIcon, DevicePhoneMobileIcon, BanknotesIcon, ClipboardDocumentCheckIcon,
     ClockIcon,
     DocumentMagnifyingGlassIcon,
-    ArrowsRightLeftIcon
+    ArrowsRightLeftIcon,
+    CheckCircleIcon
 } from "@heroicons/react/24/outline";
 import React from "react";
 // roleConfig.ts - Centralized role-based configuration
@@ -129,16 +130,16 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/owner/inventory-reorder",
             icon: ClipboardDocumentCheckIcon,
         },
-        // {
-        //     name: "Assign ToDos",
-        //     path: "/dashboard/owner/targets",
-        //     icon: ClipboardDocumentCheckIcon,
-        // },
-        // {
-        //     name: "Monthly Targets",
-        //     path: "/dashboard/owner/targets",
-        //     icon: ClipboardDocumentCheckIcon,
-        // },
+        {
+            name: "Assign ToDos",
+            path: "/dashboard/owner/assign-todos",
+            icon: CheckCircleIcon,
+        },
+        {
+            name: "Monthly Targets",
+            path: "/dashboard/owner/targets",
+            icon: ChartBarIcon,
+        },
         // {
         //     name: "Manage Expenses",
         //     path: "/dashboard/owner/manage-expenses",

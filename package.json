@@ -12,6 +12,7 @@
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^3.10.0",
     "axios": "^1.7.9",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.4.4",
     "jose": "^5.10.0",
     "js-cookie": "^3.0.5",
@@ -22,6 +23,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
+    "react-toastify": "^11.0.5",
+    "toast": "^0.5.4",
     "zod": "^3.24.2"
   },
   "devDependencies": {
