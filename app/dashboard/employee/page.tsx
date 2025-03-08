@@ -1,58 +1,73 @@
 "use client";
 
-import Card from "@/components/ui/card/Card";
-import { dashboardCards, Role } from "@/config/roleConfig";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useEmployee } from "@/hooks/useEmployee";
+import { getEmployeeTargets, getPendingTodosCount, getStoreTargets } from "@/services/employee/employeeService";
+import WelcomeSection from "@/components/employee/WelcomeSection";
+import TargetSummary from "@/components/employee/TargetSummary";
 
 export default function EmployeeDashboard() {
     const { role, isLoading } = useAuth();
+    const { employee, store } = useEmployee();
+    const [storeTargets, setStoreTargets] = useState(null);
+    const [employeeTargets, setEmployeeTargets] = useState(null);
+    const [pendingTodos, setPendingTodos] = useState(0);
 
-    console.log("🖥️ EmployeeDashboard: Role:", role, "Loading:", isLoading);
+    useEffect(() => {
+        getPendingTodosCount()
+            .then((count) => setPendingTodos(count))
+            .catch((error) => console.error("Failed to fetch pending todos:", error));
 
-    // Loading state until authentication is fully resolved
+        if (store?.dealerStoreId) {
+            getStoreTargets(store.dealerStoreId).then(setStoreTargets);
+        }
+        if (employee?.employeeNtid) {
+            getEmployeeTargets(employee.employeeNtid).then(setEmployeeTargets);
+        }
+    }, [store, employee]);
+
     if (isLoading || role === undefined) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <p className="text-gray-500 text-base sm:text-lg animate-pulse">
-                    Loading dashboard...
-                </p>
+                <p className="text-gray-500 text-lg animate-pulse">Loading dashboard...</p>
             </div>
         );
     }
 
-    // If user is not authenticated
     if (!role) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <p className="text-gray-500 text-base sm:text-lg">
-                    Please log in to access the dashboard.
-                </p>
+                <p className="text-gray-500 text-lg">Please log in to access the dashboard.</p>
             </div>
         );
     }
 
-    const typedRole = role as Role;
-
     return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <header className="mb-4">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-                    Welcome to {typedRole.charAt(0).toUpperCase() + typedRole.slice(1).toLowerCase()} Dashboard
-                </h2>
-                <p className="mt-1 text-sm sm:text-base md:text-lg text-gray-600">
-                    Manage Tasks, Inventory, EOD Report and more.
-                </p>
-            </header>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+            <WelcomeSection
+                employee={employee}
+                store={store}
+                pendingTodos={pendingTodos}
+            />
 
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {dashboardCards[typedRole]?.map((card) => (
-                    <Card
-                        key={card.link}
-                        title={card.title}
-                        description={card.description}
-                        link={card.link}
-                    />
-                ))}
+            <section className="grid grid-cols-1 gap-6">
+                <TargetSummary
+                    title="📊 Store Target Progress"
+                    targetData={storeTargets}
+                    isEmployee={false}
+                    cardStyle="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition duration-300"
+                    textStyle="text-lg font-semibold text-gray-800 dark:text-gray-200"
+                    highlightStyle="text-2xl font-bold text-blue-600 dark:text-blue-400"
+                />
+                <TargetSummary
+                    title="🎯 Your Personal Targets"
+                    targetData={employeeTargets}
+                    isEmployee={true}
+                    cardStyle="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition duration-300"
+                    textStyle="text-lg font-semibold text-gray-800 dark:text-gray-200"
+                    highlightStyle="text-2xl font-bold text-green-600 dark:text-green-400"
+                />
             </section>
         </main>
     );

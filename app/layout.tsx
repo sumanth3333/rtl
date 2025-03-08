@@ -16,7 +16,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <Head>
         {/* ✅ Manifest File */}
         <link rel="manifest" href="/manifest.json" />
-
+        <script>
+          {`
+      if (!document.querySelector('link[rel="manifest"]')) {
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = '/manifest.json';
+        document.head.appendChild(link);
+      }
+    `}
+        </script>
         {/* ✅ PWA Metadata */}
         <meta name="application-name" content="OneClick" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

@@ -112,3 +112,40 @@ export const getAuthorizedStoresAPI = async (employeeNtid: string) => {
     }
 };
 
+// ✅ Fetch Store Targets based on store ID
+export const getStoreTargets = async (dealerStoreId: string) => {
+    try {
+        const response = await apiClient.get("/store/attainment", {
+            params: { dealerStoreId },
+        });
+
+        return response.data; // Directly return raw response
+    } catch (error) {
+        console.error("❌ Error fetching store targets:", error);
+        return null;
+    }
+};
+
+// ✅ Fetch Employee Targets based on employee NTID
+export const getEmployeeTargets = async (employeeNtid: string) => {
+    try {
+        const response = await apiClient.get("/employee/attainment", {
+            params: { employeeNtid },
+        });
+
+        return response.data; // Directly return raw response
+    } catch (error) {
+        console.error("❌ Error fetching employee targets:", error);
+        return null;
+    }
+};
+
+export const getPendingTodosCount = async (): Promise<number> => {
+    try {
+        const response = await apiClient.get("/todos/pendingTodosCount");
+        return response.data.count || 0;
+    } catch (error) {
+        console.error("Error fetching pending todos count:", error);
+        return 0;
+    }
+};
