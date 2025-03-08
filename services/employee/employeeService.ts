@@ -140,9 +140,14 @@ export const getEmployeeTargets = async (employeeNtid: string) => {
     }
 };
 
-export const getPendingTodosCount = async (): Promise<number> => {
+export const getPendingTodosCount = async (dealerStoreId: string): Promise<number> => {
     try {
-        const response = await apiClient.get("/todos/pendingTodosCount");
+        const response = await apiClient.get("/todos/pendingTodosCount", {
+            params: {
+                dealerStoreId
+            }
+        });
+        console.log(response.data);
         return response.data.count || 0;
     } catch (error) {
         console.error("Error fetching pending todos count:", error);

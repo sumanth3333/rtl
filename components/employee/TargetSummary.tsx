@@ -8,14 +8,14 @@ export default function TargetSummary({ title, targetData, isEmployee, cardStyle
     const remaining = targetData[2] || {};
 
     return (
-        <div className={`${cardStyle} p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 w-full`}>
+        <div className={`${cardStyle} p-2 sm:p-5 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 w-full`}>
             <h3 className="sm:text-sm md:text-sm lg:text-sm xl:text-base font-bold text-gray-900 dark:text-gray-100 mb-4 uppercase tracking-wide text-center sm:text-left">{title}</h3>
 
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 text-center w-full">
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-2 text-center w-full">
                 {[
                     { label: "Activations", key: isEmployee ? "phonesTargetToEmployee" : "activationTargetToStore" },
                     { label: "Accessories", key: isEmployee ? "accessoriesTargetByEmployee" : "accessoriesTargetToStore" },
-                    { label: "HSI", key: "hsiTarget" },
+                    { label: "HSI", key: isEmployee ? "hsiTarget" : "hsiTargetToStore" },
                     { label: "Tablets", key: isEmployee ? "tabletsTargetByEmployee" : "tabletsTargetToStore" },
                     { label: "Watches", key: isEmployee ? "smartwatchTragetByEmployee" : "smartwatchTragetToStore" }
                 ].map((item) => (

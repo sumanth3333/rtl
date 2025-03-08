@@ -15,12 +15,11 @@ export default function EmployeeDashboard() {
     const [pendingTodos, setPendingTodos] = useState(0);
 
     useEffect(() => {
-        getPendingTodosCount()
-            .then((count) => setPendingTodos(count))
-            .catch((error) => console.error("Failed to fetch pending todos:", error));
-
         if (store?.dealerStoreId) {
             getStoreTargets(store.dealerStoreId).then(setStoreTargets);
+            getPendingTodosCount(store.dealerStoreId)
+                .then((count) => setPendingTodos(count))
+                .catch((error) => console.error("Failed to fetch pending todos:", error));
         }
         if (employee?.employeeNtid) {
             getEmployeeTargets(employee.employeeNtid).then(setEmployeeTargets);
@@ -44,7 +43,7 @@ export default function EmployeeDashboard() {
     }
 
     return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <main className="max-w-7xl mx-auto px-4 sm:px-4 lg:px-6 py-6 space-y-6">
             <WelcomeSection
                 employee={employee}
                 store={store}
