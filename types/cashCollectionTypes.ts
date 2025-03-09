@@ -35,4 +35,5 @@ export interface CashCollectionData {
     store: Store;
     cash: CashData;
     saleHistory: SaleHistory[];
+    overalllCompanyCash: CashData;
 }
