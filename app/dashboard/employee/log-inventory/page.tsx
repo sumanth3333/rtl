@@ -20,7 +20,7 @@ export default function InventoryPage() {
 
     // ✅ Fetch Inventory on Page Load
     useEffect(() => {
-        if (!store) return;
+        if (!store) { return };
         const loadInventory = async () => {
             try {
                 const data = await fetchInventory(dealerStoreId);

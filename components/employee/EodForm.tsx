@@ -126,14 +126,14 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         );
 
         // Check if individual totals match the total
-        let errors: Record<string, string> = {};
+        const errors: Record<string, string> = {};
 
-        if (totalBoxesSold !== watch("boxesSold")) errors["boxesSold"] = "Total does not match sum of individual entries.";
-        if (totalHSISold !== watch("hsiSold")) errors["hsiSold"] = "Total does not match sum of individual entries.";
-        if (totalTabletsSold !== watch("tabletsSold")) errors["tabletsSold"] = "Total does not match sum of individual entries.";
-        if (totalWatchesSold !== watch("watchesSold")) errors["watchesSold"] = "Total does not match sum of individual entries.";
-        if (totalAccessoriesByEmployee !== accessoriesByEmployee) errors["accessoriesByEmployee"] = "Total does not match sum of individual entries.";
-        if (totalsystemAccessories !== watch("systemAccessories")) errors["systemAccessories"] = "Total does not match sum of individual entries.";
+        if (totalBoxesSold !== watch("boxesSold")) { errors["boxesSold"] = "Total does not match sum of individual entries." };
+        if (totalHSISold !== watch("hsiSold")) { errors["hsiSold"] = "Total does not match sum of individual entries." };
+        if (totalTabletsSold !== watch("tabletsSold")) { errors["tabletsSold"] = "Total does not match sum of individual entries." };
+        if (totalWatchesSold !== watch("watchesSold")) { errors["watchesSold"] = "Total does not match sum of individual entries." };
+        if (totalAccessoriesByEmployee !== accessoriesByEmployee) { errors["accessoriesByEmployee"] = "Total does not match sum of individual entries." };
+        if (totalsystemAccessories !== watch("systemAccessories")) { errors["systemAccessories"] = "Total does not match sum of individual entries." };
 
         // If errors exist, update state and prevent submission
         if (Object.keys(errors).length > 0) {
