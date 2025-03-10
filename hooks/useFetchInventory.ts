@@ -9,12 +9,12 @@ export function useFetchInventory(dealerStoreId: string) {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!dealerStoreId) {return;}
+        if (!dealerStoreId) { return; }
 
         const fetchAvailableInventory = async () => {
             try {
                 const data = await fetchInventory(dealerStoreId);
-                setInventory(data);
+                setInventory(data.products);
             } catch (err) {
                 setError("Failed to fetch inventory");
             } finally {

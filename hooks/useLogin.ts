@@ -9,8 +9,8 @@ import { AxiosError } from "axios";
 import { login } from "@/services/auth/authService";
 
 const loginSchema = z.object({
-    userName: z.string().min(6, "Valid Store ID is required"),
-    password: z.string().min(6, "Valid Employee NTID is required"),
+    userName: z.string().min(6, "Valid Username or Store ID is required"),
+    password: z.string().min(6, "Valid Password or NTID is required"),
 });
 
 type LoginData = z.infer<typeof loginSchema>;
@@ -27,18 +27,25 @@ export function useLogin(onLoginSuccess: () => void) {
     });
 
     const onSubmit = async (data: LoginData) => {
+
+        // 🚨 Determine if the user is an employee by checking for '@' in username
+        const isEmployee = !data.userName.includes("@");
+
+        // 🚨 Block employees from logging in on small screens before making any request
+        if (isEmployee && window.innerWidth < 768) {
+            setErrorMessage("Employee login is not available on phones. Please use a store tablet.");
+            return; // ❌ STOP LOGIN PROCESS HERE
+        }
+
         setIsLoading(true);
         setErrorMessage("");
         try {
             const response = await login(data.userName, data.password);
-            console.log(`log in response is ${JSON.stringify(response.data)}`);
-
             if (response.status === 200) {
                 await refreshAuth();
                 if (response.data.loginPerson) {
                     setOwnerData(response.data.loginPerson, response.data.loginEmail);
                 } else if (response.data.employee) {
-                    console.log(`setting employee data`);
                     setEmployeeData(response.data);
                 }
                 onLoginSuccess();

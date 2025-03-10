@@ -154,3 +154,13 @@ export const getPendingTodosCount = async (dealerStoreId: string): Promise<numbe
         return 0;
     }
 };
+
+export const getEmployeesWorking = async (dealerStoreId: string) => {
+    try {
+        const response = await apiClient.get(`/store/numberOfEmployeesWorking?dealerStoreId=${dealerStoreId}`);
+        return response.data;
+    } catch (error) {
+        console.error("❌ Failed to fetch employees working:", error);
+        throw new Error("Failed to retrieve employees working data.");
+    }
+};

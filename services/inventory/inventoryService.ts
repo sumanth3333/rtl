@@ -7,11 +7,9 @@ export interface InventoryItem {
 }
 
 // ✅ Fetch Inventory by `dealerStoreId`
-export const fetchInventory = async (dealerStoreId: string): Promise<InventoryItem[]> => {
+export const fetchInventory = async (dealerStoreId: string): Promise<any> => {
     try {
         const url = `/inventory/store?dealerStoreId=${dealerStoreId}`;
-        console.log(`Fetching inventory from: ${url}`);
-
         const response = await apiClient.get(url);
         console.log("Raw API Response:", response);
 
@@ -20,7 +18,7 @@ export const fetchInventory = async (dealerStoreId: string): Promise<InventoryIt
             throw new Error("Invalid API response format");
         }
 
-        return response.data.products;
+        return response.data;
     } catch (error) {
         console.error("Error fetching inventory:", error);
         throw new Error("Failed to load inventory.");
@@ -30,16 +28,15 @@ export const fetchInventory = async (dealerStoreId: string): Promise<InventoryIt
 
 export const updateInventory = async (
     dealerStoreId: string,
-    updatedItems: { id: number; productName: string; quantity: number }[]
+    updatedItems: { id: number; productName: string; quantity: number }[],
+    employeeNtid: string
 ) => {
     try {
         const payload = {
             dealerStoreId,
-            products: updatedItems, // ✅ Matches the expected backend structure
+            products: updatedItems,
+            employeeNtid // ✅ Matches the expected backend structure
         };
-
-        console.log("Updating inventory with payload:", JSON.stringify(payload, null, 2));
-
         const response = await apiClient.put("/inventory/updateInventory", payload);
         return response.data;
     } catch (error) {

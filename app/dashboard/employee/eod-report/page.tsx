@@ -15,6 +15,7 @@ export default function LogEodReportPage() {
         actualCard: 0,
         systemCard: 0,
         systemAccessories: 0,
+        accessoriesByEmployee: 0,
         lastTransactionTime: "10:00:00",
         cashExpense: 0,
         expenseReason: "NONE",

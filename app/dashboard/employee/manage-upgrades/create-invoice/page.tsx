@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEmployee } from "@/hooks/useEmployee";
@@ -38,6 +38,12 @@ export default function CreateInvoicePage() {
             products: [],
         },
     });
+
+    useEffect(() => {
+        if (store || employee) {
+            return;
+        }
+    }, [store, employee]);
 
     const formValues = watch();
 

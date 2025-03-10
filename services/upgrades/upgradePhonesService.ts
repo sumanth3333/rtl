@@ -5,6 +5,11 @@ import { useEmployee } from "@/hooks/useEmployee";
 import { InvoiceData } from "@/types/invoiceTypes";
 import { SaleRequest, TransferRequest } from "@/types/upgradePhoneTypes";
 
+export async function getInvoiceByImei(imei: string) {
+    const response = await apiClient.get(`/upgradePhones/fetchInvoice/${imei}`);
+    return response.data;
+}
+
 const useUpgradePhonesService = () => {
     const { employee, store } = useEmployee();
 
