@@ -40,13 +40,13 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         mode: "onChange",
         defaultValues: initialValues,
     });
+
     // Fetch employees working in the store
     useEffect(() => {
         if (store?.dealerStoreId) {
             getEmployeesWorking(store.dealerStoreId)
                 .then((response) => {
                     if (response.count > 1) {
-                        console.log(response);
                         setEmployeesWorking(response.employees);
                         setShowIndividualForm(true);
                     }
@@ -89,10 +89,13 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const cardDifference = actualCard - systemCard;
     const accessoriesByEmployee = cashDifference + cardDifference;
 
+    const expenseReason = watch("expenseReason");
 
     // Handle individual employee data change
     const handleEmployeeDataChange = (index: number, field: string, value: number) => {
+
         setIndividualEntries((prevEntries) => {
+            console.log(expenseReason);
             const updatedEntries = [...prevEntries];
             updatedEntries[index] = {
                 ...updatedEntries[index],
@@ -104,45 +107,49 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 systemCard: systemCard,
                 actualCard: actualCard,
                 lastTransactionTime: watch("lastTransactionTime"),
+                cashExpense: watch("cashExpense"),
+                expenseReason: expenseReason,
             };
             return updatedEntries;
         });
     };
 
     const onSubmit = async (data: EodReport) => {
+
         if (!confirmClockOut) {
             alert("⚠️ You must confirm clock-out before submitting.");
             return;
         }
 
-        // Calculate totals
-        const totalBoxesSold = individualEntries.reduce((sum, entry) => sum + (entry.boxesSold || 0), 0);
-        const totalHSISold = individualEntries.reduce((sum, entry) => sum + (entry.hsiSold || 0), 0);
-        const totalTabletsSold = individualEntries.reduce((sum, entry) => sum + (entry.tabletsSold || 0), 0);
-        const totalWatchesSold = individualEntries.reduce((sum, entry) => sum + (entry.watchesSold || 0), 0);
-        const totalAccessoriesByEmployee = individualEntries.reduce((sum, entry) => sum + (entry.accessoriesByEmployee || 0), 0);
-        const totalsystemAccessories = parseFloat(
-            individualEntries.reduce((sum, entry) => sum + (entry.systemAccessories || 0), 0).toFixed(2)
-        );
+        if (showIndividualForm) {
+            // Calculate totals
+            const totalBoxesSold = individualEntries.reduce((sum, entry) => sum + (entry.boxesSold || 0), 0);
+            const totalHSISold = individualEntries.reduce((sum, entry) => sum + (entry.hsiSold || 0), 0);
+            const totalTabletsSold = individualEntries.reduce((sum, entry) => sum + (entry.tabletsSold || 0), 0);
+            const totalWatchesSold = individualEntries.reduce((sum, entry) => sum + (entry.watchesSold || 0), 0);
+            const totalAccessoriesByEmployee = individualEntries.reduce((sum, entry) => sum + (entry.accessoriesByEmployee || 0), 0);
+            const totalsystemAccessories = parseFloat(
+                individualEntries.reduce((sum, entry) => sum + (entry.systemAccessories || 0), 0).toFixed(2)
+            );
 
-        // Check if individual totals match the total
-        const errors: Record<string, string> = {};
+            // Check if individual totals match the total
+            const errors: Record<string, string> = {};
 
-        if (totalBoxesSold !== watch("boxesSold")) { errors["boxesSold"] = "Total does not match sum of individual entries." };
-        if (totalHSISold !== watch("hsiSold")) { errors["hsiSold"] = "Total does not match sum of individual entries." };
-        if (totalTabletsSold !== watch("tabletsSold")) { errors["tabletsSold"] = "Total does not match sum of individual entries." };
-        if (totalWatchesSold !== watch("watchesSold")) { errors["watchesSold"] = "Total does not match sum of individual entries." };
-        if (totalAccessoriesByEmployee !== accessoriesByEmployee) { errors["accessoriesByEmployee"] = "Total does not match sum of individual entries." };
-        if (totalsystemAccessories !== watch("systemAccessories")) { errors["systemAccessories"] = "Total does not match sum of individual entries." };
+            if (totalBoxesSold !== watch("boxesSold")) { errors["boxesSold"] = "Total does not match sum of individual entries." };
+            if (totalHSISold !== watch("hsiSold")) { errors["hsiSold"] = "Total does not match sum of individual entries." };
+            if (totalTabletsSold !== watch("tabletsSold")) { errors["tabletsSold"] = "Total does not match sum of individual entries." };
+            if (totalWatchesSold !== watch("watchesSold")) { errors["watchesSold"] = "Total does not match sum of individual entries." };
+            if (totalAccessoriesByEmployee !== accessoriesByEmployee) { errors["accessoriesByEmployee"] = "Total does not match sum of individual entries." };
+            if (totalsystemAccessories !== watch("systemAccessories")) { errors["systemAccessories"] = "Total does not match sum of individual entries." };
 
-        // If errors exist, update state and prevent submission
-        if (Object.keys(errors).length > 0) {
-            setValidationErrors(errors);
-            return;
+            // If errors exist, update state and prevent submission
+            if (Object.keys(errors).length > 0) {
+                setValidationErrors(errors);
+                return;
+            }
+
+            setValidationErrors({}); // Clear errors if validation passes
         }
-
-        setValidationErrors({}); // Clear errors if validation passes
-
         // Format data before submission
         const formattedData = {
             ...data,
@@ -176,6 +183,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             }
             // Submit each employee's individual sales data
             else {
+                console.log(individualEntries);
                 await Promise.all(
                     individualEntries.map((entry) =>
                         submitEodReport(entry)

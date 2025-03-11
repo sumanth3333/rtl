@@ -8,7 +8,6 @@ import { getStores, getAssignedTodosForStore } from "@/services/owner/ownerServi
 import { assignTodosToStore } from "@/services/owner/todosService";
 import StoreSelector from "@/components/owner/todos/StoreSelector";
 import TodoInput from "@/components/owner/todos/TodosInput";
-import AssignTodosTable from "@/components/owner/todos/AssignTodosTable";
 import AssignedTodosList from "@/components/owner/todos/AssignedTodosList";
 import { useOwner } from "@/hooks/useOwner";
 
@@ -20,11 +19,15 @@ export default function AssignTodos() {
     const [loading, setLoading] = useState(false);
     const { companyName } = useOwner();
 
-    // ✅ Fetch stores on mount
+    // ✅ Fetch stores on mount and select all stores by default
     useEffect(() => {
+        if (!companyName) {
+            return;
+        }
         async function fetchStores() {
             const storesList = await getStores(companyName);
             setStores(storesList);
+            setSelectedStores(storesList.map(store => store.dealerStoreId)); // Auto-select all stores
         }
         fetchStores();
     }, [companyName]);
@@ -62,10 +65,14 @@ export default function AssignTodos() {
             await Promise.all(
                 selectedStores.map((storeId) => assignTodosToStore({ dealerStoreId: storeId, todos }))
             );
-            toast.success("ToDos assigned successfully!");
+            toast.success("✅ ToDos assigned successfully!");
             setTodos([]); // Clear todos after assignment
+
+            setTimeout(() => {
+                window.location.reload(); // ✅ Refresh the page after success
+            }, 1500);
         } catch (error) {
-            toast.error("Failed to assign ToDos.");
+            toast.error("❌ Failed to assign ToDos.");
             console.error(error);
         }
         setLoading(false);
@@ -81,17 +88,19 @@ export default function AssignTodos() {
             {/* ✅ Add ToDos */}
             <TodoInput todos={todos} setTodos={setTodos} />
 
+            {/* ✅ Submit Button */}
+            <div className="flex justify-center">
+                <Button onClick={handleAssignTodos} isLoading={loading} variant="primary">
+                    Assign ToDos
+                </Button>
+            </div>
+
             {/* ✅ Display Assigned Todos */}
             {selectedStores.map((storeId) => (
                 <AssignedTodosList key={storeId} storeId={storeId} todos={assignedTodos[storeId] || []} />
             ))}
 
-            {/* ✅ Submit Button */}
-            <div className="flex justify-end">
-                <Button onClick={handleAssignTodos} isLoading={loading} variant="primary">
-                    Assign ToDos
-                </Button>
-            </div>
+
         </div>
     );
 }
