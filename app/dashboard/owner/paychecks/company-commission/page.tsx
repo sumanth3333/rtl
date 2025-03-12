@@ -1,24 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CompanyPayStructure, PayFrequency, Threshold } from "@/types/companyTypes";
 import { updateCompanyPayStructure } from "@/services/owner/paycheckService";
 import Button from "@/components/ui/Button";
 import { toast } from "react-toastify";
 import CommissionTable from "@/components/owner/paycheck/company-commission/CommissionTable";
 import PayFrequencySelect from "@/components/owner/paycheck/company-commission/PayFrequencySelect";
+import { useOwner } from "@/hooks/useOwner";
 
 export default function CompanyPayStructurePage() {
+
+    const { companyName } = useOwner();
+
+    useEffect(() => {
+        if (companyName) {
+            return;
+        }
+    }, [companyName]);
+
+    console.log(companyName);
     const [payStructure, setPayStructure] = useState<CompanyPayStructure>({
-        company: { companyName: "Panjaab Enterprises LLC" }, // Replace with dynamic company name later
+        company: { companyName: companyName }, // Replace with dynamic company name later
         payFrequency: "WEEKLY",
         thresholds: [
-            { itemType: "Boxes", threshold: 30, payAmount: 3 },
-            { itemType: "Boxes", threshold: 50, payAmount: 4 },
-            { itemType: "Boxes", threshold: 70, payAmount: 5 },
-            { itemType: "Tablets", threshold: 5, payAmount: 0 },
-            { itemType: "Watches", threshold: 5, payAmount: 0 },
-            { itemType: "HSI", threshold: 5, payAmount: 15 },
+            { itemType: "Boxes", min: 1, threshold: 30, payAmount: 3 }
         ],
     });
 
@@ -27,6 +33,8 @@ export default function CompanyPayStructurePage() {
     const handleSave = async () => {
         setSaving(true);
         try {
+            payStructure.company.companyName = companyName;
+            console.log(payStructure);
             await updateCompanyPayStructure(payStructure);
             toast.success("✅ Pay structure updated successfully!");
         } catch (error) {
@@ -40,7 +48,7 @@ export default function CompanyPayStructurePage() {
         <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-lg shadow">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Company Pay Structure</h1>
             <p className="text-gray-700 dark:text-gray-300 mt-2">
-                Configure your **payment frequency, commission structure, and employee incentives**.
+                Configure your payment frequency & commission structure.
             </p>
 
             {/* ✅ Select Pay Frequency */}

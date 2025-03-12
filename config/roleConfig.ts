@@ -126,8 +126,8 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/owner/cash-collection",
             icon: BanknotesIcon,
         }, {
-            name: "Inventory Re-order",
-            path: "/dashboard/owner/inventory-reorder",
+            name: "Inventory Management",
+            path: "/dashboard/owner/inventory",
             icon: ClipboardDocumentCheckIcon,
         },
         {
@@ -162,36 +162,7 @@ export const dashboardCards: Record<Role, { title: string; description: string; 
         { title: "Setup Payments", description: "Configure payment methods", link: "/dashboard/admin/payments" },
     ],
     EMPLOYEE: [
-        // {
-        //     title: "Today's Goal",  // ✅ Added new card
-        //     description: "Stay focused and track your daily sales goal",
-        //     link: "/dashboard/employee/todays-goal"
-        // },
-        {
-            title: "Tasks",
-            description: "Stay on top of your todos by viewing, updating, and completing tasks efficiently.",
-            link: "/dashboard/employee/todos"
-        },
-        {
-            title: "End of Day Report",
-            description: "submit a detailed summary of daily sales, transactions, and other store activities.",
-            link: "/dashboard/employee/eod-report"
-        },
-        {
-            title: "Inventory Management",
-            description: "Keep track of store inventory, update stock levels ensure smooth business operations.",
-            link: "/dashboard/employee/log-inventory"
-        },
-        {
-            title: "Device Upgrades",
-            description: "Manage phone upgrades, process transfers, and sales ensuring a seamless experience.",
-            link: "/dashboard/employee/manage-upgrades"
-        },
-        // {
-        //     title: "Work Schedule",
-        //     description: "View your upcoming shifts, update your availability, and manage your work schedule.",
-        //     link: "/dashboard/employee/schedule"
-        // }
+
     ],
     MANAGER: [
         { title: "Team Overview", description: "Monitor team performance", link: "/dashboard/manager/overview" },
@@ -203,31 +174,6 @@ export const dashboardCards: Record<Role, { title: string; description: string; 
         //     description: "Oversee and assign managerial roles within the company.",
         //     link: "/dashboard/owner/manage-managers"
         // },
-        {
-            title: "Manage Employees",
-            description: "Hire, track, and manage employee details and roles.",
-            link: "/dashboard/owner/manage-employees"
-        },
-        {
-            title: "Manage Stores",
-            description: "Monitor and administer store operations and performance.",
-            link: "/dashboard/owner/manage-stores"
-        },
-        {
-            title: "Paychecks",
-            description: "Generate and manage payroll for employees and staff.",
-            link: "/dashboard/owner/paychecks"
-        },
-        {
-            title: "Cash Collection",
-            description: "Track and manage cash and card collections across all stores.",
-            link: "/dashboard/owner/cash-collection"
-        },
-        {
-            title: "Inventory Re-order",
-            description: "Monitor stock levels and generate re-order summaries for low inventory.",
-            link: "/dashboard/owner/inventory-reorder"
-        },
         // {
         //     title: "Manage Expenses",
         //     description: "Track, categorize, and control business expenditures.",

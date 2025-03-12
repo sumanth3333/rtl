@@ -11,13 +11,8 @@ export interface InventoryItem {
     currentQuantity: number;
 }
 
-export interface ReorderSummaryData {
+export interface StoreCurrentStock {
     store: Store;
-    inventory: InventoryItem[];
-}
-
-export interface StoreReorderSummary {
-    store: Store;
-    estimatedReorderValue: number;
+    currentStockValue: number;
     inventory: InventoryItem[];
 }

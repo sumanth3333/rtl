@@ -15,8 +15,12 @@ export const saveCommissionSettings = async (settings: any) => {
     });
 };
 
-export async function fetchCompanyPayStructure(): Promise<CompanyPayStructure> {
-    const response = await apiClient.get(`company/payStructure`);
+export async function fetchCompanyPayStructure(companyName: string): Promise<CompanyPayStructure> {
+    const response = await apiClient.get(`company/payStructure`, {
+        params: {
+            companyName: companyName
+        }
+    });
     return response.data;
 }
 
