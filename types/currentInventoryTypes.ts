@@ -13,6 +13,9 @@ export interface InventoryItem {
 
 export interface StoreCurrentStock {
     store: Store;
+    updatedDate: string;
+    updatedTime: string;
+    updatedPerson: string;
     currentStockValue: number;
     inventory: InventoryItem[];
 }
