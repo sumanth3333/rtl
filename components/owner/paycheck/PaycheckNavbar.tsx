@@ -15,7 +15,7 @@ export default function PaycheckNavbar() {
         <nav className="relative top-0 left-0 w-full bg-white dark:bg-gray-900 shadow-md z-50 border-b border-gray-300 dark:border-gray-700">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-3 flex items-center justify-center gap-4 overflow-x-auto scrollbar-hide">
                 {[
-                    { name: "Generate Pay", path: `${basePath}/generate-pay` },
+                    { name: "Generate Pay", path: `${basePath}` },
                     { name: "Employee Pay Setup", path: `${basePath}/employee-pay-setup` },
                     { name: "Company Commission", path: `${basePath}/company-commission` },
                 ].map((item) => (
