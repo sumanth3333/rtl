@@ -8,9 +8,9 @@ interface CommissionTableProps {
 
 export default function CommissionTable({ thresholds, setThresholds }: CommissionTableProps) {
     // ✅ State to track whether Tablets, HSI, and Watches are included in Box count
-    const [includeTablet, setIncludeTablet] = useState(true);
-    const [includeHSI, setIncludeHSI] = useState(true);
-    const [includeWatch, setIncludeWatch] = useState(true);
+    const [includeTablet, setIncludeTablet] = useState(false);
+    const [includeHSI, setIncludeHSI] = useState(false);
+    const [includeWatch, setIncludeWatch] = useState(false);
 
     // ✅ Handle threshold updates
     const handleUpdate = (index: number, field: keyof Threshold, value: string | number) => {
@@ -24,13 +24,13 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
         setThresholds(thresholds.filter((_, i) => i !== index));
     };
 
-    // ✅ Add a new threshold row (defaults min to 0)
     const handleAdd = (itemType: "Boxes" | "Tablets" | "Watches" | "HSI") => {
         setThresholds([
             ...thresholds,
-            { itemType, min: 0, threshold: 30, payAmount: 0 }, // Default values
+            { thresholdId: Date.now(), itemType, minimumThreshold: 0, threshold: 30, payAmount: 0 }, // ✅ Use Date.now() for a temporary unique ID
         ]);
     };
+
 
     return (
         <div className="mt-6">
@@ -115,9 +115,9 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
                                     <input
                                         type="number"
                                         className="w-16 p-1 text-center border rounded-md bg-gray-50 dark:bg-gray-900 dark:text-white"
-                                        value={threshold.min ?? 0} // Default to 0
+                                        value={threshold.minimumThreshold ?? 0} // Default to 0
                                         min={0}
-                                        onChange={(e) => handleUpdate(index, "min", Number(e.target.value) || 0)}
+                                        onChange={(e) => handleUpdate(index, "minimumThreshold", Number(e.target.value) || 0)}
                                     />
                                 </td>
 
@@ -127,7 +127,7 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
                                         type="number"
                                         className="w-16 p-1 text-center border rounded-md bg-gray-50 dark:bg-gray-900 dark:text-white"
                                         value={threshold.threshold ?? ""}
-                                        min={threshold.min + 1}
+                                        min={threshold.minimumThreshold + 1}
                                         onChange={(e) => handleUpdate(index, "threshold", Number(e.target.value) || 0)}
                                     />
                                 </td>

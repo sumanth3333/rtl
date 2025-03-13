@@ -48,7 +48,7 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
     });
 
     const handleConfirm = async () => {
-        if (!employeeData) {return;}
+        if (!employeeData) { return; }
         setLoading(true);
         console.log("🚀 Submitting employee data:", employeeData);
         try {
@@ -108,17 +108,17 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
                 {/* 🔹 Pay and Commission */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <InputField
-                        label="$/hour" type="number"
+                        label="$/hour" type="number" step="0.01"
                         {...register("employeePayRatePerHour", { valueAsNumber: true })}
                         error={errors.employeePayRatePerHour?.message}
                     />
                     <InputField
-                        label="Commission %" type="number"
+                        label="Commission %" type="number" step="0.01"
                         {...register("commissionPercentage", { valueAsNumber: true })}
                         error={errors.commissionPercentage?.message}
                     />
                     <InputField
-                        label="$/Box" type="number"
+                        label="$/Box" type="number" step="0.01"
                         {...register("perBoxCommission", { valueAsNumber: true })}
                         error={errors.perBoxCommission?.message}
                     />

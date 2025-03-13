@@ -34,6 +34,7 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
             work: {
                 numberOfHoursWorked: paycheck.work.numberOfHoursWorked,
                 numberOfDaysWorked: paycheck.work.numberOfDaysWorked,
+                workingHoursPay: paycheck.work.workingHoursPay,
                 totalAccessories: paycheck.work.totalAccessories,
                 boxesSold: paycheck.work.boxesSold,
                 tabletsSold: paycheck.work.tabletsSold,
@@ -72,8 +73,18 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 setSuccessMessage("✅ Payslip generated successfully!");
             }
         } catch (error) {
-            console.log(error);
-            setErrorMessage("❌ Failed to generate payslip.");
+            // ✅ Safely extract error message
+            let errorMessage = "❌ Failed to generate payslip.";
+
+            if (error instanceof Error) {
+                errorMessage = error.message; // ✅ Use error.message if available
+            } else if (typeof error === "string") {
+                errorMessage = error; // ✅ If error is a string, use it
+            } else if (error && typeof error === "object" && "message" in error) {
+                errorMessage = String(error.message); // ✅ If error has a "message" property
+            }
+
+            setErrorMessage(errorMessage);
         } finally {
             setLoading(false);
         }

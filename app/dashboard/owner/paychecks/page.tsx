@@ -11,26 +11,8 @@ export default function GeneratePayPage() {
     const { companyName } = useOwner();
     const [paychecks, setPaychecks] = useState<EmployeePaycheck[]>([]); // ✅ Correctly typed
 
-    // Function to get the first day of the current month (YYYY-MM-DD)
-    const getStartDate = () => {
-        const today = new Date();
-        return new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0];
-    };
-
-    // Function to get the last day of the current month (YYYY-MM-DD)
-    const getEndDate = () => {
-        const today = new Date();
-        return new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split("T")[0];
-    };
-
-    // Ensure the dates update when the month changes
-    useEffect(() => {
-        setStartDate(getStartDate());
-        setEndDate(getEndDate());
-    }, []);
-
-    const [startDate, setStartDate] = useState<string>(getStartDate());
-    const [endDate, setEndDate] = useState<string>(getEndDate());
+    const [startDate, setStartDate] = useState<string>("");
+    const [endDate, setEndDate] = useState<string>("");
     const [includeBoxes, setIncludeBoxes] = useState<string>("NO");
     const [includeAccessories, setIncludeAccessories] = useState<string>("NO");
 

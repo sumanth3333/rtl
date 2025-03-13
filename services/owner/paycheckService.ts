@@ -17,7 +17,7 @@ export const saveCommissionSettings = async (settings: any) => {
 };
 
 export async function fetchCompanyPayStructure(companyName: string): Promise<CompanyPayStructure> {
-    const response = await apiClient.get(`company/payStructure`, {
+    const response = await apiClient.get(`company/fetchPayStructure`, {
         params: {
             companyName: companyName
         }
