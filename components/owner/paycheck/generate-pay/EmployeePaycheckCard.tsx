@@ -134,9 +134,13 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 <div className="flex flex-col items-center text-sm sm:text-base">
                     <p className="text-sm text-gray-500 uppercase tracking-wide">Commission</p>
                     <span className="text-xl font-semibold text-blue-600 dark:text-blue-400">
-                        +$
-                        {(paycheck.commission.boxesCommission + paycheck.commission.accessoriesCommission).toFixed(2)}
+                        +${(paycheck.commission.boxesCommission + paycheck.commission.accessoriesCommission).toFixed(2)}
                     </span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Boxes: <span className="text-gray-800 dark:text-gray-200 font-medium">${paycheck.commission.boxesCommission.toFixed(2)}</span>
+                    </p><p className="text-xs text-gray-500 dark:text-gray-400">
+                        Accessories: <span className="text-gray-800 dark:text-gray-200 font-medium">${paycheck.commission.accessoriesCommission.toFixed(2)}</span>
+                    </p>
                 </div>
 
                 {/* Paid for Hours */}
@@ -145,6 +149,9 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                     <span className="text-xl font-semibold text-green-600 dark:text-green-400">
                         ${paycheck.work.workingHoursPay.toFixed(2)}
                     </span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Hours: <span className="text-gray-800 dark:text-gray-200 font-medium">${paycheck.work.numberOfHoursWorked.toFixed(2)}</span>
+                    </p>
                 </div>
 
                 {/* Deductions */}
@@ -153,7 +160,11 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                     <span className="text-xl font-semibold text-red-500">
                         -${paycheck.netPay.deduction.totalDeductions.toFixed(2)}
                     </span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Taxes: <span className="text-gray-800 dark:text-gray-200 font-medium">${paycheck.netPay.deduction.taxes.toFixed(2)}</span>
+                    </p>
                 </div>
+
 
                 {/* Net Pay */}
                 <div className="text-gray-800 dark:text-gray-200 text-sm sm:text-base border-t w-full text-center pt-4">
