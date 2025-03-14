@@ -80,14 +80,15 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     }, [store, employee, reset, initialValues]);
 
     // Watch form values to dynamically calculate differences
-    const actualCash = Number(watch("actualCash"));
-    const systemCash = Number(watch("systemCash"));
-    const actualCard = Number(watch("actualCard"));
-    const systemCard = Number(watch("systemCard"));
+    const actualCash = parseFloat(Number(watch("actualCash")).toFixed(2));
+    const systemCash = parseFloat(Number(watch("systemCash")).toFixed(2));
+    const actualCard = parseFloat(Number(watch("actualCard")).toFixed(2));
+    const systemCard = parseFloat(Number(watch("systemCard")).toFixed(2));
 
-    const cashDifference = actualCash - systemCash;
-    const cardDifference = actualCard - systemCard;
-    const accessoriesByEmployee = cashDifference + cardDifference;
+    // Calculate differences
+    const cashDifference = parseFloat((actualCash - systemCash).toFixed(2));
+    const cardDifference = parseFloat((actualCard - systemCard).toFixed(2));
+    const accessoriesByEmployee = parseFloat((cashDifference + cardDifference).toFixed(2));
 
     const expenseReason = watch("expenseReason");
 
@@ -112,6 +113,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             };
             return updatedEntries;
         });
+        console.log()
     };
 
     const onSubmit = async (data: EodReport) => {
@@ -132,6 +134,8 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 individualEntries.reduce((sum, entry) => sum + (entry.systemAccessories || 0), 0).toFixed(2)
             );
 
+            console.log(totalAccessoriesByEmployee);
+            console.log(accessoriesByEmployee);
             // Check if individual totals match the total
             const errors: Record<string, string> = {};
 
