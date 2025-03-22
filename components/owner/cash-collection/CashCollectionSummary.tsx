@@ -11,7 +11,6 @@ interface CashCollectionSummaryProps {
 
 export default function CashCollectionSummary({ cashData }: CashCollectionSummaryProps) {
     const [expandedStore, setExpandedStore] = useState<string | null>(null);
-    console.log(cashData);
     const toggleStore = (storeId: string) => {
         setExpandedStore(expandedStore === storeId ? null : storeId);
     };

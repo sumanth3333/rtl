@@ -15,7 +15,6 @@ export default function TableRow<T extends Record<string, any>>({
     onDelete,
     managers = [],
 }: TableRowProps<T>) {
-    console.log(item);
     return (
         <tr className="hover:bg-gray-100 dark:hover:bg-gray-800 transition duration-200">
             {columns.map((col) => (

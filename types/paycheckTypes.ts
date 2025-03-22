@@ -41,6 +41,9 @@ export interface Sale {
     hsiSold: number;
     watchesSold: number;
     saleDate: string;
+    clockInTime: string;
+    clockOutTime: string;
+    numberOfHoursWorkedByEmployee: string;
     store: Store;
 }
 

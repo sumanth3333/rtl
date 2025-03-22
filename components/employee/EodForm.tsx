@@ -96,7 +96,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const handleEmployeeDataChange = (index: number, field: string, value: number) => {
 
         setIndividualEntries((prevEntries) => {
-            console.log(expenseReason);
             const updatedEntries = [...prevEntries];
             updatedEntries[index] = {
                 ...updatedEntries[index],
@@ -113,7 +112,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             };
             return updatedEntries;
         });
-        console.log()
     };
 
     const onSubmit = async (data: EodReport) => {
@@ -133,10 +131,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             const totalsystemAccessories = parseFloat(
                 individualEntries.reduce((sum, entry) => sum + (entry.systemAccessories || 0), 0).toFixed(2)
             );
-
-            console.log(totalAccessoriesByEmployee);
-            console.log(accessoriesByEmployee);
-            // Check if individual totals match the total
             const errors: Record<string, string> = {};
 
             if (totalBoxesSold !== watch("boxesSold")) { errors["boxesSold"] = "Total does not match sum of individual entries." };

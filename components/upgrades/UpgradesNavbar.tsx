@@ -9,7 +9,6 @@ export default function UpgradesNavBar() {
     const { role } = useAuth();
     const pathname = usePathname();
     const typedRole = role as Role;
-
     return (
         <nav className="relative w-full bg-white dark:bg-gray-900 shadow-md">
             <div className="max-w-7xl mx-auto px-2">

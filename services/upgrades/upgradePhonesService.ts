@@ -10,6 +10,25 @@ export async function getInvoiceByImei(imei: string) {
     return response.data;
 }
 
+export const fetchCompanySoldDevicesAPI = async (companyName: string, start: string, end: string) => {
+    try {
+        const response = await apiClient.post("/company/previouslySoldDevices", {
+            companyName,
+            start,
+            end,
+        });
+        console.log(response);
+        if (response.status !== 200) {
+            throw new Error("Failed to fetch company sold devices");
+        }
+        return response.data;
+    } catch (error) {
+        console.error("Company sale fetch error:", error);
+        throw error;
+    }
+};
+
+
 const useUpgradePhonesService = () => {
     const { employee, store } = useEmployee();
 

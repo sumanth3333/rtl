@@ -1,10 +1,11 @@
 import {
     BuildingOfficeIcon, BuildingStorefrontIcon, DocumentTextIcon, CreditCardIcon, ChartBarIcon, ChartBarSquareIcon, UsersIcon, HomeIcon, CurrencyDollarIcon, ClipboardDocumentListIcon, ArchiveBoxIcon, DevicePhoneMobileIcon, BanknotesIcon, ClipboardDocumentCheckIcon,
-    ClockIcon,
+    ClockIcon, PencilSquareIcon, PresentationChartLineIcon,
     DocumentMagnifyingGlassIcon,
     ArrowsRightLeftIcon,
     CheckCircleIcon
 } from "@heroicons/react/24/outline";
+import { Clock } from "lucide-react";
 import React from "react";
 // roleConfig.ts - Centralized role-based configuration
 export type Role = "ADMIN" | "EMPLOYEE" | "MANAGER" | "OWNER";
@@ -72,11 +73,12 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/employee/manage-upgrades",
             icon: DevicePhoneMobileIcon
         },
-        // {
-        //     name: "Work Schedule",
-        //     path: "/dashboard/employee/schedule",
-        //     icon: CalendarDaysIcon
-        // }
+        {
+            name: "Raise A Request",
+            path: "/dashboard/employee/raise-request",
+            icon: PencilSquareIcon
+        }
+
     ],
     MANAGER: [
         {
@@ -131,6 +133,11 @@ export const sidebarLinks: Record<Role, {
             icon: ClipboardDocumentCheckIcon,
         },
         {
+            name: "Device Upgrades",
+            path: "/dashboard/owner/manage-upgrades",
+            icon: DevicePhoneMobileIcon
+        },
+        {
             name: "Assign ToDos",
             path: "/dashboard/owner/assign-todos",
             icon: CheckCircleIcon,
@@ -140,16 +147,16 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/owner/targets",
             icon: ChartBarIcon,
         },
-        // {
-        //     name: "Manage Expenses",
-        //     path: "/dashboard/owner/manage-expenses",
-        //     icon: ChartPieIcon
-        // },
-        // {
-        //     name: "Profit/Loss",
-        //     path: "/dashboard/owner/manage-pandl",
-        //     icon: ArrowTrendingUpIcon
-        // }
+        {
+            name: "Expenses & Profits",
+            path: "/dashboard/owner/finance",
+            icon: PresentationChartLineIcon,
+        },
+        {
+            name: "Pending Requests",
+            path: "/dashboard/owner/pending-requests",
+            icon: Clock, // or Hourglass
+        }
     ]
 };
 
@@ -217,11 +224,22 @@ export const upgradeNavbarLinks: Record<Role, {
             icon: ArrowsRightLeftIcon // 🔄 Best for pending transfers & receives
         },
     ],
-    ADMIN: [{
-        name: "",
-        path: "",
-        icon: DevicePhoneMobileIcon
-    },
+    ADMIN: [
+        {
+            name: "Available Devices",
+            path: "/dashboard/owner/manage-upgrades/available-devices",
+            icon: DevicePhoneMobileIcon // 📱 Best for devices list
+        },
+        {
+            name: "Sale History",
+            path: "/dashboard/owner/manage-upgrades/sale-history",
+            icon: ClockIcon // ⏳ Best for historical records or past sales
+        },
+        {
+            name: "Find Invoice Details",
+            path: "/dashboard/owner/manage-upgrades/invoice-details",
+            icon: DocumentMagnifyingGlassIcon // 🔍 Best for searching invoice details
+        },
     ],
     MANAGER: [
         {
@@ -232,9 +250,19 @@ export const upgradeNavbarLinks: Record<Role, {
     ],
     OWNER: [
         {
-            name: "",
-            path: "",
-            icon: DevicePhoneMobileIcon
-        }
+            name: "Available Devices",
+            path: "/dashboard/owner/manage-upgrades/available-devices",
+            icon: DevicePhoneMobileIcon // 📱 Best for devices list
+        },
+        {
+            name: "Sale History",
+            path: "/dashboard/owner/manage-upgrades/sale-history",
+            icon: ClockIcon // ⏳ Best for historical records or past sales
+        },
+        {
+            name: "Find Invoice Details",
+            path: "/dashboard/owner/manage-upgrades/invoice-details",
+            icon: DocumentMagnifyingGlassIcon // 🔍 Best for searching invoice details
+        },
     ]
 }

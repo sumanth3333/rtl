@@ -63,7 +63,6 @@ export default function TargetUpdateModal({ isOpen, onClose, target, month }: Ta
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            console.log(formData);
             if ("store" in formData) {
                 await updateStoreTarget(formData as StoreTargetRequest);
             } else {

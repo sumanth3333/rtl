@@ -12,7 +12,6 @@ interface AvailableDevicesTableProps {
 
 export default function AvailableDevicesTable({ devices, storeIds, selectedStore }: AvailableDevicesTableProps) {
     const [expandedRow, setExpandedRow] = useState<number | null>(null);
-    console.log(`available devices are ${devices}`);
 
     return (
         <div className="mt-6">

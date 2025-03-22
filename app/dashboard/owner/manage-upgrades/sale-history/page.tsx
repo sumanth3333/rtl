@@ -1,46 +1,55 @@
 "use client";
 
-import PreviouslySoldDevicesTable from "@/components/upgrades/PreviouslySoldDevicesTable";
-import SaleHistoryFilters from "@/components/upgrades/SaleHistoryFilters";
-import { useState } from "react";
-import { useFetchSoldDevices } from "@/hooks/useFetchSoldDevices";
+import { useEffect, useState } from "react";
+import { useFetchCompanySoldDevices } from "@/hooks/useFetchCompanySoldDevices";
+import CompanyPreviouslySoldDevicesTable from "@/components/upgrades/CompanyPreviouslySoldDevicesTable";
+import { useOwner } from "@/hooks/useOwner";
 
-export default function SaleHistoryPage() {
-    const [selectedStore, setSelectedStore] = useState<string>("");
-    const [startDate, setStartDate] = useState<string>("");
-    const [endDate, setEndDate] = useState<string>("");
+export default function CompanySaleHistoryPage() {
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const { companyName } = useOwner();
 
-    const { soldDevices, isLoading, error } = useFetchSoldDevices(selectedStore, startDate, endDate);
+    useEffect(() => {
+        if (!companyName) {
+            return;
+        }
+    }, [companyName]);
+
+    const { data, isLoading, error } = useFetchCompanySoldDevices(companyName, startDate, endDate);
+    const currentDate = new Date().toISOString().split("T")[0];
 
     return (
-        <div className="w-full max-w-3xl mx-auto px-4 py-6 bg-white dark:bg-gray-900 transition-colors duration-300">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 text-center">
-                ⏳ Sale History
+        <div className="max-w-4xl mx-auto px-4 py-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 dark:text-white">
+                Sale History
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2 text-center">
-                Review past upgrade sales and transactions.
-            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+                <div>
+                    <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                    <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        max={currentDate}
+                        className="w-full rounded-lg border px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                    />
+                </div>
+                <div>
+                    <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                    <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        max={currentDate}
+                        className="w-full rounded-lg border px-3 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white"
+                    />
+                </div>
+            </div>
 
-            {/* Filters */}
-            <SaleHistoryFilters
-                selectedStore={selectedStore}
-                setSelectedStore={setSelectedStore}
-                startDate={startDate}
-                setStartDate={setStartDate}
-                endDate={endDate}
-                setEndDate={setEndDate}
-            />
-
-            {/* Display Sale History */}
-            {isLoading && (
-                <p className="mt-4 text-center text-blue-500">Loading sold devices...</p>
-            )}
-            {error && (
-                <p className="mt-4 text-center text-red-500">Error: {error}</p>
-            )}
-            {!isLoading && !error && (
-                <PreviouslySoldDevicesTable soldDevices={soldDevices} />
-            )}
+            {isLoading && <p className="text-blue-500 text-center mt-4">Loading company sale history...</p>}
+            {error && <p className="text-red-500 text-center mt-4">Error: {error}</p>}
+            {!isLoading && !error && <CompanyPreviouslySoldDevicesTable data={data} />}
         </div>
     );
 }

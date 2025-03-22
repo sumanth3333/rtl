@@ -53,7 +53,6 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 netPay: paycheck.netPay.netPay,
             },
         };
-        console.log(payload);
         try {
             const response = await apiClient.post("/company/payslip", payload);
             if (response.data) {
@@ -222,6 +221,9 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                                     <thead>
                                         <tr className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300">
                                             <th className="p-3 text-left">Sale Date</th>
+                                            <th className="p-3 text-left">Opened At</th>
+                                            <th className="p-3 text-left">Closed At</th>
+                                            <th className="p-3 text-left">Hours</th>
                                             <th className="p-3 text-left">Store</th>
                                             <th className="p-3 text-center">Boxes</th>
                                             <th className="p-3 text-center">Accessories ($)</th>
@@ -241,6 +243,15 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                                             >
                                                 <td className="p-3 font-medium text-gray-700 dark:text-gray-300">
                                                     {sale.saleDate}
+                                                </td>
+                                                <td className="p-3 font-medium text-gray-700 dark:text-gray-300">
+                                                    {sale.clockInTime}
+                                                </td>
+                                                <td className="p-3 font-medium text-gray-700 dark:text-gray-300">
+                                                    {sale.clockOutTime}
+                                                </td>
+                                                <td className="p-3 font-medium text-gray-700 dark:text-gray-300">
+                                                    {sale.numberOfHoursWorkedByEmployee}
                                                 </td>
                                                 <td className="p-3 text-gray-700 dark:text-gray-300">
                                                     {sale.store.storeName}
