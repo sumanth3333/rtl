@@ -31,6 +31,7 @@ export default function ReorderInventoryPage() {
                     setSelectedStores={setSelectedStores}
                     showOverall={showOverall}
                     setShowOverall={setShowOverall}
+                    pageType="Reorder Inventory"
                 />
             ) : (
                 <p className="text-center text-gray-600 dark:text-gray-400">Loading stores...</p>

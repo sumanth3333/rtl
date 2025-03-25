@@ -20,14 +20,13 @@ export default function Sidebar({
     const { role, refreshAuth } = useAuth();
     const [loading, setLoading] = useState(true);
 
-    // ✅ Try refreshing token if role is null
     useEffect(() => {
         const fetchRole = async () => {
             if (!role) {
                 try {
-                    const refreshed = await refreshToken(); // ✅ Refresh Token API Call
+                    const refreshed = await refreshToken();
                     if (refreshed) {
-                        await refreshAuth(); // ✅ Fetch user details again
+                        await refreshAuth();
                     }
                 } catch (error) {
                     console.error("Failed to refresh token:", error);
@@ -39,7 +38,6 @@ export default function Sidebar({
         fetchRole();
     }, [role, refreshAuth]);
 
-    // ✅ Prevent background scrolling when sidebar is open on mobile
     useEffect(() => {
         if (isMobile && !isCollapsed) {
             document.body.style.overflow = "hidden";
@@ -51,7 +49,6 @@ export default function Sidebar({
         };
     }, [isMobile, isCollapsed]);
 
-    // ✅ Show loading state until role is available
     if (loading || !role) {
         return <div className="text-gray-600 dark:text-gray-300 p-4">Loading Sidebar...</div>;
     }
@@ -77,10 +74,10 @@ export default function Sidebar({
                 {/* Sidebar Header */}
                 <SidebarHeader isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
-                {/* Sidebar Content - Scrollable */}
-                <div className="flex flex-col h-screen">
-                    <div className="flex flex-1 overflow-y-auto pb-24">
-                        <nav className="flex flex-col space-y-2 mt-4 w-full">
+                {/* Sidebar Content - Fully Scrollable */}
+                <div className="flex flex-col flex-1 overflow-hidden">
+                    <div className="flex-1 overflow-y-auto">
+                        <nav className="flex flex-col space-y-2 mt-4 w-full px-2">
                             {sidebarLinks[typedRole]?.map((link) => (
                                 <SidebarItem
                                     key={link.path}
@@ -97,7 +94,11 @@ export default function Sidebar({
                             ))}
                         </nav>
                     </div>
-                    <SidebarFooter isCollapsed={isCollapsed} />
+
+                    {/* Sidebar Footer - Stays at Bottom */}
+                    <div className="mt-auto">
+                        <SidebarFooter isCollapsed={isCollapsed} />
+                    </div>
                 </div>
             </aside>
 

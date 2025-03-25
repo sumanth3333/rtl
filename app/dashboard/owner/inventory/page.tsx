@@ -29,6 +29,7 @@ export default function CurrentInventoryPage() {
                 setSelectedStores={setSelectedStores}
                 showOverall={showOverall}
                 setShowOverall={setShowOverall}
+                pageType="Current Inventory"
             />
 
             {showOverall && <OverallInventoryTable data={overallInventory} stockValue={overallStockValue} />}

@@ -6,9 +6,10 @@ interface StoreSelectorProps {
     setSelectedStores: React.Dispatch<React.SetStateAction<string[]>>;
     showOverall: boolean;
     setShowOverall: React.Dispatch<React.SetStateAction<boolean>>;
+    pageType: string;
 }
 
-export default function StoreSelector({ stores, selectedStores, setSelectedStores, showOverall, setShowOverall }: StoreSelectorProps) {
+export default function StoreSelector({ stores, selectedStores, setSelectedStores, showOverall, setShowOverall, pageType }: StoreSelectorProps) {
     const toggleStoreSelection = (storeId: string) => {
         setSelectedStores((prev) =>
             prev.includes(storeId) ? prev.filter((id) => id !== storeId) : [...prev, storeId]
@@ -37,7 +38,7 @@ export default function StoreSelector({ stores, selectedStores, setSelectedStore
                         onChange={() => setShowOverall(prev => !prev)}
                         className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                     />
-                    <span className="text-gray-800 dark:text-gray-100 font-semibold">Show Overall Inventory</span>
+                    <span className="text-gray-800 dark:text-gray-100 font-semibold">Show Overall {pageType}</span>
                 </label>
             </div>
         </div>
