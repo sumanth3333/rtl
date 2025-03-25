@@ -37,7 +37,7 @@ export default function StoreSelector({ stores, selectedStores, setSelectedStore
                         onChange={() => setShowOverall(prev => !prev)}
                         className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                     />
-                    <span className="text-gray-800 dark:text-gray-100 font-semibold">Show Overall Reorder Summary</span>
+                    <span className="text-gray-800 dark:text-gray-100 font-semibold">Show Overall Inventory</span>
                 </label>
             </div>
         </div>
