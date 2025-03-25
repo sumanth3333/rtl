@@ -7,6 +7,7 @@ import { getLatestEodDetails, getWhoIsWorking } from "@/services/owner/ownerServ
 import EmployeeList from "@/components/owner/EmployeeList";
 import { useOwner } from "@/hooks/useOwner";
 import LatestEodList from "@/components/owner/LatestEodList";
+import ElbScorecard from "@/components/owner/ElbScorecard";
 
 export default function OwnerDashboard() {
     const { role, isLoading } = useAuth();
@@ -20,12 +21,12 @@ export default function OwnerDashboard() {
         if (companyName) {
             getWhoIsWorking(companyName)
                 .then((data) => setWorkingEmployees(data))
-                .catch((error) => console.error("Failed to fetch employees:", error))
+                .catch(() => { })
                 .finally(() => setLoadingEmployees(false));
 
             getLatestEodDetails(companyName)
                 .then((eodDetails) => setLatestEod(eodDetails))
-                .catch((error) => console.error("Failed to fetch employees:", error))
+                .catch(() => { })
                 .finally(() => setLoadingEod(false));
         }
     }, [companyName]);
@@ -47,50 +48,52 @@ export default function OwnerDashboard() {
     }
 
     return (
-        <div className="p-4 md:p-6 space-y-6">
-            {/* Welcome Banner */}
-            <header className="relative bg-gradient-to-r from-[#E0EAFC] to-[#CFDEF3] dark:from-[#232526] dark:to-[#414345] text-gray-900 dark:text-gray-100 p-6 rounded-xl shadow-lg">
-                <h1 className="text-2xl md:text-4xl font-bold text-center md:text-left">Welcome, {companyName}</h1>
-                <p className="hidden md:block text-lg mt-2">Manage Companies, Stores, Invoices, and Payments efficiently.</p>
+        <div className="p-3 md:p-6 space-y-4">
+            {/* 🚀 Stunning Welcome Banner */}
+            {/* 🚀 Subtle & Modern Welcome Banner */}
+            <header className="relative w-full text-white rounded-b-xl overflow-hidden shadow-md">
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 opacity-90"></div>
+
+                <div className="relative p-6 flex flex-col items-center md:items-start text-center md:text-left">
+                    <h1 className="text-xl md:text-3xl font-extrabold tracking-tight text-white">
+                        Welcome, {companyName}
+                    </h1>
+                    <p className="text-sm md:text-base text-white/80 mt-1">
+                        Effortlessly manage your stores, employees, sales data and many more.
+                    </p>
+                </div>
             </header>
 
-            {/* Widgets Section */}
-            <main className="space-y-6">
-                {/* Who is Working Section */}
+            {/* 🚀 Dashboard Sections */}
+            <main className="space-y-4">
+                {/* ✅ Who is Working */}
                 <section>
-                    <h2 className="text-xl md:text-2xl font-bold uppercase tracking-wide text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 pt-4 pb-2">
-                        WHO IS WORKING
-                    </h2>
-
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">📍 Who is Working</h2>
                     {loadingEmployees ? (
-                        <SkeletonTable rows={4} />
+                        <SkeletonTable rows={3} />
                     ) : workingEmployees.length > 0 ? (
                         <EmployeeList employees={workingEmployees} />
                     ) : (
-                        <p className="text-gray-500">No employees currently working.</p>
+                        <p className="text-gray-500 text-sm text-center">No employees currently working.</p>
                     )}
                 </section>
 
-                {/* Additional Widgets Section */}
+                {/* ✅ Latest EOD Summary */}
                 <section>
-                    <h2 className="text-xl md:text-2xl font-bold uppercase tracking-wide text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 pt-4 pb-2">
-                        LATEST EOD SUMMARY
-                    </h2>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">📊 Latest EOD Summary</h2>
                     {loadingEod ? (
-                        <SkeletonTable rows={4} />
+                        <SkeletonTable rows={3} />
                     ) : latestEod.length > 0 ? (
                         <LatestEodList eodList={latestEod} />
                     ) : (
-                        <p className="text-gray-500">No EOD Report Available.</p>
+                        <p className="text-gray-500 text-sm text-center">No EOD reports available.</p>
                     )}
-
                 </section>
-                <section>
-                    <h2 className="text-xl md:text-2xl font-extrabold uppercase tracking-wide text-gray-900 dark:text-white border-b-4 border-gray-300 dark:border-gray-700 pt-4 pb-2">
-                        ELB SCORECARD SO FAR (COMING SOON)
-                    </h2>
-                    <SkeletonTable rows={6} />
 
+                {/* ✅ ELB Scorecard */}
+                <section>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">📈 ELB Scorecard</h2>
+                    <ElbScorecard companyName={companyName} />
                 </section>
             </main>
         </div>

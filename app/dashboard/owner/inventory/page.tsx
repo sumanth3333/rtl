@@ -5,13 +5,14 @@ import { useOwner } from "@/hooks/useOwner";
 import StoreSelector from "@/components/owner/inventory/StoreSelector";
 import { useFetchCurrentInventory } from "@/hooks/useFetchCurrentInventory";
 import CurrentInvTable from "@/components/owner/inventory/CurrentInvTable";
+import OverallInventoryTable from "@/components/owner/inventory/OverallInventoryTable";
 
 export default function CurrentInventoryPage() {
     const { companyName } = useOwner();
-    const { data, isLoading, error } = useFetchCurrentInventory(companyName);
+    const { data, isLoading, error, overallStockValue, overallInventory } = useFetchCurrentInventory(companyName);
     const [selectedStores, setSelectedStores] = useState<string[]>([]);
+    const [showOverall, setShowOverall] = useState<boolean>(false);
 
-    // ✅ Filter inventory based on selected stores
     const filteredStores = selectedStores.length
         ? data.filter((store) => selectedStores.includes(store.store.dealerStoreId))
         : [];
@@ -22,14 +23,17 @@ export default function CurrentInventoryPage() {
                 📦 Current Inventory
             </h1>
 
-            {/* ✅ Store Selector */}
             <StoreSelector
                 stores={data.map((store) => store.store)}
                 selectedStores={selectedStores}
                 setSelectedStores={setSelectedStores}
+                showOverall={showOverall}
+                setShowOverall={setShowOverall}
             />
 
-            {/* ✅ Inventory Table */}
+            {showOverall && <OverallInventoryTable data={overallInventory} stockValue={overallStockValue} />}
+
+            {/* ✅ Store-specific Inventory Tables */}
             <div className="mt-6">
                 {isLoading ? (
                     <p className="text-center text-gray-600 dark:text-gray-400">Loading inventory...</p>

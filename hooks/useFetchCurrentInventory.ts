@@ -1,11 +1,11 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import apiClient from "@/services/api/apiClient";
-import { StoreCurrentStock } from "@/types/currentInventoryTypes";
+import { StoreCurrentStock, OverallProductInventory } from "@/types/currentInventoryTypes";
 
 export const useFetchCurrentInventory = (companyName: string) => {
     const [data, setData] = useState<StoreCurrentStock[]>([]);
+    const [overallInventory, setOverallInventory] = useState<OverallProductInventory[]>([]);
+    const [overallStockValue, setOverallStockValue] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -18,11 +18,9 @@ export const useFetchCurrentInventory = (companyName: string) => {
                     params: { companyName },
                 });
 
-                if (!Array.isArray(response.data)) {
-                    throw new Error("Invalid API response format");
-                }
-
-                setData(response.data);
+                setData(response.data.storesStockDetails);
+                setOverallInventory(response.data.overallCurrentinventory || []);
+                setOverallStockValue(response.data.overallCurrentStockValue || 0);
             } catch (err) {
                 setError(err instanceof Error ? err.message : "Failed to fetch current inventory.");
             } finally {
@@ -33,5 +31,5 @@ export const useFetchCurrentInventory = (companyName: string) => {
         fetchData();
     }, [companyName]);
 
-    return { data, isLoading, error };
+    return { data, isLoading, error, overallInventory, overallStockValue };
 };

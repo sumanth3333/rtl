@@ -1,17 +1,18 @@
-"use client";
+"use client"
 
 import { useOwner } from "@/hooks/useOwner";
 import { useFetchReorderSummary } from "@/hooks/useFetchReorderSummary";
 import { useState } from "react";
 import StoreSelector from "@/components/owner/inventory/StoreSelector";
 import ReorderTable from "@/components/owner/inventory/ReorderTable";
+import OverallReorderTable from "@/components/owner/inventory/OverallReorderTable"; // New component
 
 export default function ReorderInventoryPage() {
     const { companyName } = useOwner();
-    const { data, isLoading, error } = useFetchReorderSummary(companyName);
+    const { data, isLoading, error, overallReorderSummary, overallReorderValue } = useFetchReorderSummary(companyName);
     const [selectedStores, setSelectedStores] = useState<string[]>([]);
+    const [showOverall, setShowOverall] = useState<boolean>(false);
 
-    // ✅ Ensure data is available before filtering
     const filteredStores = data && selectedStores.length
         ? data.filter((store) => selectedStores.includes(store.store.dealerStoreId))
         : [];
@@ -28,25 +29,36 @@ export default function ReorderInventoryPage() {
                     stores={data.map((store) => store.store)}
                     selectedStores={selectedStores}
                     setSelectedStores={setSelectedStores}
+                    showOverall={showOverall}
+                    setShowOverall={setShowOverall}
                 />
             ) : (
                 <p className="text-center text-gray-600 dark:text-gray-400">Loading stores...</p>
             )}
 
-            {/* ✅ Display Reorder List */}
             <div className="mt-6">
                 {isLoading ? (
                     <p className="text-center text-gray-600 dark:text-gray-400">Loading reorder inventory...</p>
                 ) : error ? (
                     <p className="text-center text-red-500">Error loading inventory: {error.message}</p>
-                ) : selectedStores.length === 0 ? (
-                    <p className="text-center text-gray-600 dark:text-gray-400">
-                        🚨 Please select a store to see the reorder list.
-                    </p>
                 ) : (
-                    filteredStores.map((store) => (
-                        <ReorderTable key={store.store.dealerStoreId} store={store} />
-                    ))
+                    <>
+                        {showOverall && overallReorderSummary && (
+                            <OverallReorderTable
+                                inventory={overallReorderSummary}
+                                totalValue={overallReorderValue}
+                            />
+                        )}
+                        {filteredStores.length > 0 ? (
+                            filteredStores.map((store) => (
+                                <ReorderTable key={store.store.dealerStoreId} store={store} />
+                            ))
+                        ) : !showOverall ? (
+                            <p className="text-center text-gray-600 dark:text-gray-400">
+                                🚨 Please select a store to see the reorder list.
+                            </p>
+                        ) : null}
+                    </>
                 )}
             </div>
         </div>

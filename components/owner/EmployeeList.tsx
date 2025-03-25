@@ -13,27 +13,82 @@ interface EmployeeListProps {
 
 export default function EmployeeList({ employees }: EmployeeListProps) {
     return (
-        <div className="w-full overflow-x-auto md:overflow-visible">
-            <table className="w-full border-collapse text-sm text-left bg-white dark:bg-gray-900 shadow-lg rounded-lg overflow-hidden">
-                <thead className="bg-gradient-to-r from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 text-sm md:text-base uppercase">
-                    <tr>
-                        <th className="px-6 py-4 text-left font-semibold">Store ID</th>
-                        <th className="px-6 py-4 text-left font-semibold">Employee Name</th>
-                        <th className="px-6 py-4 text-left font-semibold">Clock-In Time</th>
-                        <th className="px-6 py-4 text-left font-semibold">Clock-Out Time</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {employees.map((employee, index) => (
-                        <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300">
-                            <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">{employee.dealerStoreId}</td>
-                            <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{employee.employeeName}</td>
-                            <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{employee.clockinTime}</td>
-                            <td className="px-6 py-4 text-green-600 dark:text-green-400 font-semibold">{employee.clockoutTime || "Currently Working"}</td>
+        <div className="w-full p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md">
+            {/* ✅ Desktop View */}
+            <div className="hidden md:block">
+                <table className="w-full text-sm border-collapse border border-gray-300 dark:border-gray-700">
+                    <thead className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-300 uppercase">
+                        <tr>
+                            <th className="p-3 text-left">Store</th>
+                            <th className="p-3 text-left">Employee</th>
+                            <th className="p-3 text-center">Clock-In</th>
+                            <th className="p-3 text-center">Clock-Out</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        {employees.map((employee, index) => (
+                            <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                                <td className="p-3 font-semibold text-gray-900 dark:text-white">
+                                    {employee.dealerStoreId}
+                                </td>
+                                <td className="p-3 text-gray-700 dark:text-gray-300">
+                                    {employee.employeeName}
+                                </td>
+                                <td className="p-3 text-center text-blue-600 dark:text-blue-400 font-semibold">
+                                    {employee.clockinTime}
+                                </td>
+                                <td className={`p-3 text-center font-semibold ${employee.clockoutTime
+                                    ? "text-green-600 dark:text-green-400"
+                                    : "text-yellow-500 dark:text-yellow-400"
+                                    }`}>
+                                    {employee.clockoutTime || "Currently Working"}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* ✅ Mobile View */}
+            <div className="md:hidden flex flex-col gap-2">
+                {employees.map((employee, index) => (
+                    <div
+                        key={index}
+                        className="p-3 bg-gray-50 dark:bg-gray-800 border-l-4 border-blue-500 dark:border-blue-400 rounded-md shadow-sm flex flex-col"
+                    >
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <span>Store</span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                {employee.dealerStoreId}
+                            </span>
+                        </div>
+
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <span>Employee</span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                {employee.employeeName}
+                            </span>
+                        </div>
+
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <span>Clock-In</span>
+                            <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                                {employee.clockinTime}
+                            </span>
+                        </div>
+
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <span>Clock-Out</span>
+                            <span className={`text-sm font-semibold ${employee.clockoutTime
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-yellow-500 dark:text-yellow-400"
+                                }`}>
+                                {employee.clockoutTime || "Currently Working"}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

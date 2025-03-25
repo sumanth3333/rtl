@@ -4,10 +4,7 @@ export interface Store {
 }
 
 export interface InventoryItem {
-    dealerStoreId: string;
-    storeName: string;
     productName: string;
-    minimumQuantity: number;
     currentQuantity: number;
 }
 
@@ -18,4 +15,9 @@ export interface StoreCurrentStock {
     updatedPerson: string;
     currentStockValue: number;
     inventory: InventoryItem[];
+}
+
+export interface OverallProductInventory {
+    productName: string;
+    currentQuantity: number;
 }
