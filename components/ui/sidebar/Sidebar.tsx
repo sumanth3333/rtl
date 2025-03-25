@@ -76,7 +76,7 @@ export default function Sidebar({
 
                 {/* Sidebar Content - Fully Scrollable */}
                 <div className="flex flex-col flex-1 overflow-hidden">
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto pb-24"> {/* ✅ Adds extra padding to prevent hiding */}
                         <nav className="flex flex-col space-y-2 mt-4 w-full px-2">
                             {sidebarLinks[typedRole]?.map((link) => (
                                 <SidebarItem
@@ -96,7 +96,7 @@ export default function Sidebar({
                     </div>
 
                     {/* Sidebar Footer - Stays at Bottom */}
-                    <div className="mt-auto">
+                    <div className="pb-4"> {/* ✅ Added padding-bottom to prevent last item from hiding */}
                         <SidebarFooter isCollapsed={isCollapsed} />
                     </div>
                 </div>
