@@ -78,28 +78,26 @@ export default function Sidebar({
                 <SidebarHeader isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
                 {/* Sidebar Content - Scrollable */}
-                <div className="flex flex-col flex-1 overflow-y-auto overscroll-contain scrollbar-hide">
-                    <nav className="flex flex-col space-y-2 mt-4">
-                        {sidebarLinks[typedRole]?.map((link) => (
-                            <SidebarItem
-                                key={link.path}
-                                name={link.name}
-                                path={link.path}
-                                icon={link.icon}
-                                isCollapsed={isCollapsed}
-                                onClick={() => {
-                                    if (isMobile) {
-                                        setIsCollapsed(true);
-                                    }
-                                }}
-                            />
-                        ))}
-                    </nav>
-
-                    {/* Sidebar Footer - Now Scrolls with Sidebar */}
-                    <div className="">
-                        <SidebarFooter isCollapsed={isCollapsed} />
+                <div className="flex flex-col h-screen">
+                    <div className="flex flex-1 overflow-y-auto pb-24">
+                        <nav className="flex flex-col space-y-2 mt-4 w-full">
+                            {sidebarLinks[typedRole]?.map((link) => (
+                                <SidebarItem
+                                    key={link.path}
+                                    name={link.name}
+                                    path={link.path}
+                                    icon={link.icon}
+                                    isCollapsed={isCollapsed}
+                                    onClick={() => {
+                                        if (isMobile) {
+                                            setIsCollapsed(true);
+                                        }
+                                    }}
+                                />
+                            ))}
+                        </nav>
                     </div>
+                    <SidebarFooter isCollapsed={isCollapsed} />
                 </div>
             </aside>
 
