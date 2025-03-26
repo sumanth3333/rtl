@@ -6,7 +6,7 @@ import SidebarFooter from "@/components/ui/sidebar/SidebarFooter";
 import { sidebarLinks, Role } from "@/config/roleConfig";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
-import { refreshToken } from "@/services/auth/authService"; // ✅ Import refresh token function
+import { refreshToken } from "@/services/auth/authService";
 
 export default function Sidebar({
     isCollapsed,
@@ -74,29 +74,27 @@ export default function Sidebar({
                 {/* Sidebar Header */}
                 <SidebarHeader isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
-                {/* Sidebar Content - Fully Scrollable */}
-                <div className="flex flex-col flex-1 overflow-hidden">
-                    <div className="flex-1 overflow-y-auto pb-24"> {/* ✅ Adds extra padding to prevent hiding */}
-                        <nav className="flex flex-col space-y-2 mt-4 w-full px-2">
-                            {sidebarLinks[typedRole]?.map((link) => (
-                                <SidebarItem
-                                    key={link.path}
-                                    name={link.name}
-                                    path={link.path}
-                                    icon={link.icon}
-                                    isCollapsed={isCollapsed}
-                                    onClick={() => {
-                                        if (isMobile) {
-                                            setIsCollapsed(true);
-                                        }
-                                    }}
-                                />
-                            ))}
-                        </nav>
-                    </div>
+                {/* Sidebar Content - Scrollable */}
+                <div className="overflow-y-auto overscroll-contain scrollbar-hide">
+                    <nav className="flex flex-col space-y-2 mt-4 w-full px-2">
+                        {sidebarLinks[typedRole]?.map((link) => (
+                            <SidebarItem
+                                key={link.path}
+                                name={link.name}
+                                path={link.path}
+                                icon={link.icon}
+                                isCollapsed={isCollapsed}
+                                onClick={() => {
+                                    if (isMobile) {
+                                        setIsCollapsed(true);
+                                    }
+                                }}
+                            />
+                        ))}
+                    </nav>
 
-                    {/* Sidebar Footer - Stays at Bottom */}
-                    <div className="pb-4"> {/* ✅ Added padding-bottom to prevent last item from hiding */}
+                    {/* Sidebar Footer - Appears Just Below Content */}
+                    <div className="mt-4">
                         <SidebarFooter isCollapsed={isCollapsed} />
                     </div>
                 </div>
