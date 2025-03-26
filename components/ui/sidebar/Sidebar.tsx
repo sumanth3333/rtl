@@ -94,7 +94,7 @@ export default function Sidebar({
                     </nav>
 
                     {/* Sidebar Footer - Appears Just Below Content */}
-                    <div className="mt-4">
+                    <div className="pb-8">
                         <SidebarFooter isCollapsed={isCollapsed} />
                     </div>
                 </div>
