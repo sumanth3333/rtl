@@ -1,12 +1,12 @@
 "use client";
 
+import { useOwner } from "@/hooks/useOwner";
 import { fetchCompanyPendingRequests, markRequestAsCompleted } from "@/services/requests/pendingRequestsService";
 import { StorePendingRequests } from "@/types/requestTypes";
 import { useEffect, useState } from "react";
 
-const companyName = "Panjaab Enterprises LLC";
-
 export default function OwnerPendingRequestsPage() {
+    const { companyName } = useOwner();
     const [pendingRequests, setPendingRequests] = useState<StorePendingRequests[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -34,8 +34,11 @@ export default function OwnerPendingRequestsPage() {
     };
 
     useEffect(() => {
+        if (!companyName) {
+            return;
+        }
         loadPendingRequests();
-    }, []);
+    }, [companyName]);
 
     return (
         <div className="max-w-5xl mx-auto p-6">
