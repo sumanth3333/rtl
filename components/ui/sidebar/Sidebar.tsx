@@ -75,8 +75,8 @@ export default function Sidebar({
                 <SidebarHeader isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
                 {/* Sidebar Content - Scrollable */}
-                <div className="overflow-y-auto overscroll-contain scrollbar-hide">
-                    <nav className="flex flex-col space-y-2 mt-4 w-full px-2">
+                <div className="overflow-y-auto overscroll-contain scrollbar-hide pb-8">
+                    <nav className="flex flex-col space-y-2 mt-4 w-full px-2 pb-6">
                         {sidebarLinks[typedRole]?.map((link) => (
                             <SidebarItem
                                 key={link.path}
