@@ -4,7 +4,7 @@ import { z } from "zod";
 export const employeeSchema = z.object({
     employeeNtid: z.string().min(3, "Employee NTID must be at least 3 characters.").toUpperCase(),
     employeeName: z.string().min(6, "Employee name must have firstname and lastname."),
-    phoneNumber: z.string().regex(/^\d{10,15}$/, "Invalid phone number."),
+    phoneNumber: z.string().regex(/^\d{10,15}$/, "Invalid phone number - no special characters like -,(,),space."),
     email: z.string().email("please enter a valid email"),
     address: z.object({
         streetName: z.string().min(5, "Street name is required."),
@@ -12,9 +12,9 @@ export const employeeSchema = z.object({
         state: z.string().min(2, "State is required."),
         zipcode: z.string().length(5, "Zipcode must be 5 digits."),
     }),
-    employeePayRatePerHour: z.number().min(1, "Please enter pay rate per hour"),
-    commissionPercentage: z.number().min(1, "Please enter accessories commission %"),
-    perBoxCommission: z.number().min(1, "Please enter commission per box"),
+    employeePayRatePerHour: z.number().min(0, "Please enter pay rate per hour"),
+    commissionPercentage: z.number().min(0, "Please enter accessories commission %"),
+    perBoxCommission: z.number().min(0, "Please enter commission per box"),
     company: z.object({
         companyName: z.string(),
     }),

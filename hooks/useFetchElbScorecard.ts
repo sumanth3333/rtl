@@ -52,7 +52,7 @@ export const useFetchElbScorecard = (companyName: string) => {
                 const res = await apiClient.get(`/company/MTDMetricsForStoresAndEmployees`, {
                     params: { companyName },
                 });
-
+                console.log(res);
                 setData(res.data);
             } catch (err) {
                 setError(err instanceof Error ? err.message : "Failed to fetch ELB Scorecard data.");

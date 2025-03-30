@@ -29,11 +29,24 @@ export default function TargetSummary({ title, targetData, isEmployee, cardStyle
                                 </tr>
                                 <tr>
                                     <td className="text-gray-600 dark:text-gray-400 font-medium pr-2 text-left">Achieved:</td>
-                                    <td className="text-green-600 dark:text-green-400 font-bold text-right">{item.key.includes("accessories") ? (achieved[item.key] || 0).toFixed(2) : achieved[item.key] || 0}</td>
+                                    <td className="text-blue-600 dark:text-blue-400 font-bold text-right">
+                                        {item.key.includes("accessories") ? (achieved[item.key] || 0).toFixed(2) : achieved[item.key] || 0}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td className="text-gray-600 dark:text-gray-400 font-medium pr-2 text-left">Remaining:</td>
-                                    <td className="text-red-600 dark:text-red-400 font-bold text-right">{item.key.includes("accessories") ? (remaining[item.key] || 0).toFixed(2) : remaining[item.key] || 0}</td>
+                                    <td
+                                        className={`font-bold text-right ${(remaining[item.key] || 0) > 0
+                                            ? "text-red-600 dark:text-red-400"
+                                            : "text-green-600 dark:text-green-400"
+                                            }`}
+                                    >
+                                        {(() => {
+                                            const value = remaining[item.key] || 0;
+                                            const formatted = item.key.includes("accessories") ? Math.abs(value).toFixed(2) : Math.abs(value);
+                                            return value < 0 ? `+${formatted}` : formatted;
+                                        })()}
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

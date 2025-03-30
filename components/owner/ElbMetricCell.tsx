@@ -15,7 +15,7 @@ export default function ElbMetricCell({ achieved, total, remaining, isMobile = f
             <td className="p-3 text-center">
                 <span className="text-blue-600 font-semibold">{achieved}</span> / {total}
                 <br />
-                <span className={`text-sm ${remainingClass}`}>{formattedRemaining} left</span>
+                <span className={`text-sm ${remainingClass}`}>{formattedRemaining}</span>
             </td>
         );
     }
@@ -25,7 +25,7 @@ export default function ElbMetricCell({ achieved, total, remaining, isMobile = f
         <div className="flex justify-between text-sm">
             <span className="text-gray-500 dark:text-gray-400">Achieved:</span>
             <span className="text-blue-600 font-semibold">{achieved} / {total}</span>
-            <span className={`text-sm ${remainingClass}`}>{formattedRemaining} left</span>
+            <span className={`text-sm ${remainingClass}`}>{formattedRemaining}</span>
         </div>
     );
 }
