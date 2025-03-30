@@ -1,5 +1,6 @@
 "use client";
-
+import { useState } from "react";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useLogin } from "@/hooks/useLogin"; // ✅ Import updated hook
 import InputField from "@/components/ui/InputField"; // ✅ Import enhanced input field
 import Button from "@/components/ui/Button"; // ✅ Import enhanced button
@@ -7,6 +8,7 @@ import { motion } from "framer-motion";
 
 export default function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => void }) {
     const { register, handleSubmit, errors, errorMessage, onSubmit, isLoading } = useLogin(onLoginSuccess);
+    const [showPassword, setShowPassword] = useState(false);
 
     return (
         <motion.form
@@ -31,20 +33,36 @@ export default function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => vo
                 />
             </motion.div>
 
-            {/* ✅ Password / Employee NTID Field */}
             <motion.div
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: 0.2 }}
             >
-                <InputField
-                    label="Password or Employee NTID"
-                    type="password"
-                    placeholder="Enter Password or NTID"
-                    {...register("password")}
-                    error={errors.password?.message}
-                />
+                <div className="relative">
+                    <InputField
+                        label="Password or Employee NTID"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter Password or NTID"
+                        {...register("password")}
+                        error={errors.password?.message}
+                    />
+
+                    {/* Eye toggle icon (positioned absolutely, doesn't affect InputField layout) */}
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-3 bottom-2.5 md:bottom-3 flex items-center focus:outline-none"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                        {showPassword ? (
+                            <EyeSlashIcon className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+                        ) : (
+                            <EyeIcon className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+                        )}
+                    </button>
+                </div>
             </motion.div>
+
 
             {/* ✅ Display Error Messages */}
             {errorMessage && (
