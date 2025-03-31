@@ -4,18 +4,18 @@ import { jwtVerify } from "jose";
 import { validRoles } from "./constants/validRoles";
 
 export async function middleware(request: NextRequest) {
-    console.log(`Inside Middleware.ts`);
+    //console.log(`Inside Middleware.ts`);
 
     const jwt = request.cookies.get("accessToken")?.value;
     const refreshToken = request.cookies.get("refreshToken")?.value;
 
     if (!jwt && !refreshToken) {
-        console.log("🚨 No tokens found. Redirecting to login.");
+        //console.log("🚨 No tokens found. Redirecting to login.");
         return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
     if (!jwt && refreshToken) {
-        console.log("🔄 Access token missing, allowing frontend to refresh...");
+        //console.log("🔄 Access token missing, allowing frontend to refresh...");
         return NextResponse.next(); // ✅ Let Axios handle refresh
     }
 
@@ -28,13 +28,13 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL("/unauthorized", request.url));
         }
 
-        console.log("✅ Middleware validation passed.");
+        //console.log("✅ Middleware validation passed.");
         return NextResponse.next();
     } catch (error) {
         console.error("🚨 JWT verification failed:", error);
 
         if (refreshToken) {
-            console.log("🔄 JWT expired but refreshToken exists. Allowing frontend to refresh...");
+            //console.log("🔄 JWT expired but refreshToken exists. Allowing frontend to refresh...");
             return NextResponse.next(); // ✅ Let Axios handle it
         }
 

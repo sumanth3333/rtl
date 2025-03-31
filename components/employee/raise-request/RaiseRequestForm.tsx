@@ -12,7 +12,7 @@ export default function RaiseRequestForm({ employeeNtid, dealerStoreId }: RaiseR
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
-    console.log(employeeNtid, dealerStoreId)
+    //console.log(employeeNtid, dealerStoreId)
     // ✅ Handle adding new request item
     const addRequestItem = () => {
         setRequestItems([...requestItems, { itemDescription: "", priority: "LOW" }]);

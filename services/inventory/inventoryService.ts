@@ -11,7 +11,7 @@ export const fetchInventory = async (dealerStoreId: string): Promise<any> => {
     try {
         const url = `/inventory/store?dealerStoreId=${dealerStoreId}`;
         const response = await apiClient.get(url);
-        console.log("Raw API Response:", response);
+        //console.log("Raw API Response:", response);
 
         if (!response.data || !Array.isArray(response.data.products)) {
             console.error("API Error: Expected 'products' array but got", response.data);

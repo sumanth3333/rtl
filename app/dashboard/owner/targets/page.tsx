@@ -32,11 +32,11 @@ export default function MonthlyTargets() {
                 // ✅ Fetch and set Store Targets
                 const stores: StoreTargetResponse[] = await getStoreTargets(companyName, targetMonth);
                 setStoreTargets(stores); // ✅ State now correctly expects an array of StoreTargetResponse
-                console.log(stores);
+                //console.log(stores);
                 // ✅ Fetch and set Employee Targets
                 const employees: EmployeeTargetResponse[] = await getEmployeeTargets(companyName, targetMonth);
                 setEmployeeTargets(employees); // ✅ State now correctly expects an array of EmployeeTargetResponse
-                console.log(employees);
+                //console.log(employees);
             } catch (error) {
                 console.error("Error fetching targets:", error);
             } finally {

@@ -41,9 +41,9 @@ export default function StoreForm({ onSubmit }: StoreFormProps) {
     }, [companyName, setValue]);
 
     const handleConfirm = async () => {
-        if (!storeData) {return;}
+        if (!storeData) { return; }
         setLoading(true);
-        console.log("🚀 Submitting store data:", storeData);
+        //console.log("🚀 Submitting store data:", storeData);
         try {
             await onSubmit(storeData);
             setShowSuccess(true);
@@ -59,7 +59,7 @@ export default function StoreForm({ onSubmit }: StoreFormProps) {
         <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 transition-all">
             <form
                 onSubmit={handleSubmit((data) => {
-                    console.log("✅ Form data captured:", data);
+                    //console.log("✅ Form data captured:", data);
                     setStoreData(data);
                     setShowConfirmation(true);
                 })}

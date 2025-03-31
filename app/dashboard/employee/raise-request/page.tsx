@@ -20,7 +20,7 @@ export default function RaiseRequestPage() {
         }
         const fetchPendingRequests = async () => {
             try {
-                const response = await apiClient.get(`/requestItem/pendingsInStore?dealerStoreId=${store?.dealerStoreId}`);
+                const response = await apiClient.get(`/requestItem/pendingsInStore?dealerStoreId=${dealerStoreId}`);
                 setPendingRequests(response.data);
             } catch (error) {
                 console.error("❌ Error fetching pending requests:", error);

@@ -2,32 +2,26 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { EodReport, eodReportSchema } from "@/types/employeeSchema";
 import InputField from "@/components/ui/InputField";
 import Button from "@/components/ui/Button";
 import { useEmployee } from "@/hooks/useEmployee";
-import { getEmployeesWorking, submitEodReport } from "@/services/employee/employeeService";
+import { getEmployeesWorking } from "@/services/employee/employeeService";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import ConfirmationModal from "../ui/modals/ConfirmationModal";
 import SuccessModal from "../ui/modals/SuccessModal";
-import { useLogout } from "@/hooks/useLogout";
-
-export default function EodForm({ initialValues }: { initialValues: EodReport }) {
+import { EodReportByOwner, eodReportSchema } from "@/types/ownerTypes";
+import { submitEodReport } from "@/services/owner/ownerService";
+export default function EodForm({ initialValues, storeName, employeeName, saleDate }: { initialValues: EodReportByOwner, storeName: string, employeeName: string, saleDate: string }) {
     const { employee, store } = useEmployee();
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [hasExpense, setHasExpense] = useState(false);
     const [confirmClockOut, setConfirmClockOut] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [formData, setFormData] = useState<EodReport | null>(null);
+    const [formData, setFormData] = useState<EodReportByOwner | null>(null);
     const [employeesWorking, setEmployeesWorking] = useState<{ employeeNtid: string; employeeName: string }[]>([]);
-    const [individualEntries, setIndividualEntries] = useState<EodReport[]>([]);
+    const [individualEntries, setIndividualEntries] = useState<EodReportByOwner[]>([]);
     const [showIndividualForm, setShowIndividualForm] = useState(false);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-
-    const logout = useLogout();
 
     const {
         register,
@@ -35,7 +29,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         formState: { errors, isValid },
         watch,
         reset,
-    } = useForm<EodReport>({
+    } = useForm<EodReportByOwner>({
         resolver: zodResolver(eodReportSchema),
         mode: "onChange",
         defaultValues: initialValues,
@@ -67,7 +61,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 actualCard: initialValues.actualCard ?? 0,
                 systemCard: initialValues.systemCard ?? 0,
                 systemAccessories: initialValues.systemAccessories ?? 0,
-                accessoriesByEmployee: initialValues.accessoriesByEmployee ?? 0,
+                accessories: initialValues.accessories ?? 0,
                 lastTransactionTime: initialValues.lastTransactionTime ?? "10:00:00",
                 cashExpense: initialValues.cashExpense ?? 0,
                 expenseReason: initialValues.expenseReason ?? "NONE",
@@ -88,7 +82,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     // Calculate differences
     const cashDifference = parseFloat((actualCash - systemCash).toFixed(2));
     const cardDifference = parseFloat((actualCard - systemCard).toFixed(2));
-    const accessoriesByEmployee = parseFloat((cashDifference + cardDifference).toFixed(2));
+    const accessories = parseFloat((cashDifference + cardDifference + Number(watch("systemAccessories")).toFixed(2)));
 
     const expenseReason = watch("expenseReason");
 
@@ -114,12 +108,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         });
     };
 
-    const onSubmit = async (data: EodReport) => {
-
-        if (!confirmClockOut) {
-            alert("⚠️ You must confirm clock-out before submitting.");
-            return;
-        }
+    const onSubmit = async (data: EodReportByOwner) => {
 
         if (showIndividualForm) {
             // Calculate totals
@@ -127,7 +116,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             const totalHSISold = individualEntries.reduce((sum, entry) => sum + (entry.hsiSold || 0), 0);
             const totalTabletsSold = individualEntries.reduce((sum, entry) => sum + (entry.tabletsSold || 0), 0);
             const totalWatchesSold = individualEntries.reduce((sum, entry) => sum + (entry.watchesSold || 0), 0);
-            const totalAccessoriesByEmployee = individualEntries.reduce((sum, entry) => sum + (entry.accessoriesByEmployee || 0), 0);
+            const totalAccessories = individualEntries.reduce((sum, entry) => sum + (entry.accessories || 0), 0);
             const totalsystemAccessories = parseFloat(
                 individualEntries.reduce((sum, entry) => sum + (entry.systemAccessories || 0), 0).toFixed(2)
             );
@@ -137,7 +126,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             if (totalHSISold !== watch("hsiSold")) { errors["hsiSold"] = "Total does not match sum of individual entries." };
             if (totalTabletsSold !== watch("tabletsSold")) { errors["tabletsSold"] = "Total does not match sum of individual entries." };
             if (totalWatchesSold !== watch("watchesSold")) { errors["watchesSold"] = "Total does not match sum of individual entries." };
-            if (totalAccessoriesByEmployee !== accessoriesByEmployee) { errors["accessoriesByEmployee"] = "Total does not match sum of individual entries." };
+            if (totalAccessories !== accessories) { errors["accessories"] = "Total does not match sum of individual entries." };
             if (totalsystemAccessories !== watch("systemAccessories")) { errors["systemAccessories"] = "Total does not match sum of individual entries." };
 
             // If errors exist, update state and prevent submission
@@ -156,14 +145,15 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             actualCard: parseFloat((data.actualCard ?? 0).toFixed(2)),
             systemCard: parseFloat((data.systemCard ?? 0).toFixed(2)),
             systemAccessories: parseFloat((data.systemAccessories ?? 0).toFixed(2)),
-            accessoriesByEmployee: parseFloat((data.accessoriesByEmployee ?? 0).toFixed(2)),
+            accessories: parseFloat((data.accessories ?? 0).toFixed(2)),
             lastTransactionTime: data.lastTransactionTime,
+            saleDate: saleDate,
             boxesSold: parseFloat((data.boxesSold ?? 0).toFixed(2)),
             hsiSold: parseFloat((data.hsiSold ?? 0).toFixed(2)),
             tabletsSold: parseFloat((data.tabletsSold ?? 0).toFixed(2)),
             watchesSold: parseFloat((data.watchesSold ?? 0).toFixed(2)),
-            cashExpense: hasExpense ? parseFloat((data.cashExpense ?? 0).toFixed(2)) : 0,
-            expenseReason: hasExpense ? data.expenseReason ?? "NONE" : "NONE",
+            cashExpense: parseFloat((data.cashExpense ?? 0).toFixed(2)),
+            expenseReason: data.expenseReason ?? "NONE",
         };
 
         setFormData(formattedData);
@@ -177,7 +167,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         try {
             // Submit main EOD Report
             if (!showIndividualForm) {
-                await submitEodReport(formData as EodReport);
+                await submitEodReport(formData as EodReportByOwner);
             }
             // Submit each employee's individual sales data
             else {
@@ -190,10 +180,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             }
             setShowSuccess(true);
             reset();
-
-            setTimeout(() => {
-                logout();
-            }, 3000);
 
         } catch (error) {
             alert("❌ Failed to submit EOD report.");
@@ -228,7 +214,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 {/* System Accessories Field */}
                 <div className="grid grid-cols-3 gap-2 md:gap-2 mt-4">
                     <InputField label="System Accessories" type="number" step="0.01" {...register("systemAccessories", { valueAsNumber: true })} error={errors.systemAccessories?.message} />
-                    <InputField label="Total(Cash+Card) Accessories" type="number" step="0.01" value={accessoriesByEmployee.toFixed(2)} error={errors.accessoriesByEmployee?.message} readOnly />
+                    <InputField label="Total Accessories" type="number" step="0.01" {...register("accessories", { valueAsNumber: true })} error={errors.accessories?.message} />
                     <InputField label="Last transaction at?(refer Invoice Listing)" type="time" step="1" placeholder="HH:mm:ss" {...register("lastTransactionTime")} error={errors.lastTransactionTime?.message} />
                 </div>
 
@@ -240,22 +226,10 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                     <InputField label="Watches Sold" type="number" {...register("watchesSold", { valueAsNumber: true })} error={errors.watchesSold?.message} />
                 </div>
 
-                {/* Toggle Expense Fields */}
-                <div className="mt-4 flex items-center gap-2">
-                    <input type="checkbox" id="hasExpense" checked={hasExpense} onChange={() => setHasExpense(!hasExpense)} className="w-4 h-4" />
-                    <label htmlFor="hasExpense" className="text-gray-800 dark:text-gray-300 text-sm">
-                        Add reason for expense or short
-                    </label>
+                <div className="grid grid-cols-2 gap-2 md:gap-4 mt-3">
+                    <InputField label="Expense Amount" type="number" step="0.01" {...register("cashExpense", { valueAsNumber: true })} error={errors.cashExpense?.message} />
+                    <InputField label="Expense Reason" type="text" {...register("expenseReason")} error={errors.expenseReason?.message} />
                 </div>
-
-                {/* Expense Fields if Selected */}
-                {hasExpense && (
-                    <div className="grid grid-cols-2 gap-2 md:gap-4 mt-3">
-                        <InputField label="Expense Amount" type="number" step="0.01" {...register("cashExpense", { valueAsNumber: true })} error={errors.cashExpense?.message} />
-                        <InputField label="Expense Reason" type="text" {...register("expenseReason")} error={errors.expenseReason?.message} />
-                    </div>
-                )}
-
                 {/* Individual Employee Sales Entry */}
                 {showIndividualForm && (
                     <div className="mt-6 p-4 sm:p-6 bg-white dark:bg-gray-900 shadow-lg rounded-lg">
@@ -301,12 +275,12 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                         required
                                     />
                                     <InputField
-                                        name="accessoriesByEmployee"
-                                        label="Total Cash/Card $$"
+                                        name="TotalAccessories"
+                                        label="Total Accessories"
                                         type="number"
-                                        value={individualEntries[index]?.accessoriesByEmployee}
-                                        onChange={(e) => handleEmployeeDataChange(index, "accessoriesByEmployee", Number(e.target.value))}
-                                        error={validationErrors["accessoriesByEmployee"]}
+                                        value={individualEntries[index]?.accessories}
+                                        onChange={(e) => handleEmployeeDataChange(index, "accessories", Number(e.target.value))}
+                                        error={validationErrors["accessories"]}
                                         required
                                     />
                                     <InputField
@@ -335,8 +309,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                         className="w-4 h-4"
                     />
                     <label htmlFor="confirmClockOut" className="text-gray-800 dark:text-gray-300 text-sm">
-                        I understand that, any inaccurate information provided leads to <strong>loss of pay (or) termination </strong>
-                        & submitting this form <strong>automatically clocks me out</strong>.
+                        I understand that, I'm updating the report of {employeeName} worked at {storeName} on the date {saleDate}.
                     </label>
                 </div>
 
@@ -360,7 +333,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 isOpen={showSuccess}
                 onClose={() => setShowSuccess(false)}
                 title="EOD Report Submitted!"
-                message="Your report has been successfully recorded & you'll be Logged out in 3 seconds."
+                message="Your report has been successfully recorded"
             />
         </>
     );

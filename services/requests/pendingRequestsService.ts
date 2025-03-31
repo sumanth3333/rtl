@@ -10,6 +10,6 @@ export const fetchCompanyPendingRequests = async (companyName: string) => {
 
 export const markRequestAsCompleted = async (id: number) => {
     const response = await apiClient.post(`/company/requestItemStatus?id=${id}`);
-    console.log(response)
+    //console.log(response)
     return response.status === 200;
 };

@@ -20,7 +20,7 @@ const useFetchTodos = (storeId?: string) => {
 
         const fetchData = async () => {
             try {
-                console.log(`Fetching todos for store: ${storeId}`);
+                //console.log(`Fetching todos for store: ${storeId}`);
                 const data = await fetchTodos(storeId);
                 if (Array.isArray(data.todos)) {
                     setTodos(data.todos);

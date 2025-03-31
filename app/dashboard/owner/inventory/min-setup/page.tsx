@@ -29,7 +29,7 @@ export default function MinQuantitySetupPage() {
                 }, {} as { [productId: number]: number });
             });
 
-            console.log("✅ Initialized Quantities:", initialQuantities);
+            //console.log("✅ Initialized Quantities:", initialQuantities);
             return initialQuantities;
         });
     }, [stores]);
@@ -44,13 +44,13 @@ export default function MinQuantitySetupPage() {
             }
         }));
 
-        console.log(`🔄 Updated Quantities for ${storeId}:`, storeQuantities);
+        //console.log(`🔄 Updated Quantities for ${storeId}:`, storeQuantities);
     };
 
     // ✅ Handle Save (Ensuring latest state)
     const handleSave = async (storeId: string) => {
         setStoreQuantities(prevStoreQuantities => {
-            console.log("✅ storeQuantities Before Save:", prevStoreQuantities);
+            //console.log("✅ storeQuantities Before Save:", prevStoreQuantities);
 
             const selectedStore = stores.find(store => store.store.dealerStoreId === storeId);
             if (!selectedStore) { return prevStoreQuantities };
@@ -65,7 +65,7 @@ export default function MinQuantitySetupPage() {
                 })),
             };
 
-            console.log("🚀 Final Payload Before Sending:", payload);
+            //console.log("🚀 Final Payload Before Sending:", payload);
 
             // ✅ Call `updateInventory` with only `payload`
             updateInventory(payload).then(response => {

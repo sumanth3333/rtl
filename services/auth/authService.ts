@@ -6,7 +6,7 @@ export const login = async (userName: string, password: string) => {
     try {
         const response = await apiClient.post("/auth/login", { userName, password });
         if (response.status === 200) {
-            console.log(response)
+            //console.log(response)
         }
         return response;
     } catch (error) {
@@ -18,11 +18,11 @@ export const login = async (userName: string, password: string) => {
 // ✅ Calls API to refresh token (cookie gets updated automatically)
 export const refreshToken = async () => {
     try {
-        console.log("🔄 Calling refresh token API...");
+        //console.log("🔄 Calling refresh token API...");
         const response = await apiClient.post("/auth/refreshToken");
 
         if (response.status === 200) {
-            console.log("✅ Token refreshed successfully (HttpOnly cookie updated).");
+            //console.log("✅ Token refreshed successfully (HttpOnly cookie updated).");
             return true;
         }
 
@@ -56,10 +56,10 @@ const getAccessTokenFromCookie = (): string | null => {
 
 // ✅ Logout function (backend clears cookies)
 export const logoutAPI = async () => {
-    console.log("🚀 Logging out...");
+    //console.log("🚀 Logging out...");
     try {
         const response = await apiClient.post("/auth/logout");
-        console.log("✅ Logout successful.");
+        //console.log("✅ Logout successful.");
         return response;
     } catch (error) {
         console.error("🚨 Logout failed:", error);

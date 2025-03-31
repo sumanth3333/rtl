@@ -9,7 +9,7 @@ export const clockInEmployee = async (employeeNtid: string, dealerStoreId: strin
             dealerStoreId,
         });
 
-        console.log("✅ Clock-in response:", response.data);
+        //console.log("✅ Clock-in response:", response.data);
         return response.data || {}; // Ensure data is always returned
     } catch (error) {
         console.error("❌ Error clocking in:", error);
@@ -21,7 +21,7 @@ export const clockInEmployee = async (employeeNtid: string, dealerStoreId: strin
 export const submitEodReport = async (data: EodReport) => {
     try {
         const response = await apiClient.post("/sale/saveSaleDetails", data);
-        console.log("✅ EOD Report Submitted Successfully:", response.data);
+        //console.log("✅ EOD Report Submitted Successfully:", response.data);
         return response.data; // Return the API response if needed
     } catch (error: unknown) {
         let errorMessage = "An unknown error occurred";
@@ -104,7 +104,7 @@ export const getAuthorizedStoresAPI = async (employeeNtid: string) => {
             throw new Error("Invalid response format from API.");
         }
 
-        console.log(`✅ Authorized Stores:`, response.data.stores);
+        //console.log(`✅ Authorized Stores:`, response.data.stores);
         return response.data; // Returns the full response containing `stores`
     } catch (error: any) {
         console.error("❌ Error fetching authorized stores:", error);
@@ -147,7 +147,7 @@ export const getPendingTodosCount = async (dealerStoreId: string): Promise<numbe
                 dealerStoreId
             }
         });
-        console.log(response.data);
+        //console.log(response.data);
         return response.data.count || 0;
     } catch (error) {
         console.error("Error fetching pending todos count:", error);

@@ -143,6 +143,11 @@ export const sidebarLinks: Record<Role, {
             icon: CheckCircleIcon,
         },
         {
+            name: "End of Day Report",
+            path: "/dashboard/owner/eod-report",
+            icon: DocumentTextIcon
+        },
+        {
             name: "Monthly Targets",
             path: "/dashboard/owner/targets",
             icon: ChartBarIcon,

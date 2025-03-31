@@ -54,12 +54,29 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                         </thead>
                         <tbody>
                             {storeData.map((store, index) => {
-                                const [total, achieved, remaining] = store.storeMTD || [{}, {}, {}];
+                                const [total = {}, achieved = {}, remaining = {}] = Array.isArray(store.storeMTD) && store.storeMTD.length === 3
+                                    ? store.storeMTD
+                                    : [{}, {}, {}];
+
                                 return (
-                                    <tr key={index} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
-                                        <td className="p-2 font-semibold">{store.store.storeName}</td>
-                                        {["activationTargetToStore", "accessoriesTargetToStore", "hsiTargetToStore", "tabletsTargetToStore", "smartwatchTragetToStore"].map((key) => (
-                                            <ElbMetricCell key={key} achieved={achieved[key] ?? 0} total={total[key] ?? 0} remaining={remaining[key] ?? 0} />
+                                    <tr
+                                        key={index}
+                                        className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    >
+                                        <td className="p-2 font-semibold">{store.store?.storeName ?? "N/A"}</td>
+                                        {[
+                                            "activationTargetToStore",
+                                            "accessoriesTargetToStore",
+                                            "hsiTargetToStore",
+                                            "tabletsTargetToStore",
+                                            "smartwatchTragetToStore",
+                                        ].map((key) => (
+                                            <ElbMetricCell
+                                                key={key}
+                                                achieved={achieved?.[key] ?? 0}
+                                                total={total?.[key] ?? 0}
+                                                remaining={remaining?.[key] ?? 0}
+                                            />
                                         ))}
                                     </tr>
                                 );
@@ -80,12 +97,29 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                         </thead>
                         <tbody>
                             {employeeData.map((employee, index) => {
-                                const [total, achieved, remaining] = employee.employeeMTD || [{}, {}, {}];
+                                const [total = {}, achieved = {}, remaining = {}] = Array.isArray(employee.employeeMTD) && employee.employeeMTD.length === 3
+                                    ? employee.employeeMTD
+                                    : [{}, {}, {}];
+
                                 return (
-                                    <tr key={index} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
-                                        <td className="p-2 font-semibold">{employee.employee.employeeName}</td>
-                                        {["phonesTargetToEmployee", "accessoriesTargetByEmployee", "hsiTarget", "tabletsTargetByEmployee", "smartwatchTragetByEmployee"].map((key) => (
-                                            <ElbMetricCell key={key} achieved={achieved[key] ?? 0} total={total[key] ?? 0} remaining={remaining[key] ?? 0} />
+                                    <tr
+                                        key={index}
+                                        className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    >
+                                        <td className="p-2 font-semibold">{employee.employee?.employeeName ?? "N/A"}</td>
+                                        {[
+                                            "phonesTargetToEmployee",
+                                            "accessoriesTargetByEmployee",
+                                            "hsiTarget",
+                                            "tabletsTargetByEmployee",
+                                            "smartwatchTragetByEmployee",
+                                        ].map((key) => (
+                                            <ElbMetricCell
+                                                key={key}
+                                                achieved={achieved?.[key] ?? 0}
+                                                total={total?.[key] ?? 0}
+                                                remaining={remaining?.[key] ?? 0}
+                                            />
                                         ))}
                                     </tr>
                                 );
@@ -95,11 +129,12 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                 )}
             </div>
 
+
             {/* Mobile View (Optimized for Phones) */}
             <div className="md:hidden space-y-2">
                 {selectedType === "stores" &&
                     storeData.map((store, index) => {
-                        const [total, achieved, remaining] = store.storeMTD || [{}, {}, {}];
+                        const [total = {}, achieved = {}, remaining = {}] = store.storeMTD || [];
 
                         return (
                             <div key={index} className="p-3 bg-white dark:bg-gray-800 rounded-md shadow-sm border-l-4 border-blue-500 dark:border-blue-400">
@@ -127,11 +162,18 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
 
                 {selectedType === "employees" &&
                     employeeData.map((employee, index) => {
-                        const [total, achieved, remaining] = employee.employeeMTD || [{}, {}, {}];
+                        const [total = {}, achieved = {}, remaining = {}] = Array.isArray(employee.employeeMTD) && employee.employeeMTD.length >= 3
+                            ? employee.employeeMTD
+                            : [{}, {}, {}];
 
                         return (
-                            <div key={index} className="p-3 bg-white dark:bg-gray-800 rounded-md shadow-sm border-l-4 border-green-500 dark:border-green-400">
-                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{employee.employee.employeeName}</h3>
+                            <div
+                                key={index}
+                                className="p-3 bg-white dark:bg-gray-800 rounded-md shadow-sm border-l-4 border-green-500 dark:border-green-400"
+                            >
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                                    {employee.employee?.employeeName ?? "N/A"}
+                                </h3>
                                 {[
                                     { label: "Phones", key: "phonesTargetToEmployee" },
                                     { label: "Accessories ($)", key: "accessoriesTargetByEmployee" },
@@ -142,9 +184,16 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                                     <div key={key} className="flex justify-between text-xs">
                                         <span className="text-gray-600 dark:text-gray-300">{label}</span>
                                         <span className="font-semibold text-green-600 dark:text-green-400">
-                                            {achieved[key] ?? 0} / {total[key] ?? 0}
-                                            <span className={`ml-1 text-xs ${(remaining[key] ?? 0) < 0 ? "text-green-600" : "text-red-500"}`}>
-                                                {(remaining[key] ?? 0) < 0 ? `+${Math.abs(remaining[key])}` : `-${remaining[key] ?? 0}`}
+                                            {achieved?.[key] ?? 0} / {total?.[key] ?? 0}
+                                            <span
+                                                className={`ml-1 text-xs ${(remaining?.[key] ?? 0) < 0
+                                                    ? "text-green-600"
+                                                    : "text-red-500"
+                                                    }`}
+                                            >
+                                                {(remaining?.[key] ?? 0) < 0
+                                                    ? `+${Math.abs(remaining?.[key])}`
+                                                    : `-${remaining?.[key] ?? 0}`}
                                             </span>
                                         </span>
                                     </div>
@@ -152,6 +201,8 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                             </div>
                         );
                     })}
+
+
             </div>
         </div>
     );

@@ -11,12 +11,12 @@ export function useLogout() {
 
     return async () => {
         try {
-            console.log("🚀 Logging out...");
+            //console.log("🚀 Logging out...");
             const response = await logout(); // ✅ Clear user state in AuthContext
             if (response && response.status === 200) {
                 clearOwnerData();
                 clearEmployeeData();
-                console.log("✅ Logout successful. Redirecting...");
+                //console.log("✅ Logout successful. Redirecting...");
                 router.push("/auth/login"); // ✅ Redirect after logout
             }
         } catch (error) {

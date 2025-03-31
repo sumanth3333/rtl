@@ -15,7 +15,7 @@ export default function InvoiceDetailsPage() {
         setError("");
         try {
             const response = await getInvoiceByImei(imei);
-            console.log(response);
+            //console.log(response);
             setInvoiceData(response);
         } catch (err: unknown) {
             let errorMessage = "Invoice not found or invalid IMEI."; // Default error

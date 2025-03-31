@@ -8,14 +8,14 @@ export const fetchCashCollectionAPI = async (
     dealerStoreId: string,
 ): Promise<CashCollectionData[]> => {
     try {
-        console.log("fetching cash collection")
-        console.log(`Fetching cash collection from: ${apiClient.defaults.baseURL}/company/cashCollection?companyName=${companyName}&startDate=${startDate}&endDate=${endDate}&dealerStoreId=${dealerStoreId}`);
+        //console.log("fetching cash collection")
+        //console.log(`Fetching cash collection from: ${apiClient.defaults.baseURL}/company/cashCollection?companyName=${companyName}&startDate=${startDate}&endDate=${endDate}&dealerStoreId=${dealerStoreId}`);
 
         const response = await apiClient.get(`/company/cashCollection`, {
             params: { companyName, dealerStoreId, startDate, endDate },
         });
 
-        console.log("API Response:", response);
+        //console.log("API Response:", response);
 
         if (!response || !response.data) {
             console.error("Invalid API Response:", response);

@@ -17,7 +17,7 @@ export const fetchCompanySoldDevicesAPI = async (companyName: string, start: str
             start,
             end,
         });
-        console.log(response);
+        //console.log(response);
         if (response.status !== 200) {
             throw new Error("Failed to fetch company sold devices");
         }
@@ -44,7 +44,7 @@ const useUpgradePhonesService = () => {
     const createInvoice = async (invoiceData: InvoiceData) => {
         try {
             const { employeeNtid } = ensureContext();
-            console.log(`${employeeNtid} ${invoiceData}`)
+            //console.log(`${employeeNtid} ${invoiceData}`)
             const response = await apiClient.post("/upgradePhones/invoice", {
                 ...invoiceData,
                 employeeNtid,

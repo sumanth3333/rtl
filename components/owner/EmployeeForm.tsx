@@ -50,7 +50,7 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
     const handleConfirm = async () => {
         if (!employeeData) { return; }
         setLoading(true);
-        console.log("🚀 Submitting employee data:", employeeData);
+        //console.log("🚀 Submitting employee data:", employeeData);
         try {
             await onSubmit(employeeData);
             setShowSuccess(true);
@@ -66,7 +66,7 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
         <div className="flex justify-center items-center min-h-screen py-8 bg-gray-100 dark:bg-gray-900 transition-all">
             <form
                 onSubmit={handleSubmit((data) => {
-                    console.log("✅ Form data captured:", data);
+                    //console.log("✅ Form data captured:", data);
                     setEmployeeData(data);
                     setShowConfirmation(true);
                 })}

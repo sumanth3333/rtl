@@ -29,7 +29,7 @@ export default function InventoryTable({ inventory, dealerStoreId, onSubmit }: I
     // ✅ Sync form values with inventory on mount
     useEffect(() => {
         reset({ dealerStoreId, products: inventory });
-    }, [inventory, reset]);
+    }, [inventory, dealerStoreId, reset]);
 
     // ✅ Capture updated values
     const updatedProducts = watch("products");

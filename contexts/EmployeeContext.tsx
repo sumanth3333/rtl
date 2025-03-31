@@ -43,8 +43,8 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
             localStorage.setItem("clockinLocation", clockinLocation || "N/A");
             localStorage.setItem("clockinTime", clockinTime || "N/A");
 
-            if (employee) {localStorage.setItem("employeeData", JSON.stringify(employee));}
-            if (store) {localStorage.setItem("storeData", JSON.stringify(store));}
+            if (employee) { localStorage.setItem("employeeData", JSON.stringify(employee)); }
+            if (store) { localStorage.setItem("storeData", JSON.stringify(store)); }
         }
     }, [isClockin, clockinLocation, clockinTime, employee, store]);
 
@@ -62,7 +62,7 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
 
     // ✅ Set Employee Data on Login
     const setEmployeeData = (data: any) => {
-        console.log("Setting Employee Data:", data);
+        //console.log("Setting Employee Data:", data);
 
         setEmployee(data.employee);
         setStore(data.store);
@@ -78,7 +78,7 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
 
     // ✅ Clear Employee Data on Logout
     const clearEmployeeData = () => {
-        console.log("Clearing Employee Data");
+        //console.log("Clearing Employee Data");
 
         setEmployee(null);
         setStore(null);

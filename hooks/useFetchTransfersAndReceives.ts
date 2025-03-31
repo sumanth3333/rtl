@@ -12,12 +12,12 @@ export const useFetchTransfersAndReceives = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!store?.dealerStoreId) {return;}
+        if (!store?.dealerStoreId) { return; }
 
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                console.log("Fetching transfers and receives...");
+                //console.log("Fetching transfers and receives...");
                 const transfersData = await fetchTransfersAPI(store.dealerStoreId);
                 setTransfers(transfersData.pendingTransfers);
                 setReceives(transfersData.pendingReceives);

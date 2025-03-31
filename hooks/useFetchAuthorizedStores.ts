@@ -16,7 +16,7 @@ export const useFetchAuthorizedStores = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        console.log("🟢 Employee Context:", employee); // Debugging
+        //console.log("🟢 Employee Context:", employee); // Debugging
 
         if (!employee || !employee.employeeNtid) {
             console.warn("❌ Employee data not available yet. Retrying...");
@@ -25,7 +25,7 @@ export const useFetchAuthorizedStores = () => {
 
         const fetchStores = async () => {
             try {
-                console.log("🔄 Fetching authorized stores for:", employee.employeeNtid);
+                //console.log("🔄 Fetching authorized stores for:", employee.employeeNtid);
                 const response = await getAuthorizedStoresAPI(employee.employeeNtid);
                 const storesData = response?.stores || [];
 
