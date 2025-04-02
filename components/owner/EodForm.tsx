@@ -37,6 +37,7 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
 
     // Fetch employees working in the store
     useEffect(() => {
+        console.log(errors);
         if (store?.dealerStoreId) {
             getEmployeesWorking(store.dealerStoreId)
                 .then((response) => {
@@ -109,7 +110,7 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
     };
 
     const onSubmit = async (data: EodReportByOwner) => {
-
+        console.log(data);
         if (showIndividualForm) {
             // Calculate totals
             const totalBoxesSold = individualEntries.reduce((sum, entry) => sum + (entry.boxesSold || 0), 0);
@@ -155,7 +156,8 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
             cashExpense: parseFloat((data.cashExpense ?? 0).toFixed(2)),
             expenseReason: data.expenseReason ?? "NONE",
         };
-
+        console.log(errors.root?.message);
+        console.log(formattedData);
         setFormData(formattedData);
         setShowConfirm(true);
     };

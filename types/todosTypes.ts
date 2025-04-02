@@ -8,6 +8,7 @@ export interface Store {
 export interface AssignTodosRequest {
     dealerStoreId: string;
     todos: string[];
+    scheduledDate: string;
 }
 
 export interface AssignedTodo {

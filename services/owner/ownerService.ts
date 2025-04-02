@@ -147,6 +147,16 @@ export const getAssignedTodosForStore = async (dealerStoreId: string): Promise<{
     }
 };
 
+export const getAssignedTodosForStoreByDate = async (dealerStoreId: string, todosDate: string): Promise<{ todos: AssignedTodo[] }> => {
+    try {
+        const response = await apiClient.get("/todos/getAssinedTodosByDate", { params: { dealerStoreId, todosDate } });
+        return response.data;
+    } catch (error) {
+        console.error("❌ Error fetching assigned todos:", error);
+        return { todos: [] };
+    }
+};
+
 export const getEodDetails = async (dealerStoreId: string, employeeNtid: string, saleDate: string) => {
     try {
         const response = await apiClient.get("/sale/fetchSubmittedSaleForCompany", {

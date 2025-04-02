@@ -16,6 +16,11 @@ export default function TodosInput({ todos, setTodos }: TodoInputProps) {
         }
     };
 
+    const removeTodo = (index: number) => {
+        const updatedTodos = todos.filter((_, i) => i !== index);
+        setTodos(updatedTodos);
+    };
+
     return (
         <div className="p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Add ToDos</h3>
@@ -32,11 +37,19 @@ export default function TodosInput({ todos, setTodos }: TodoInputProps) {
                 </Button>
             </div>
 
-            {/* ✅ Display added todos */}
-            <ul className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+            {/* ✅ Display added todos with remove (X) option */}
+            <ul className="mt-3 text-sm text-gray-600 dark:text-gray-300 space-y-2">
                 {todos.map((todo, index) => (
-                    <li key={index} className="flex justify-between p-2 bg-gray-100 dark:bg-gray-800 rounded-md mt-1">
-                        {todo}
+                    <li
+                        key={index}
+                        className="flex justify-between items-center bg-gray-100 dark:bg-gray-800 rounded-md px-3 py-2"
+                    >
+                        <span>{todo}</span>
+                        <button
+                            onClick={() => removeTodo(index)}
+                            className="text-red-500 hover:text-red-700 font-bold ml-4"
+                            aria-label="Remove todo"
+                        >Remove</button>
                     </li>
                 ))}
             </ul>

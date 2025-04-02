@@ -7,6 +7,8 @@ import { EmployeeProvider } from "@/contexts/EmployeeContext";
 import { ThemeProviderWrapper } from "./ThemeProviderWrapper";
 import Head from "next/head";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister"; // ✅ Import the new component
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export { metadata };
 
@@ -44,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <OwnerProvider>
               <EmployeeProvider>
                 <main className="flex-grow">{children}</main>
+                <ToastContainer position="top-right" autoClose={5000} />
               </EmployeeProvider>
             </OwnerProvider>
           </AuthProvider>
