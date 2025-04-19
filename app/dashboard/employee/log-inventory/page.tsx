@@ -26,6 +26,16 @@ export default function InventoryPage() {
     useEffect(() => {
         if (!employeeNtid) { return; }
 
+        const fetchData = async () => {
+            try {
+                const data = await fetchCompanyNameByNtid(employeeNtid);
+                setCompanyName(data);
+            } catch (err) {
+                setError("Failed to fetch companyName. " + err);
+            }
+        };
+
+        fetchData();
     }, [employeeNtid]);
 
 

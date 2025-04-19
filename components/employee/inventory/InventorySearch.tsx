@@ -9,7 +9,7 @@ interface InventorySearchProps {
 
 export default function InventorySearch({ data }: InventorySearchProps) {
     const [query, setQuery] = useState("");
-
+    console.log(data);
     const groupedResults = useMemo(() => {
         if (!query) {
             return [];
