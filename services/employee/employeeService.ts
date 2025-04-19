@@ -164,3 +164,13 @@ export const getEmployeesWorking = async (dealerStoreId: string) => {
         throw new Error("Failed to retrieve employees working data.");
     }
 };
+
+export const fetchCompanyNameByNtid = async (employeeNtid: string) => {
+    try {
+        const response = await apiClient.get(`/employee/getCompanyName/${employeeNtid}`);
+        return response.data;
+    } catch (error) {
+        console.error("❌ Failed to fetch companyName", error);
+        throw new Error("Failed to fetch companyName");
+    }
+};

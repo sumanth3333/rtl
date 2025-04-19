@@ -4,11 +4,14 @@ import { useState, useEffect } from "react";
 import { fetchInventory, InventoryItem, updateInventory } from "@/services/inventory/inventoryService";
 import InventoryTable from "@/components/employee/inventory/InventoryTable";
 import { useEmployee } from "@/hooks/useEmployee";
+import { fetchCompanyNameByNtid } from "@/services/employee/employeeService";
+import { useFetchCurrentInventory } from "@/hooks/useFetchCurrentInventory";
+import InventorySearch from "@/components/employee/inventory/InventorySearch";
 
 export default function InventoryPage() {
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string>("");
     const [updatedPerson, setUpdatedPerson] = useState<string | null>(null);
     const [updatedTime, setUpdatedTime] = useState<string | null>(null);
     const [updatedDate, setUpdatedDate] = useState<string | null>(null);
@@ -17,6 +20,17 @@ export default function InventoryPage() {
 
     const dealerStoreId = store?.dealerStoreId || "";
     const employeeNtid = employee?.employeeNtid || "";
+    const [companyName, setCompanyName] = useState<string>("");
+
+
+    useEffect(() => {
+        if (!employeeNtid) { return; }
+
+    }, [employeeNtid]);
+
+
+    const { data, isLoading, overallInventory } = useFetchCurrentInventory(companyName);
+    console.log(data);
 
     // ✅ Fetch Inventory on Page Load
     useEffect(() => {
@@ -62,6 +76,10 @@ export default function InventoryPage() {
                     </p>
                 </div>
             </header>
+
+            {data && data.length > 0 && (
+                <InventorySearch data={data} />
+            )}
 
             {/* ✅ Inventory Content */}
             <section className="w-full">

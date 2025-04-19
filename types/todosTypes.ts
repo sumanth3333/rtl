@@ -4,6 +4,10 @@ export interface Store {
     storeName: string;
 }
 
+export interface Employee {
+    employeeName: string;
+    employeeNtid: string;
+}
 // ✅ Assign Todos Request Format
 export interface AssignTodosRequest {
     dealerStoreId: string;
@@ -15,4 +19,9 @@ export interface AssignedTodo {
     id: number;
     completed: boolean;
     todoDescription: string;
+}
+
+export interface AssignTodosResponse {
+    todos: AssignedTodo[];
+    workingEmployee: Employee | null;
 }

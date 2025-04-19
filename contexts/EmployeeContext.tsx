@@ -1,5 +1,6 @@
 "use client";
 
+import apiClient from "@/services/api/apiClient";
 import { CurrentEmployee, CurrentStore, EmployeeContextType } from "@/types/employeeTypes";
 import { createContext, useState, useEffect, ReactNode } from "react";
 
@@ -21,33 +22,6 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
     const [employee, setEmployee] = useState<CurrentEmployee | null>(null);
     const [store, setStore] = useState<CurrentStore | null>(null);
 
-    // ✅ Load from localStorage only on the client side (after mounting)
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            setIsClockin(localStorage.getItem("clockInStatus") === "true");
-            setClockinLocation(localStorage.getItem("clockinLocation") || "N/A");
-            setClockinTime(localStorage.getItem("clockinTime") || "N/A");
-
-            const savedEmployee = localStorage.getItem("employeeData");
-            setEmployee(savedEmployee ? JSON.parse(savedEmployee) : null);
-
-            const savedStore = localStorage.getItem("storeData");
-            setStore(savedStore ? JSON.parse(savedStore) : null);
-        }
-    }, []);
-
-    // ✅ Save to localStorage when values change
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            localStorage.setItem("clockInStatus", isClockin.toString());
-            localStorage.setItem("clockinLocation", clockinLocation || "N/A");
-            localStorage.setItem("clockinTime", clockinTime || "N/A");
-
-            if (employee) { localStorage.setItem("employeeData", JSON.stringify(employee)); }
-            if (store) { localStorage.setItem("storeData", JSON.stringify(store)); }
-        }
-    }, [isClockin, clockinLocation, clockinTime, employee, store]);
-
     const setClockIn = (status: boolean, location?: string, time?: string) => {
         setIsClockin(status);
         setClockinLocation(location || "N/A");
@@ -60,15 +34,31 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    // ✅ Set Employee Data on Login
-    const setEmployeeData = (data: any) => {
-        //console.log("Setting Employee Data:", data);
+    const fetchClockInStatus = async (employeeNtid: string, date: string) => {
+        try {
+            const response = await apiClient.get(`/employee/isClockedin`, {
+                params: { employeeNtid, date },
+            });
 
+            const data = response.data;
+            console.log(data);
+            if (data.clockinStatus) {
+                setClockIn(true, data.dealerStoreId || "N/A", data.clockinTime || "N/A");
+            } else {
+                setClockIn(false, "N/A", "N/A");
+            }
+        } catch (error) {
+            console.error("Error fetching clock-in status:", error);
+            setClockIn(false, "N/A", "N/A");
+        }
+    };
+
+    const setEmployeeData = (data: any) => {
         setEmployee(data.employee);
         setStore(data.store);
 
-        const clockInStatus = data.isClockin === "true";
-        setClockIn(clockInStatus, data.clockinLocation || "N/A", data.clockinTime || "N/A");
+        const today = new Date().toISOString().split("T")[0];
+        fetchClockInStatus(data.employee.employeeNtid, today);
 
         if (typeof window !== "undefined") {
             localStorage.setItem("employeeData", JSON.stringify(data.employee));
@@ -76,10 +66,7 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    // ✅ Clear Employee Data on Logout
     const clearEmployeeData = () => {
-        //console.log("Clearing Employee Data");
-
         setEmployee(null);
         setStore(null);
         setIsClockin(false);
@@ -94,6 +81,28 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
             localStorage.removeItem("storeData");
         }
     };
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            setIsClockin(localStorage.getItem("clockInStatus") === "true");
+            setClockinLocation(localStorage.getItem("clockinLocation") || "N/A");
+            setClockinTime(localStorage.getItem("clockinTime") || "N/A");
+
+            const savedEmployee = localStorage.getItem("employeeData");
+            const savedStore = localStorage.getItem("storeData");
+
+            const parsedEmployee = savedEmployee ? JSON.parse(savedEmployee) : null;
+            const parsedStore = savedStore ? JSON.parse(savedStore) : null;
+
+            setEmployee(parsedEmployee);
+            setStore(parsedStore);
+
+            const today = new Date().toISOString().split("T")[0];
+            if (parsedEmployee.employeeNtid) {
+                fetchClockInStatus(parsedEmployee.employeeNtid, today);
+            }
+        }
+    }, []);
 
     return (
         <EmployeeContext.Provider
