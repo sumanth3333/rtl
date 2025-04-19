@@ -98,8 +98,8 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
             setStore(parsedStore);
 
             const today = new Date().toISOString().split("T")[0];
-            if (parsedEmployee.employeeNtid) {
-                fetchClockInStatus(parsedEmployee.employeeNtid, today);
+            if (parsedEmployee?.employeeNtid) {
+                fetchClockInStatus(parsedEmployee?.employeeNtid, today);
             }
         }
     }, []);
