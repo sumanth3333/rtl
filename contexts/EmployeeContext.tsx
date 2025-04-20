@@ -57,7 +57,7 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
         setEmployee(data.employee);
         setStore(data.store);
 
-        const today = new Date().toISOString().split("T")[0];
+        const today = new Date().toLocaleDateString("en-CA");
         fetchClockInStatus(data.employee.employeeNtid, today);
 
         if (typeof window !== "undefined") {
@@ -97,7 +97,7 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
             setEmployee(parsedEmployee);
             setStore(parsedStore);
 
-            const today = new Date().toISOString().split("T")[0];
+            const today = new Date().toLocaleDateString("en-CA");
             if (parsedEmployee?.employeeNtid) {
                 fetchClockInStatus(parsedEmployee?.employeeNtid, today);
             }
