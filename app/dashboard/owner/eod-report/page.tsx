@@ -19,6 +19,8 @@ export default function LogEodReportOwnerPage() {
     const [eodFormValues, setEodFormValues] = useState({
         store: { dealerStoreId: dealerStoreId ?? "" },
         employee: { employeeNtid: employeeNtid ?? "" },
+        clockinTime: "10:00:00",
+        clockoutTime: "10:00:00",
         actualCash: 0,
         systemCash: 0,
         actualCard: 0,
@@ -56,6 +58,8 @@ export default function LogEodReportOwnerPage() {
                         store: { dealerStoreId },
                         employee: { employeeNtid },
                         actualCash: data.actualCash ?? 0,
+                        clockinTime: data.clockinTime ?? "10:00:00",
+                        clockoutTime: data.clockoutTime ?? "10:00:00",
                         systemCash: data.systemCash ?? 0,
                         actualCard: data.actualCard ?? 0,
                         systemCard: data.systemCard ?? 0,
@@ -77,6 +81,8 @@ export default function LogEodReportOwnerPage() {
                     setEodFormValues({
                         store: { dealerStoreId },
                         employee: { employeeNtid },
+                        clockinTime: "10:00:00",
+                        clockoutTime: "10:00:00",
                         actualCash: 0,
                         systemCash: 0,
                         actualCard: 0,

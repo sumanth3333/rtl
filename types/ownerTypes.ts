@@ -23,10 +23,19 @@ export const eodReportSchema = z.object({
     hsiSold: z.number().nonnegative("HSI Sold cannot be negative"),
     tabletsSold: z.number().nonnegative("Tablets Sold cannot be negative"),
     watchesSold: z.number().nonnegative("Watches Sold cannot be negative"),
-    lastTransactionTime: z.string().regex(
-        /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/,
-        "Invalid time format. Please enter time in HH:mm:ss format."
+    clockinTime: z.string().regex(
+        /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/,
+        "Invalid time format. Please enter time in HH:mm or HH:mm:ss format."
     ),
+    clockoutTime: z.string().regex(
+        /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/,
+        "Invalid time format. Please enter time in HH:mm or HH:mm:ss format."
+    ),
+    lastTransactionTime: z.string().regex(
+        /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/,
+        "Invalid time format. Please enter time in HH:mm or HH:mm:ss format."
+    ),
+
     saleDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid sale date. Format must be YYYY-MM-DD."),
 });
 
