@@ -79,15 +79,31 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         }
     }, [store, employee, reset, initialValues]);
 
-    // Watch form values to dynamically calculate differences
-    const actualCash = parseFloat(Number(watch("actualCash")).toFixed(2));
-    const systemCash = parseFloat(Number(watch("systemCash")).toFixed(2));
-    const actualCard = parseFloat(Number(watch("actualCard")).toFixed(2));
-    const systemCard = parseFloat(Number(watch("systemCard")).toFixed(2));
+    const actualCashRaw = watch("actualCash") ?? 0;
+    const systemCash = watch("systemCash") ?? 0;
+    const actualCardRaw = watch("actualCard") ?? 0;
+    const systemCard = watch("systemCard") ?? 0;
+    const cashExpense = watch("cashExpense") ?? 0;
+    const expenseType = watch("expenseType");
+    const paymentMethod = watch("paymentMethod");
 
-    // Calculate differences
-    const cashDifference = parseFloat((actualCash - systemCash).toFixed(2));
-    const cardDifference = parseFloat((actualCard - systemCard).toFixed(2));
+    let adjustedActualCash = actualCashRaw;
+    let adjustedActualCard = actualCardRaw;
+
+    if (hasExpense && expenseType && paymentMethod && cashExpense) {
+        if (paymentMethod === "Cash") {
+            adjustedActualCash = expenseType === "Short"
+                ? actualCashRaw + cashExpense
+                : actualCashRaw - cashExpense;
+        } else if (paymentMethod === "Card") {
+            adjustedActualCard = expenseType === "Short"
+                ? actualCardRaw + cashExpense
+                : actualCardRaw - cashExpense;
+        }
+    }
+
+    const cashDifference = parseFloat((adjustedActualCash - systemCash).toFixed(2));
+    const cardDifference = parseFloat((adjustedActualCard - systemCard).toFixed(2));
     const accessoriesByEmployee = parseFloat((cashDifference + cardDifference).toFixed(2));
 
     const expenseReason = watch("expenseReason");
@@ -103,9 +119,9 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 store: { dealerStoreId: store?.dealerStoreId || "" },
                 employee: { employeeNtid: employeesWorking[index].employeeNtid },
                 systemCash: systemCash,
-                actualCash: actualCash,
+                actualCash: adjustedActualCash,
                 systemCard: systemCard,
-                actualCard: actualCard,
+                actualCard: adjustedActualCard,
                 lastTransactionTime: watch("lastTransactionTime"),
                 cashExpense: watch("cashExpense"),
                 expenseReason: expenseReason,
@@ -120,7 +136,30 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             alert("⚠️ You must confirm clock-out before submitting.");
             return;
         }
+        let adjustedActualCash = data.actualCash ?? 0;
+        let adjustedActualCard = data.actualCard ?? 0;
 
+        if (hasExpense) {
+            const expenseAmount = data.cashExpense ?? 0;
+            const expenseType = data.expenseType;
+            const paymentMethod = data.paymentMethod;
+
+            if (expenseType && paymentMethod && expenseAmount) {
+                if (paymentMethod === "Cash") {
+                    if (expenseType === "Short") {
+                        adjustedActualCash += expenseAmount;
+                    } else if (expenseType === "Over") {
+                        adjustedActualCash -= expenseAmount;
+                    }
+                } else if (paymentMethod === "Card") {
+                    if (expenseType === "Short") {
+                        adjustedActualCard += expenseAmount;
+                    } else if (expenseType === "Over") {
+                        adjustedActualCard -= expenseAmount;
+                    }
+                }
+            }
+        }
         if (showIndividualForm) {
             // Calculate totals
             const totalBoxesSold = individualEntries.reduce((sum, entry) => sum + (entry.boxesSold || 0), 0);
@@ -151,9 +190,9 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         // Format data before submission
         const formattedData = {
             ...data,
-            actualCash: parseFloat((data.actualCash ?? 0).toFixed(2)),
+            actualCash: parseFloat(adjustedActualCash.toFixed(2)),
             systemCash: parseFloat((data.systemCash ?? 0).toFixed(2)),
-            actualCard: parseFloat((data.actualCard ?? 0).toFixed(2)),
+            actualCard: parseFloat(adjustedActualCard.toFixed(2)),
             systemCard: parseFloat((data.systemCard ?? 0).toFixed(2)),
             systemAccessories: parseFloat((data.systemAccessories ?? 0).toFixed(2)),
             accessoriesByEmployee: parseFloat((data.accessoriesByEmployee ?? 0).toFixed(2)),
@@ -166,6 +205,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             expenseReason: hasExpense ? data.expenseReason ?? "NONE" : "NONE",
         };
 
+        console.log(formattedData);
         setFormData(formattedData);
         setShowConfirm(true);
     };
@@ -181,11 +221,8 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             }
             // Submit each employee's individual sales data
             else {
-                //console.log(individualEntries);
                 await Promise.all(
-                    individualEntries.map((entry) =>
-                        submitEodReport(entry)
-                    )
+                    individualEntries.map((entry) => submitEodReport(entry))
                 );
             }
             setShowSuccess(true);
@@ -196,9 +233,14 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             }, 3000);
 
         } catch (error) {
-            alert("❌ Failed to submit EOD report.");
+            if (error instanceof Error) {
+                alert(error.message);
+            } else {
+                alert("Something went wrong.");
+            }
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
@@ -244,17 +286,64 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 <div className="mt-4 flex items-center gap-2">
                     <input type="checkbox" id="hasExpense" checked={hasExpense} onChange={() => setHasExpense(!hasExpense)} className="w-4 h-4" />
                     <label htmlFor="hasExpense" className="text-gray-800 dark:text-gray-300 text-sm">
-                        Add reason for expense or short
+                        Add reason for Over/(Short)
                     </label>
                 </div>
 
                 {/* Expense Fields if Selected */}
                 {hasExpense && (
                     <div className="grid grid-cols-2 gap-2 md:gap-4 mt-3">
-                        <InputField label="Expense Amount" type="number" step="0.01" {...register("cashExpense", { valueAsNumber: true })} error={errors.cashExpense?.message} />
-                        <InputField label="Expense Reason" type="text" {...register("expenseReason")} error={errors.expenseReason?.message} />
+                        {/* Expense Amount */}
+                        <InputField
+                            label="Expense Amount"
+                            type="number"
+                            step="0.01"
+                            {...register("cashExpense", { valueAsNumber: true })}
+                            error={errors.cashExpense?.message}
+                        />
+
+                        {/* Expense Reason */}
+                        <InputField
+                            label="Expense Reason"
+                            type="text"
+                            {...register("expenseReason")}
+                            error={errors.expenseReason?.message}
+                        />
+
+                        {/* Expense Type: Short or Over */}
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium mb-1">Expense Type</label>
+                            <select
+                                {...register("expenseType")}
+                                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            >
+                                <option value="">Select</option>
+                                <option value="Short">Short</option>
+                                <option value="Over">Over</option>
+                            </select>
+                            {errors.expenseType && (
+                                <span className="text-xs text-red-500 mt-1">{errors.expenseType.message}</span>
+                            )}
+                        </div>
+
+                        {/* Payment Method: Cash or Card */}
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium mb-1">Payment Method</label>
+                            <select
+                                {...register("paymentMethod")}
+                                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                            >
+                                <option value="">Select</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Card">Card</option>
+                            </select>
+                            {errors.paymentMethod && (
+                                <span className="text-xs text-red-500 mt-1">{errors.paymentMethod.message}</span>
+                            )}
+                        </div>
                     </div>
                 )}
+
 
                 {/* Individual Employee Sales Entry */}
                 {showIndividualForm && (

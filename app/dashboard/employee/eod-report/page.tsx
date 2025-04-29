@@ -4,6 +4,7 @@ import EodForm from "@/components/employee/EodForm";
 import { useEmployee } from "@/hooks/useEmployee";
 import { getEodDetails } from "@/services/employee/employeeService";
 import { useEffect, useState } from "react";
+import EODFaq from "@/components/employee/EODFaq";
 
 export default function LogEodReportPage() {
     const { employee, store } = useEmployee();
@@ -23,6 +24,9 @@ export default function LogEodReportPage() {
         hsiSold: 0,
         tabletsSold: 0,
         watchesSold: 0,
+        expenseType: "Short",
+        paymentMethod: "Cash",
+
     });
 
     useEffect(() => {
@@ -31,7 +35,7 @@ export default function LogEodReportPage() {
                 .then((data) => {
                     setEodFormValues((prevValues) => ({
                         ...prevValues,
-                        ...data, // Merge existing values with API response
+                        ...data,
                     }));
                 })
                 .catch((error) => {
@@ -41,13 +45,23 @@ export default function LogEodReportPage() {
     }, [store?.dealerStoreId, employee?.employeeNtid]);
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4 pb-16">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 dark:text-gray-100 my-4 text-center">
                 End Of Day Report
             </h1>
+
+            {/* Form Section */}
             <div className="w-full max-w-3xl">
                 <EodForm initialValues={eodFormValues} />
             </div>
+
+            {/* Divider */}
+            <div className="h-px my-12 w-full bg-gray-300 dark:bg-gray-700" />
+
+            {/* FAQ Section
+            <div className="w-full max-w-4xl">
+                 <EODFaq /> 
+            </div> */}
         </div>
     );
 }

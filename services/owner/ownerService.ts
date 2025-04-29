@@ -149,7 +149,8 @@ export const getAssignedTodosForStore = async (dealerStoreId: string): Promise<{
 
 export const getAssignedTodosForStoreByDate = async (dealerStoreId: string, todosDate: string): Promise<{ todos: AssignedTodo[] }> => {
     try {
-        const response = await apiClient.get("/todos/getAssinedTodosByDate", { params: { dealerStoreId, todosDate } });
+        const response = await apiClient.get("/todos/ViewTodoStatusForStore", { params: { dealerStoreId, todosDate } });
+        console.log(response);
         return response.data;
     } catch (error) {
         console.error("❌ Error fetching assigned todos:", error);

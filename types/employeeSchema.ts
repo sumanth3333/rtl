@@ -38,6 +38,8 @@ export const eodReportSchema = z.object({
     hsiSold: z.number().nonnegative("HSI Sold cannot be negative"),
     tabletsSold: z.number().nonnegative("Tablets Sold cannot be negative"),
     watchesSold: z.number().nonnegative("Watches Sold cannot be negative"),
+    expenseType: z.string().optional(),
+    paymentMethod: z.string().optional(),
     lastTransactionTime: z.string()
         .regex(/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, "Invalid time format. Please enter time in HH:mm:ss format."),
 });
