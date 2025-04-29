@@ -12,6 +12,7 @@ export interface StoreTargetRequest {
 
 export interface StoreTarget {
     activationTargetToStore: number;
+    upgradeTargetToStore: number;
     accessoriesTargetToStore: number;
     hsiTargetToStore: number;
     tabletsTargetToStore: number;
@@ -41,10 +42,11 @@ export interface EmployeeDTO {
 
 export interface EmployeeTarget {
     phonesTargetToEmployee: number;
+    upgradeTargetToEmployee: number;
     accessoriesTargetByEmployee: number;
     hsiTarget: number;
     tabletsTargetByEmployee: number;
-    smartwatchTragetByEmployee: number;
+    smartwatchTargetByEmployee: number;
     targetMonth: string;
 }
 

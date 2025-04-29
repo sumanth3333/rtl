@@ -16,7 +16,8 @@ export default function EmployeeTargetTable({ targets, onEdit, month }: Employee
                     <thead className="bg-gray-700 text-white">
                         <tr>
                             <th className="p-3 text-left">Employee</th>
-                            <th className="p-3 text-right">Phones</th>
+                            <th className="p-3 text-right">Activations</th>
+                            <th className="p-3 text-right">Upgrades</th>
                             <th className="p-3 text-right">Accessories</th>
                             <th className="p-3 text-right">HSI</th>
                             <th className="p-3 text-right">Tablets</th>
@@ -29,10 +30,11 @@ export default function EmployeeTargetTable({ targets, onEdit, month }: Employee
                             // ✅ Ensure we always pass a valid `EmployeeTarget`
                             const validTarget: EmployeeTarget = target ?? {
                                 phonesTargetToEmployee: 0,
+                                upgradeTargetToEmployee: 0,
                                 accessoriesTargetByEmployee: 0.0,
                                 hsiTarget: 0,
                                 tabletsTargetByEmployee: 0,
-                                smartwatchTragetByEmployee: 0,
+                                smartwatchTargetByEmployee: 0,
                                 targetMonth: month, // Format: YYYY-MM
                             };
 
@@ -42,10 +44,11 @@ export default function EmployeeTargetTable({ targets, onEdit, month }: Employee
                                     {target ? (
                                         <>
                                             <td className="p-3 text-right">{target.phonesTargetToEmployee}</td>
+                                            <td className="p-3 text-right">{target.upgradeTargetToEmployee}</td>
                                             <td className="p-3 text-right">${target.accessoriesTargetByEmployee.toFixed(2)}</td>
                                             <td className="p-3 text-right">{target.hsiTarget}</td>
                                             <td className="p-3 text-right">{target.tabletsTargetByEmployee}</td>
-                                            <td className="p-3 text-right">{target.smartwatchTragetByEmployee}</td>
+                                            <td className="p-3 text-right">{target.smartwatchTargetByEmployee}</td>
                                         </>
                                     ) : (
                                         <td colSpan={5} className="p-3 text-center text-gray-500 italic">

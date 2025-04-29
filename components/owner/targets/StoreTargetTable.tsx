@@ -17,6 +17,7 @@ export default function StoreTargetTable({ targets, month, onEdit }: StoreTarget
                         <tr>
                             <th className="p-3 text-left">Store</th>
                             <th className="p-3 text-right">Activations</th>
+                            <th className="p-3 text-right">Upgrades</th>
                             <th className="p-3 text-right">Accessories</th>
                             <th className="p-3 text-right">HSI</th>
                             <th className="p-3 text-right">Tablets</th>
@@ -29,6 +30,7 @@ export default function StoreTargetTable({ targets, month, onEdit }: StoreTarget
                             // ✅ Ensure we always pass a valid `StoreTarget`
                             const validTarget: StoreTarget = target ?? {
                                 activationTargetToStore: 0,
+                                upgradeTargetToStore: 0,
                                 accessoriesTargetToStore: 0.0,
                                 hsiTargetToStore: 0,
                                 tabletsTargetToStore: 0,
@@ -42,6 +44,7 @@ export default function StoreTargetTable({ targets, month, onEdit }: StoreTarget
                                     {target ? (
                                         <>
                                             <td className="p-3 text-right">{target.activationTargetToStore}</td>
+                                            <td className="p-3 text-right">{target.upgradeTargetToStore}</td>
                                             <td className="p-3 text-right">${target.accessoriesTargetToStore.toFixed(2)}</td>
                                             <td className="p-3 text-right">{target.hsiTargetToStore}</td>
                                             <td className="p-3 text-right">{target.tabletsTargetToStore}</td>

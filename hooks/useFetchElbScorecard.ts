@@ -8,7 +8,7 @@ interface StoreMTD {
     accessoriesTargetToStore: number;
     hsiTargetToStore: number;
     tabletsTargetToStore: number;
-    smartwatchTragetToStore: number;
+    smartwatchTargetToStore: number;
     targetMonth: string;
 }
 
@@ -17,7 +17,7 @@ interface EmployeeMTD {
     accessoriesTargetByEmployee: number;
     hsiTarget: number;
     tabletsTargetByEmployee: number;
-    smartwatchTragetByEmployee: number;
+    smartwatchTargetByEmployee: number;
     targetMonth: string;
 }
 

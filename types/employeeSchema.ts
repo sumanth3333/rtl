@@ -36,6 +36,7 @@ export const eodReportSchema = z.object({
     expenseReason: z.string().optional(),
     boxesSold: z.number().nonnegative("Boxes Sold cannot be negative"),
     hsiSold: z.number().nonnegative("HSI Sold cannot be negative"),
+    upgrade: z.number().nonnegative("Upgrades Sold cannot be negative"),
     tabletsSold: z.number().nonnegative("Tablets Sold cannot be negative"),
     watchesSold: z.number().nonnegative("Watches Sold cannot be negative"),
     expenseType: z.string().optional(),

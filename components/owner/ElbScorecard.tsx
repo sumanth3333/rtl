@@ -47,7 +47,7 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                         <thead className="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-300">
                             <tr>
                                 <th className="p-2 text-left">Store Name</th>
-                                {["Activations", "Accessories ($)", "HSI", "Tablets", "Smartwatches"].map((label) => (
+                                {["Activations", "Upgrades", "Accessories ($)", "HSI", "Tablets", "Smartwatches"].map((label) => (
                                     <th key={label} className="p-2 text-center">{label}</th>
                                 ))}
                             </tr>
@@ -66,6 +66,7 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                                         <td className="p-2 font-semibold">{store.store?.storeName ?? "N/A"}</td>
                                         {[
                                             "activationTargetToStore",
+                                            "upgradeTargetToStore",
                                             "accessoriesTargetToStore",
                                             "hsiTargetToStore",
                                             "tabletsTargetToStore",
@@ -90,7 +91,7 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                         <thead className="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-300">
                             <tr>
                                 <th className="p-2 text-left">Employee Name</th>
-                                {["Phones", "Accessories ($)", "HSI", "Tablets", "Smartwatches"].map((label) => (
+                                {["Activations", "Upgrades", "Accessories ($)", "HSI", "Tablets", "Smartwatches"].map((label) => (
                                     <th key={label} className="p-2 text-center">{label}</th>
                                 ))}
                             </tr>
@@ -109,10 +110,11 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                                         <td className="p-2 font-semibold">{employee.employee?.employeeName ?? "N/A"}</td>
                                         {[
                                             "phonesTargetToEmployee",
+                                            "upgradeTargetToEmployee",
                                             "accessoriesTargetByEmployee",
                                             "hsiTarget",
                                             "tabletsTargetByEmployee",
-                                            "smartwatchTragetByEmployee",
+                                            "smartwatchTargetByEmployee",
                                         ].map((key) => (
                                             <ElbMetricCell
                                                 key={key}
@@ -179,7 +181,7 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                                     { label: "Accessories ($)", key: "accessoriesTargetByEmployee" },
                                     { label: "HSI", key: "hsiTarget" },
                                     { label: "Tablets", key: "tabletsTargetByEmployee" },
-                                    { label: "Smartwatches", key: "smartwatchTragetByEmployee" },
+                                    { label: "Smartwatches", key: "smartwatchTargetByEmployee" },
                                 ].map(({ label, key }) => (
                                     <div key={key} className="flex justify-between text-xs">
                                         <span className="text-gray-600 dark:text-gray-300">{label}</span>

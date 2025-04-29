@@ -31,6 +31,7 @@ export default function TargetUpdateModal({ isOpen, onClose, target, month }: Ta
                     target: {
                         ...(prev.target ?? {
                             activationTargetToStore: 0,
+                            upgradeTargetToStore: 0,
                             accessoriesTargetToStore: 0.0,
                             hsiTargetToStore: 0,
                             tabletsTargetToStore: 0,
@@ -47,10 +48,11 @@ export default function TargetUpdateModal({ isOpen, onClose, target, month }: Ta
                     target: {
                         ...(prev.target ?? {
                             phonesTargetToEmployee: 0,
+                            upgradeTargetToEmployee: 0,
                             accessoriesTargetByEmployee: 0.0,
                             hsiTarget: 0,
                             tabletsTargetByEmployee: 0,
-                            smartwatchTragetByEmployee: 0,
+                            smartwatchTargetByEmployee: 0,
                             targetMonth: month,
                         }),
                         [name]: Number(value),
@@ -70,10 +72,10 @@ export default function TargetUpdateModal({ isOpen, onClose, target, month }: Ta
             }
             onClose();
 
-            // ✅ Refresh the page after a short delay
-            setTimeout(() => {
-                window.location.reload();
-            }, 500); // Small delay for better UX
+            // // ✅ Refresh the page after a short delay
+            // setTimeout(() => {
+            //     window.location.reload();
+            // }, 500); // Small delay for better UX
         } catch (error) {
             console.error("Error updating target:", error);
         }

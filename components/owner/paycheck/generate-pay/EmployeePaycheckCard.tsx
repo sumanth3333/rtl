@@ -37,6 +37,7 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 workingHoursPay: paycheck.work.workingHoursPay,
                 totalAccessories: paycheck.work.totalAccessories,
                 boxesSold: paycheck.work.boxesSold,
+                upgrade: paycheck.work.upgradesSold,
                 tabletsSold: paycheck.work.tabletsSold,
                 hsiSold: paycheck.work.hsiSold,
                 watchesSold: paycheck.work.watchesSold,
@@ -114,10 +115,11 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                         ["Days Worked", paycheck.work.numberOfDaysWorked],
                         ["Hours Worked", paycheck.work.numberOfHoursWorked.toFixed(2)],
                         ["Accessories Sold", paycheck.work.totalAccessories],
-                        ["Boxes Sold", paycheck.work.boxesSold],
-                        ["Tablets Sold", paycheck.work.tabletsSold],
-                        ["HSI Sold", paycheck.work.hsiSold],
-                        ["Watches Sold", paycheck.work.watchesSold],
+                        ["Activations", paycheck.work.boxesSold],
+                        ["Upgrades", paycheck.work.upgradesSold],
+                        ["Tablets", paycheck.work.tabletsSold],
+                        ["HSI", paycheck.work.hsiSold],
+                        ["Watches", paycheck.work.watchesSold],
                     ].map(([label, value], index) => (
                         <div key={index} className="flex flex-col items-center">
                             <span className="text-gray-500 dark:text-gray-400 text-xs uppercase">{label}</span>
@@ -225,7 +227,8 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                                             <th className="p-3 text-left">Closed At</th>
                                             <th className="p-3 text-left">Hours</th>
                                             <th className="p-3 text-left">Store</th>
-                                            <th className="p-3 text-center">Boxes</th>
+                                            <th className="p-3 text-center">Activations</th>
+                                            <th className="p-3 text-center">Upgrades</th>
                                             <th className="p-3 text-center">Accessories ($)</th>
                                             <th className="p-3 text-center">Tablets</th>
                                             <th className="p-3 text-center">HSI</th>
@@ -258,6 +261,9 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                                                 </td>
                                                 <td className="p-3 text-center text-blue-600 dark:text-blue-400 font-bold">
                                                     {sale.boxesSold}
+                                                </td>
+                                                <td className="p-3 text-center text-blue-600 dark:text-blue-400 font-bold">
+                                                    {sale.upgrade}
                                                 </td>
                                                 <td className="p-3 text-center text-green-600 dark:text-green-400 font-semibold">
                                                     ${sale.accessories.toFixed(2)}

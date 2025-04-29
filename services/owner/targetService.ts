@@ -19,6 +19,7 @@ export async function updateStoreTarget(storeTarget: StoreTargetRequest): Promis
             dealerStoreId: storeTarget.store.dealerStoreId,
         },
         activationTargetToStore: storeTarget.target.activationTargetToStore,
+        upgradeTargetToStore: storeTarget.target.upgradeTargetToStore,
         accessoriesTargetToStore: storeTarget.target.accessoriesTargetToStore,
         hsiTargetToStore: storeTarget.target.hsiTargetToStore,
         tabletsTargetToStore: storeTarget.target.tabletsTargetToStore,
@@ -35,10 +36,11 @@ export async function updateEmployeeTarget(employeeTarget: EmployeeTargetRequest
             employeeNtid: employeeTarget.employee.employeeNtid,
         },
         phonesTargetToEmployee: employeeTarget.target.phonesTargetToEmployee,
+        upgradeTargetToEmployee: employeeTarget.target.upgradeTargetToEmployee,
         accessoriesTargetByEmployee: employeeTarget.target.accessoriesTargetByEmployee,
         hsiTarget: employeeTarget.target.hsiTarget,
         tabletsTargetByEmployee: employeeTarget.target.tabletsTargetByEmployee,
-        smartwatchTragetByEmployee: employeeTarget.target.smartwatchTragetByEmployee,
+        smartwatchTargetByEmployee: employeeTarget.target.smartwatchTargetByEmployee,
         targetMonth: employeeTarget.target.targetMonth,
     }
     const response = await apiClient.post(`${BASE_URL}/employeeTarget`, employeeTargetPayload);

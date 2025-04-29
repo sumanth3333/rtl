@@ -21,6 +21,7 @@ export default function LogEodReportPage() {
         cashExpense: 0,
         expenseReason: "NONE",
         boxesSold: 0,
+        upgrade: 0,
         hsiSold: 0,
         tabletsSold: 0,
         watchesSold: 0,

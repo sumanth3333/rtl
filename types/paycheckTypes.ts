@@ -9,6 +9,7 @@ export interface WorkDetails {
     workingHoursPay: number;
     totalAccessories: number;
     boxesSold: number;
+    upgradesSold: number;
     tabletsSold: number;
     hsiSold: number;
     watchesSold: number;
@@ -36,6 +37,7 @@ export interface Store {
 
 export interface Sale {
     boxesSold: number;
+    upgrade: number;
     accessories: number;
     tabletsSold: number;
     hsiSold: number;

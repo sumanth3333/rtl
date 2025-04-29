@@ -72,6 +72,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 cashExpense: initialValues.cashExpense ?? 0,
                 expenseReason: initialValues.expenseReason ?? "NONE",
                 boxesSold: initialValues.boxesSold ?? 0,
+                upgrade: initialValues.upgrade ?? 0,
                 hsiSold: initialValues.hsiSold ?? 0,
                 tabletsSold: initialValues.tabletsSold ?? 0,
                 watchesSold: initialValues.watchesSold ?? 0,
@@ -163,6 +164,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         if (showIndividualForm) {
             // Calculate totals
             const totalBoxesSold = individualEntries.reduce((sum, entry) => sum + (entry.boxesSold || 0), 0);
+            const totalUpgrades = individualEntries.reduce((sum, entry) => sum + (entry.upgrade || 0), 0);
             const totalHSISold = individualEntries.reduce((sum, entry) => sum + (entry.hsiSold || 0), 0);
             const totalTabletsSold = individualEntries.reduce((sum, entry) => sum + (entry.tabletsSold || 0), 0);
             const totalWatchesSold = individualEntries.reduce((sum, entry) => sum + (entry.watchesSold || 0), 0);
@@ -173,6 +175,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             const errors: Record<string, string> = {};
 
             if (totalBoxesSold !== watch("boxesSold")) { errors["boxesSold"] = "Total does not match sum of individual entries." };
+            if (totalUpgrades !== watch("upgrade")) { errors["upgrade"] = "Total does not match sum of individual entries." };
             if (totalHSISold !== watch("hsiSold")) { errors["hsiSold"] = "Total does not match sum of individual entries." };
             if (totalTabletsSold !== watch("tabletsSold")) { errors["tabletsSold"] = "Total does not match sum of individual entries." };
             if (totalWatchesSold !== watch("watchesSold")) { errors["watchesSold"] = "Total does not match sum of individual entries." };
@@ -198,6 +201,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             accessoriesByEmployee: parseFloat((data.accessoriesByEmployee ?? 0).toFixed(2)),
             lastTransactionTime: data.lastTransactionTime,
             boxesSold: parseFloat((data.boxesSold ?? 0).toFixed(2)),
+            upgrade: parseFloat((data.upgrade ?? 0).toFixed(2)),
             hsiSold: parseFloat((data.hsiSold ?? 0).toFixed(2)),
             tabletsSold: parseFloat((data.tabletsSold ?? 0).toFixed(2)),
             watchesSold: parseFloat((data.watchesSold ?? 0).toFixed(2)),
@@ -275,11 +279,12 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 </div>
 
                 {/* Sales Data Fields */}
-                <div className="grid grid-cols-2 gap-2 md:gap-4 mt-6">
-                    <InputField label="Total Boxes Sold (Donot include BTS & HSI)" type="number" {...register("boxesSold", { valueAsNumber: true })} error={errors.boxesSold?.message} />
-                    <InputField label="HSI Sold" type="number" {...register("hsiSold", { valueAsNumber: true })} error={errors.hsiSold?.message} />
-                    <InputField label="Tablets Sold" type="number" {...register("tabletsSold", { valueAsNumber: true })} error={errors.tabletsSold?.message} />
-                    <InputField label="Watches Sold" type="number" {...register("watchesSold", { valueAsNumber: true })} error={errors.watchesSold?.message} />
+                <div className="grid grid-cols-3 gap-2 md:gap-4 mt-6">
+                    <InputField label="Activations(inc. reactivations & BYOD)" type="number" {...register("boxesSold", { valueAsNumber: true })} error={errors.boxesSold?.message} />
+                    <InputField label="Upgrades" type="number" {...register("upgrade", { valueAsNumber: true })} error={errors.upgrade?.message} />
+                    <InputField label="HSI" type="number" {...register("hsiSold", { valueAsNumber: true })} error={errors.hsiSold?.message} />
+                    <InputField label="Tablets" type="number" {...register("tabletsSold", { valueAsNumber: true })} error={errors.tabletsSold?.message} />
+                    <InputField label="Watches" type="number" {...register("watchesSold", { valueAsNumber: true })} error={errors.watchesSold?.message} />
                 </div>
 
                 {/* Toggle Expense Fields */}
@@ -292,55 +297,59 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
 
                 {/* Expense Fields if Selected */}
                 {hasExpense && (
-                    <div className="grid grid-cols-2 gap-2 md:gap-4 mt-3">
-                        {/* Expense Amount */}
-                        <InputField
-                            label="Expense Amount"
-                            type="number"
-                            step="0.01"
-                            {...register("cashExpense", { valueAsNumber: true })}
-                            error={errors.cashExpense?.message}
-                        />
+                    <div>
+                        <div className="grid grid-cols-3 gap-2 md:gap-4 mt-3">
+                            {/* Expense Amount */}
+                            <InputField
+                                label="Amount"
+                                type="number"
+                                step="0.01"
+                                {...register("cashExpense", { valueAsNumber: true })}
+                                error={errors.cashExpense?.message}
+                            />
 
-                        {/* Expense Reason */}
-                        <InputField
-                            label="Expense Reason"
-                            type="text"
-                            {...register("expenseReason")}
-                            error={errors.expenseReason?.message}
-                        />
+                            {/* Expense Type: Short or Over */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium mb-1">Expense Type</label>
+                                <select
+                                    {...register("expenseType")}
+                                    className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                >
+                                    <option value="">Select</option>
+                                    <option value="Short">Short</option>
+                                    <option value="Over">Over</option>
+                                </select>
+                                {errors.expenseType && (
+                                    <span className="text-xs text-red-500 mt-1">{errors.expenseType.message}</span>
+                                )}
+                            </div>
 
-                        {/* Expense Type: Short or Over */}
-                        <div className="flex flex-col">
-                            <label className="text-sm font-medium mb-1">Expense Type</label>
-                            <select
-                                {...register("expenseType")}
-                                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                            >
-                                <option value="">Select</option>
-                                <option value="Short">Short</option>
-                                <option value="Over">Over</option>
-                            </select>
-                            {errors.expenseType && (
-                                <span className="text-xs text-red-500 mt-1">{errors.expenseType.message}</span>
-                            )}
+                            {/* Payment Method: Cash or Card */}
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium mb-1">Payment Method</label>
+                                <select
+                                    {...register("paymentMethod")}
+                                    className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                >
+                                    <option value="">Select</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Card">Card</option>
+                                </select>
+                                {errors.paymentMethod && (
+                                    <span className="text-xs text-red-500 mt-1">{errors.paymentMethod.message}</span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1">
+                            {/* Expense Reason */}
+                            <InputField
+                                label="Reason"
+                                type="text"
+                                {...register("expenseReason")}
+                                error={errors.expenseReason?.message}
+                            />
                         </div>
 
-                        {/* Payment Method: Cash or Card */}
-                        <div className="flex flex-col">
-                            <label className="text-sm font-medium mb-1">Payment Method</label>
-                            <select
-                                {...register("paymentMethod")}
-                                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                            >
-                                <option value="">Select</option>
-                                <option value="Cash">Cash</option>
-                                <option value="Card">Card</option>
-                            </select>
-                            {errors.paymentMethod && (
-                                <span className="text-xs text-red-500 mt-1">{errors.paymentMethod.message}</span>
-                            )}
-                        </div>
                     </div>
                 )}
 
@@ -355,7 +364,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                 <div className="grid grid-cols-3 gap-4">
                                     <InputField
                                         name="boxesSold"
-                                        label="Boxes Sold"
+                                        label="Activations"
                                         type="number"
                                         value={individualEntries[index]?.boxesSold}
                                         onChange={(e) => handleEmployeeDataChange(index, "boxesSold", Number(e.target.value))}
@@ -363,8 +372,17 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                         required
                                     />
                                     <InputField
+                                        name="upgrade"
+                                        label="Upgrades"
+                                        type="number"
+                                        value={individualEntries[index]?.boxesSold}
+                                        onChange={(e) => handleEmployeeDataChange(index, "upgrade", Number(e.target.value))}
+                                        error={validationErrors["upgrade"]}
+                                        required
+                                    />
+                                    <InputField
                                         name="hsiSold"
-                                        label="HSI Sold"
+                                        label="HSI"
                                         type="number"
                                         value={individualEntries[index]?.hsiSold}
                                         onChange={(e) => handleEmployeeDataChange(index, "hsiSold", Number(e.target.value))}
@@ -373,7 +391,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                     />
                                     <InputField
                                         name="tabletsSold"
-                                        label="Tablets Sold"
+                                        label="Tablets"
                                         type="number"
                                         value={individualEntries[index]?.tabletsSold}
                                         onChange={(e) => handleEmployeeDataChange(index, "tabletsSold", Number(e.target.value))}
@@ -382,7 +400,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                     />
                                     <InputField
                                         name="watchesSold"
-                                        label="Watches Sold"
+                                        label="Watches"
                                         type="number"
                                         value={individualEntries[index]?.watchesSold}
                                         onChange={(e) => handleEmployeeDataChange(index, "watchesSold", Number(e.target.value))}
@@ -432,12 +450,13 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 <Button type="submit" variant="primary" isLoading={loading} fullWidth disabled={!confirmClockOut}>
                     Submit Report
                 </Button>
-            </form>
+            </form >
 
             {/* Confirmation Modal */}
-            <ConfirmationModal
+            < ConfirmationModal
                 isOpen={showConfirm}
-                onClose={() => setShowConfirm(false)}
+                onClose={() => setShowConfirm(false)
+                }
                 onConfirm={handleConfirm}
                 title="Confirm Submission"
                 message="Are you sure you want to submit this EOD report?"
@@ -445,7 +464,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             />
 
             {/* Success Modal */}
-            <SuccessModal
+            < SuccessModal
                 isOpen={showSuccess}
                 onClose={() => setShowSuccess(false)}
                 title="EOD Report Submitted!"

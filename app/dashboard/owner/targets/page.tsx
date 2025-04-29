@@ -51,6 +51,7 @@ export default function MonthlyTargets() {
         const initialTarget = type === "store"
             ? {
                 activationTargetToStore: 0,
+                upgradeTargetToStore: 0,
                 accessoriesTargetToStore: 0.0,
                 hsiTargetToStore: 0,
                 tabletsTargetToStore: 0,
@@ -59,10 +60,11 @@ export default function MonthlyTargets() {
             } as StoreTarget
             : {
                 phonesTargetToEmployee: 0,
+                upgradeTargetToEmployee: 0,
                 accessoriesTargetByEmployee: 0.0,
                 hsiTarget: 0,
                 tabletsTargetByEmployee: 0,
-                smartwatchTragetByEmployee: 0,
+                smartwatchTargetByEmployee: 0,
                 targetMonth,
 
             } as EmployeeTarget;
