@@ -375,7 +375,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                         name="upgrade"
                                         label="Upgrades"
                                         type="number"
-                                        value={individualEntries[index]?.boxesSold}
+                                        value={individualEntries[index]?.upgrade}
                                         onChange={(e) => handleEmployeeDataChange(index, "upgrade", Number(e.target.value))}
                                         error={validationErrors["upgrade"]}
                                         required
