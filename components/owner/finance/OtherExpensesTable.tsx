@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 
 interface OtherExpense {
     paymentMode: string;
-    paidAt: string;
     paidTo: string;
     paidFor: string;
     amount: number;
     month: string;
     paidDate: string;
+    expenseRecordedDate: string;
 }
 
 interface OtherExpensesTableProps {
@@ -48,21 +48,20 @@ export default function OtherExpensesTable({
     const handleAddRow = () => {
         const newRow: OtherExpense = {
             paymentMode: "",
-            paidAt: "",
             paidTo: "",
             paidFor: "",
             amount: 0,
             month,
-            paidDate: new Date().toISOString().slice(0, 10), // today's date
+            paidDate: new Date().toISOString().slice(0, 10),
+            expenseRecordedDate: new Date().toISOString().slice(0, 10),
         };
         const updated = [...tableData, newRow];
         setTableData(updated);
         onUpdate(updated);
     };
 
-    const getTotalAmount = () => {
-        return tableData.reduce((sum, row) => sum + (row.amount || 0), 0).toFixed(2);
-    };
+    const getTotalAmount = () =>
+        tableData.reduce((sum, row) => sum + (row.amount || 0), 0).toFixed(2);
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -78,7 +77,7 @@ export default function OtherExpensesTable({
     };
 
     return (
-        <div className="mt-10 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-md">
+        <div className="mt-10">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200">
                     💸 Other Expenses
@@ -86,14 +85,14 @@ export default function OtherExpensesTable({
                 <div className="flex gap-2">
                     <button
                         onClick={handleAddRow}
-                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-semibold"
+                        className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 text-sm"
                     >
-                        + Add Row
+                        Add New Expense
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md text-sm font-semibold disabled:opacity-50"
+                        className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 text-sm"
                     >
                         {isSaving ? "Saving..." : "Save"}
                     </button>
@@ -109,11 +108,11 @@ export default function OtherExpensesTable({
                     <thead>
                         <tr className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300">
                             <th className="p-3">Payment Mode</th>
-                            <th className="p-3">Paid At</th>
                             <th className="p-3">Paid To</th>
                             <th className="p-3">Paid For</th>
                             <th className="p-3 text-center">Amount</th>
                             <th className="p-3 text-center">Paid Date</th>
+                            <th className="p-3 text-center">Recorded Date</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -124,14 +123,6 @@ export default function OtherExpensesTable({
                                         type="text"
                                         value={item.paymentMode}
                                         onChange={(e) => handleChange(index, "paymentMode", e.target.value)}
-                                        className="w-full p-1 rounded bg-white dark:bg-gray-900 text-center"
-                                    />
-                                </td>
-                                <td className="p-2">
-                                    <input
-                                        type="text"
-                                        value={item.paidAt}
-                                        onChange={(e) => handleChange(index, "paidAt", e.target.value)}
                                         className="w-full p-1 rounded bg-white dark:bg-gray-900 text-center"
                                     />
                                 </td>
@@ -168,15 +159,23 @@ export default function OtherExpensesTable({
                                         className="w-full p-1 rounded bg-white dark:bg-gray-900 text-center"
                                     />
                                 </td>
+                                <td className="p-2 text-center">
+                                    <input
+                                        type="date"
+                                        value={item.expenseRecordedDate}
+                                        onChange={(e) => handleChange(index, "expenseRecordedDate", e.target.value)}
+                                        className="w-full p-1 rounded bg-white dark:bg-gray-900 text-center"
+                                    />
+                                </td>
                             </tr>
                         ))}
 
                         <tr className="bg-gray-300 dark:bg-gray-700 font-bold text-gray-800 dark:text-white">
-                            <td className="p-3 text-right" colSpan={4}>
+                            <td className="p-3 text-right" colSpan={3}>
                                 TOTAL
                             </td>
-                            <td className="p-3 text-center">{getTotalAmount()}</td>
-                            <td />
+                            <td className="p-3 text-center">${getTotalAmount()}</td>
+                            <td colSpan={2} />
                         </tr>
                     </tbody>
                 </table>

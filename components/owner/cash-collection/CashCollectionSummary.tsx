@@ -54,7 +54,7 @@ export default function CashCollectionSummary({ cashData }: CashCollectionSummar
                     {/* Expandable Sale History */}
                     {expandedStore === store.dealerStoreId && (
                         <div className="mt-2 sm:mt-3">
-                            <SaleHistoryTable saleHistory={saleHistory} />
+                            <SaleHistoryTable saleHistory={saleHistory} dealerStoreId={store.dealerStoreId} />
                         </div>
                     )}
                 </div>

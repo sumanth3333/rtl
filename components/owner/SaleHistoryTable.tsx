@@ -6,9 +6,10 @@ import SaleHistoryRow from "./SaleHistoryRow";
 
 interface SaleHistoryTableProps {
     saleHistory: SaleHistory[];
+    dealerStoreId: string;
 }
 
-export default function SaleHistoryTable({ saleHistory }: SaleHistoryTableProps) {
+export default function SaleHistoryTable({ saleHistory, dealerStoreId }: SaleHistoryTableProps) {
     const headers = [
         { key: "employeeName", label: "Employee" },
         { key: "saleDate", label: "Sale Date" },
@@ -59,7 +60,7 @@ export default function SaleHistoryTable({ saleHistory }: SaleHistoryTableProps)
                     </thead>
                     <tbody>
                         {sortedData.map((sale) => (
-                            <SaleHistoryRow key={sale.saleDate + sale.employeeName} sale={sale} />
+                            <SaleHistoryRow key={sale.saleDate + sale.employeeName} sale={sale} store={dealerStoreId} />
                         ))}
                     </tbody>
                 </table>

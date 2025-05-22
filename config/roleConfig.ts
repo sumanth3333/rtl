@@ -5,7 +5,7 @@ import {
     ArrowsRightLeftIcon,
     CheckCircleIcon
 } from "@heroicons/react/24/outline";
-import { Clock } from "lucide-react";
+import { Clock, MapPin, Settings } from "lucide-react";
 import React from "react";
 // roleConfig.ts - Centralized role-based configuration
 export type Role = "ADMIN" | "EMPLOYEE" | "MANAGER" | "OWNER";
@@ -62,6 +62,11 @@ export const sidebarLinks: Record<Role, {
             name: "End of Day Report",
             path: "/dashboard/employee/eod-report",
             icon: DocumentTextIcon
+        },
+        {
+            name: "EOD Remarks",
+            path: "/dashboard/employee/eod-remarks",
+            icon: ClipboardDocumentCheckIcon
         },
         {
             name: "Inventory Management",
@@ -148,6 +153,11 @@ export const sidebarLinks: Record<Role, {
             icon: DocumentTextIcon
         },
         {
+            name: "EOD Remarks",
+            path: "/dashboard/owner/eod-remarks",
+            icon: ClipboardDocumentCheckIcon
+        },
+        {
             name: "Monthly Targets",
             path: "/dashboard/owner/targets",
             icon: ChartBarIcon,
@@ -161,7 +171,18 @@ export const sidebarLinks: Record<Role, {
             name: "Pending Requests",
             path: "/dashboard/owner/pending-requests",
             icon: Clock, // or Hourglass
+        },
+        {
+            name: "Store Visit",
+            path: "/dashboard/owner/store-visit",
+            icon: MapPin,
+        },
+        {
+            name: "Settings",
+            path: "/dashboard/owner/settings",
+            icon: Settings,
         }
+
     ]
 };
 

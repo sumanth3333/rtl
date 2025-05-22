@@ -4,7 +4,6 @@ import EodForm from "@/components/employee/EodForm";
 import { useEmployee } from "@/hooks/useEmployee";
 import { getEodDetails } from "@/services/employee/employeeService";
 import { useEffect, useState } from "react";
-import EODFaq from "@/components/employee/EODFaq";
 
 export default function LogEodReportPage() {
     const { employee, store } = useEmployee();
@@ -22,6 +21,7 @@ export default function LogEodReportPage() {
         expenseReason: "NONE",
         boxesSold: 0,
         upgrade: 0,
+        migrations: 0,
         hsiSold: 0,
         tabletsSold: 0,
         watchesSold: 0,

@@ -1,4 +1,3 @@
-// 📄 pages/owner/finance/ProfitsAndExpensesPage.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,52 +6,85 @@ import PAndENavBar from "@/components/owner/finance/PAndENavBar";
 import EditableTable from "@/components/owner/finance/EditableTable";
 import OtherExpensesTable from "@/components/owner/finance/OtherExpensesTable";
 import { useOwner } from "@/hooks/useOwner";
+import LegalExpensesTable from "@/components/owner/finance/LegalExpensesTable";
+import StoreExpensesDisplay from "@/components/owner/finance/StoreExpensesDisplay";
+import InvoicesDisplayTable from "@/components/owner/finance/InvoicesDisplayTable";
 
 export default function ProfitsAndExpensesPage() {
     const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toISOString().slice(0, 7));
+    const { companyName } = useOwner();
+    const [invoiceExpenses, setInvoiceExpenses] = useState<any[]>([]);
     const [bills, setBills] = useState<any[]>([]);
+    const [storeExpenses, setStoreExpenses] = useState<any[]>([]);
+    const [dealerExpenses, setDealerExpenses] = useState<any[]>([]);
+    const [legalExpenses, setLegalExpenses] = useState<any[]>([]);
     const [otherExpenses, setOtherExpenses] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
     const [columnKeys, setColumnKeys] = useState<string[]>([]);
     const [columnLabels, setColumnLabels] = useState<string[]>([]);
-    const { companyName } = useOwner();
 
     useEffect(() => {
-        if (!companyName) {
-            return;
-        }
+        if (!companyName) return;
+
+
         const fetchData = async () => {
             setLoading(true);
             setError(null);
             try {
-                // Fetch regular expenses
+                // Business Bills
                 const billResponse = await apiClient.get("/expense/fetchRegularExpenses", {
-                    params: { companyName, month: selectedMonth },
+                    params: { companyName, month: selectedMonth }
                 });
                 const fetchedBills = billResponse.data;
                 setBills(fetchedBills);
 
                 if (fetchedBills.length > 0) {
-                    const firstRow = fetchedBills[0];
-                    const ignoreKeys = ["dealerStoreId", "paidMonth"];
-                    const keys = Object.keys(firstRow).filter((k) => !ignoreKeys.includes(k));
+                    const ignore = ["dealerStoreId", "paidMonth"];
+                    const keys = Object.keys(fetchedBills[0]).filter(k => !ignore.includes(k));
                     setColumnKeys(keys);
-
-                    const labels = keys.map((key) =>
+                    setColumnLabels(keys.map(key =>
                         key
                             .replace(/([a-z])([A-Z])/g, "$1 $2")
                             .replace(/_/g, " ")
-                            .replace(/\b\w/g, (char) => char.toUpperCase())
-                    );
-                    setColumnLabels(labels);
+                            .replace(/\b\w/g, (c) => c.toUpperCase())
+                    ));
                 }
-
-                // Fetch other expenses
-                const otherResponse = await apiClient.get("/expense/fetchOtherExpenses", {
-                    params: { companyName, month: selectedMonth },
+                const invoiceRes = await apiClient.get("/upgradePhones/viewAllInvoicesForTheMonth", {
+                    params: { companyName, month: selectedMonth }
                 });
-                setOtherExpenses(otherResponse.data);
+                setInvoiceExpenses(invoiceRes.data);
+
+                // Other expenses
+                const otherRes = await apiClient.get("/expense/fetchOtherExpenses", {
+                    params: { companyName, month: selectedMonth }
+                });
+                setOtherExpenses(otherRes.data);
+
+                // Store expenses
+                const storeRes = await apiClient.get("/expense/fetchStoreExpenses", {
+                    params: { companyName, month: selectedMonth }
+                });
+                const flattenedStoreExpenses = storeRes.data.flatMap((store: any) =>
+                    store.expenses.map((expense: any) => ({
+                        dealerStoreId: store.dealerStoreId,
+                        ...expense
+                    }))
+                );
+                setStoreExpenses(flattenedStoreExpenses);
+                console.log(storeRes);
+                // Dealer expenses
+                const dealerRes = await apiClient.get("/expense/fetchDealerExpenses", {
+                    params: { companyName, month: selectedMonth }
+                });
+                setDealerExpenses(dealerRes.data);
+
+                // Legal expenses
+                const legalRes = await apiClient.get("/expense/fetchLegalExpenses", {
+                    params: { companyName, month: selectedMonth }
+                });
+                setLegalExpenses(legalRes.data);
 
             } catch {
                 setError("Failed to fetch expenses.");
@@ -64,17 +96,54 @@ export default function ProfitsAndExpensesPage() {
         fetchData();
     }, [selectedMonth, companyName]);
 
-    const handleUpdateBills = (updated: any[]) => setBills(updated);
-    const handleUpdateOtherExpenses = (updated: any[]) => setOtherExpenses(updated);
-
-    const handleSaveBills = async (updated: any[]) => {
-        await apiClient.post("/expense/saveRegularExpenses", updated);
+    const handleSaveBills = async (data: any[]) => {
+        await apiClient.post("/expense/saveRegularExpenses", data);
     };
 
-    const handleSaveOtherExpenses = async (updated: any[]) => {
-        await apiClient.post("/v1/expense/saveOtherExpenses", {
+    const handleSaveOtherExpenses = async (data: any[]) => {
+        await apiClient.post("/expense/saveOtherExpenses", {
             companyName,
-            expenses: updated,
+            expenses: data,
+        });
+    };
+
+    const handleSaveStoreExpenses = async (data: any[]) => {
+        const grouped = data.reduce((acc: Record<string, any[]>, item) => {
+            const id = item.dealerStoreId;
+            if (!acc[id]) acc[id] = [];
+            acc[id].push({
+                paidFor: item.paidFor,
+                amount: item.amount,
+                month: item.month,
+                paidDate: item.paidDate,
+                expenseRecordedDate: item.expenseRecordedDate
+            });
+            return acc;
+        }, {});
+
+        const payload = Object.entries(grouped).map(([dealerStoreId, expenses]) => ({
+            dealerStoreId,
+            expenses
+        }));
+
+        await apiClient.post("/expense/saveStoreExpenses", {
+            companyName,
+            expenses: payload
+        });
+    };
+
+
+    const handleSaveDealerExpenses = async (data: any[]) => {
+        await apiClient.post("/expense/saveDealerExpenses", {
+            companyName,
+            expenses: data,
+        });
+    };
+
+    const handleSaveLegalExpenses = async (data: any[]) => {
+        await apiClient.post("/expense/saveLegalExpenses", {
+            companyName,
+            expenses: data,
         });
     };
 
@@ -82,7 +151,7 @@ export default function ProfitsAndExpensesPage() {
         <>
             <PAndENavBar selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} />
 
-            <div className="max-w-6xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+            <div className=" mx-auto p-6">
                 <p className="text-xl text-center font-bold text-gray-900 dark:text-gray-100 mb-6">
                     {selectedMonth} Expenses
                 </p>
@@ -95,17 +164,39 @@ export default function ProfitsAndExpensesPage() {
                     columnKeys={columnKeys}
                     columnLabels={columnLabels}
                     data={bills}
-                    onUpdate={handleUpdateBills}
+                    onUpdate={setBills}
                     onSave={handleSaveBills}
+                />
+
+                <StoreExpensesDisplay
+                    expenses={storeExpenses}
+                    onAdd={(newExpense) => setStoreExpenses(prev => [...prev, newExpense])}
+                    onSave={handleSaveStoreExpenses}
                 />
 
                 <OtherExpensesTable
                     data={otherExpenses}
                     companyName={companyName}
                     month={selectedMonth}
-                    onUpdate={handleUpdateOtherExpenses}
+                    onUpdate={setOtherExpenses}
                     onSave={handleSaveOtherExpenses}
                 />
+
+                <EditableTable
+                    title="📦 Dealer Expenses"
+                    columnKeys={["dealerStoreId", "amount"]}
+                    columnLabels={["Store ID", "Amount"]}
+                    data={dealerExpenses}
+                    onUpdate={setDealerExpenses}
+                    onSave={handleSaveDealerExpenses}
+                />
+
+                <LegalExpensesTable
+                    data={legalExpenses}
+                    onUpdate={setLegalExpenses}
+                    onSave={handleSaveLegalExpenses}
+                />
+                <InvoicesDisplayTable data={invoiceExpenses} />
             </div>
         </>
     );
