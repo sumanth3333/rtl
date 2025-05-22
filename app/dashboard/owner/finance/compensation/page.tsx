@@ -18,7 +18,7 @@ export default function CompensationPage() {
 
     useEffect(() => {
         const fetchStores = async () => {
-            if (!companyName) return;
+            if (!companyName) { return };
             const list = await getStores(companyName);
             setStores(list);
         };

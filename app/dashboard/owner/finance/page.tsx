@@ -26,7 +26,7 @@ export default function ProfitsAndExpensesPage() {
     const [columnLabels, setColumnLabels] = useState<string[]>([]);
 
     useEffect(() => {
-        if (!companyName) return;
+        if (!companyName) { return };
 
 
         const fetchData = async () => {
@@ -110,7 +110,7 @@ export default function ProfitsAndExpensesPage() {
     const handleSaveStoreExpenses = async (data: any[]) => {
         const grouped = data.reduce((acc: Record<string, any[]>, item) => {
             const id = item.dealerStoreId;
-            if (!acc[id]) acc[id] = [];
+            if (!acc[id]) { acc[id] = []; }
             acc[id].push({
                 paidFor: item.paidFor,
                 amount: item.amount,

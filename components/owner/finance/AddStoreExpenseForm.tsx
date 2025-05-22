@@ -29,7 +29,7 @@ export default function AddStoreExpenseForm({ onAdd }: { onAdd: (e: StoreExpense
     };
 
     const handleSubmit = () => {
-        if (!form.dealerStoreId || !form.paidFor || !form.amount) return;
+        if (!form.dealerStoreId || !form.paidFor || !form.amount) { return; }
         onAdd(form);
         setForm({
             dealerStoreId: "",

@@ -69,7 +69,7 @@ export default function ChangePasswordForm() {
     }, [oldPwd, newPwd, confirmPwd]);
 
     const handleSubmit = async () => {
-        if (formError) return;
+        if (formError) { return; }
 
         try {
             const response = await apiClient.post("/company/changePassword", {

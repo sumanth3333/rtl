@@ -23,7 +23,7 @@ export default function ViewEmployeeEodRemarksPage() {
 
     useEffect(() => {
         const fetchEmployees = async () => {
-            if (!companyName) return;
+            if (!companyName) { return };
             const list = await getEmployees(companyName);
             setEmployees(list);
         };

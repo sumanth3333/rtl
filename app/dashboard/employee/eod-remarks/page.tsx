@@ -28,7 +28,7 @@ export default function EodRemarksPage() {
     });
 
     const fetchRemarks = async () => {
-        if (!employee || !store) return;
+        if (!employee || !store) { return };
         try {
             const res = await apiClient.get("/employee/fetchEmployeeEodRemarks", {
                 params: {
