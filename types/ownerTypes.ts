@@ -23,6 +23,7 @@ export const eodReportSchema = z.object({
     paymentMethod: z.string().optional(),
     boxesSold: z.number().nonnegative("Activations cannot be negative"),
     upgrade: z.number().nonnegative("Upgrades cannot be negative"),
+    migrations: z.number().nonnegative("Migrations cannot be negative"),
     hsiSold: z.number().nonnegative("HSI cannot be negative"),
     tabletsSold: z.number().nonnegative("Tablets cannot be negative"),
     watchesSold: z.number().nonnegative("Watches cannot be negative"),
@@ -40,6 +41,7 @@ export const eodReportSchema = z.object({
     ),
 
     saleDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid sale date. Format must be YYYY-MM-DD."),
+
 });
 
 

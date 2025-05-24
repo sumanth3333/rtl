@@ -48,6 +48,7 @@ export const getEodDetails = async (dealerStoreId: string, employeeNtid: string)
                 employeeNtid
             }
         });
+        console.log(response);
         return response.data; // Return the API response if needed
     } catch (error: unknown) {
         let errorMessage = "An unknown error occurred";

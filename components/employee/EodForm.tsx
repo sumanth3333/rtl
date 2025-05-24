@@ -72,6 +72,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 cashExpense: initialValues.cashExpense ?? 0,
                 expenseReason: initialValues.expenseReason ?? "NONE",
                 boxesSold: initialValues.boxesSold ?? 0,
+                migrations: initialValues.migrations ?? 0,
                 upgrade: initialValues.upgrade ?? 0,
                 hsiSold: initialValues.hsiSold ?? 0,
                 tabletsSold: initialValues.tabletsSold ?? 0,
@@ -164,6 +165,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         if (showIndividualForm) {
             // Calculate totals
             const totalBoxesSold = individualEntries.reduce((sum, entry) => sum + (entry.boxesSold || 0), 0);
+            const totalMigrations = individualEntries.reduce((sum, entry) => sum + (entry.migrations || 0), 0);
             const totalUpgrades = individualEntries.reduce((sum, entry) => sum + (entry.upgrade || 0), 0);
             const totalHSISold = individualEntries.reduce((sum, entry) => sum + (entry.hsiSold || 0), 0);
             const totalTabletsSold = individualEntries.reduce((sum, entry) => sum + (entry.tabletsSold || 0), 0);
@@ -175,6 +177,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             const errors: Record<string, string> = {};
 
             if (totalBoxesSold !== watch("boxesSold")) { errors["boxesSold"] = "Total does not match sum of individual entries." };
+            if (totalMigrations !== watch("migrations")) { errors["migrations"] = "Total does not match sum of individual entries." };
             if (totalUpgrades !== watch("upgrade")) { errors["upgrade"] = "Total does not match sum of individual entries." };
             if (totalHSISold !== watch("hsiSold")) { errors["hsiSold"] = "Total does not match sum of individual entries." };
             if (totalTabletsSold !== watch("tabletsSold")) { errors["tabletsSold"] = "Total does not match sum of individual entries." };
@@ -201,6 +204,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             accessoriesByEmployee: parseFloat((data.accessoriesByEmployee ?? 0).toFixed(2)),
             lastTransactionTime: data.lastTransactionTime,
             boxesSold: parseFloat((data.boxesSold ?? 0).toFixed(2)),
+            migrations: parseFloat((data.migrations ?? 0).toFixed(2)),
             upgrade: parseFloat((data.upgrade ?? 0).toFixed(2)),
             hsiSold: parseFloat((data.hsiSold ?? 0).toFixed(2)),
             tabletsSold: parseFloat((data.tabletsSold ?? 0).toFixed(2)),
@@ -279,9 +283,10 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 </div>
 
                 {/* Sales Data Fields */}
-                <div className="grid grid-cols-3 gap-2 md:gap-4 mt-6">
+                <div className="grid grid-cols-3 gap-2 md:gap-3 mt-6">
                     <InputField label="Activations(inc. reactivations & BYOD)" type="number" {...register("boxesSold", { valueAsNumber: true })} error={errors.boxesSold?.message} />
                     <InputField label="Upgrades" type="number" {...register("upgrade", { valueAsNumber: true })} error={errors.upgrade?.message} />
+                    <InputField label="Migrations" type="number" {...register("migrations", { valueAsNumber: true })} error={errors.migrations?.message} />
                     <InputField label="HSI" type="number" {...register("hsiSold", { valueAsNumber: true })} error={errors.hsiSold?.message} />
                     <InputField label="Tablets" type="number" {...register("tabletsSold", { valueAsNumber: true })} error={errors.tabletsSold?.message} />
                     <InputField label="Watches" type="number" {...register("watchesSold", { valueAsNumber: true })} error={errors.watchesSold?.message} />
@@ -378,6 +383,15 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                         value={individualEntries[index]?.upgrade}
                                         onChange={(e) => handleEmployeeDataChange(index, "upgrade", Number(e.target.value))}
                                         error={validationErrors["upgrade"]}
+                                        required
+                                    />
+                                    <InputField
+                                        name="migrations"
+                                        label="Migrations"
+                                        type="number"
+                                        value={individualEntries[index]?.migrations}
+                                        onChange={(e) => handleEmployeeDataChange(index, "migrations", Number(e.target.value))}
+                                        error={validationErrors["migrations"]}
                                         required
                                     />
                                     <InputField

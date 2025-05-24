@@ -36,6 +36,7 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
             reset({
                 store: { dealerStoreId: store.dealerStoreId },
                 employee: { employeeNtid: employee.employeeNtid },
+                saleDate,
                 actualCash: initialValues.actualCash ?? 0,
                 systemCash: initialValues.systemCash ?? 0,
                 actualCard: initialValues.actualCard ?? 0,
@@ -48,6 +49,7 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
                 cashExpense: initialValues.cashExpense ?? 0,
                 expenseReason: initialValues.expenseReason ?? "NONE",
                 boxesSold: initialValues.boxesSold ?? 0,
+                migrations: initialValues.migrations ?? 0,
                 upgrade: initialValues.upgrade ?? 0,
                 hsiSold: initialValues.hsiSold ?? 0,
                 tabletsSold: initialValues.tabletsSold ?? 0,
@@ -78,7 +80,8 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
                 : actualCardRaw - cashExpense;
         }
     }
-
+    console.log(errors);
+    console.log(saleDate);
     const cashDifference = parseFloat((adjustedActualCash - systemCash).toFixed(2));
     const cardDifference = parseFloat((adjustedActualCard - systemCard).toFixed(2));
     const accessoriesByEmployee = parseFloat((cashDifference + cardDifference).toFixed(2));
@@ -128,6 +131,7 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
             saleDate: saleDate,
             boxesSold: parseFloat((data.boxesSold ?? 0).toFixed(2)),
             upgrade: parseFloat((data.upgrade ?? 0).toFixed(2)),
+            migrations: parseFloat((data.migrations ?? 0).toFixed(2)),
             hsiSold: parseFloat((data.hsiSold ?? 0).toFixed(2)),
             tabletsSold: parseFloat((data.tabletsSold ?? 0).toFixed(2)),
             watchesSold: parseFloat((data.watchesSold ?? 0).toFixed(2)),
@@ -208,6 +212,7 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
                 <div className="grid grid-cols-3 gap-2 md:gap-4 mt-6">
                     <InputField label="Activations(inc. reactivations & BYOD)" type="number" {...register("boxesSold", { valueAsNumber: true })} error={errors.boxesSold?.message} />
                     <InputField label="Upgrades" type="number" {...register("upgrade", { valueAsNumber: true })} error={errors.upgrade?.message} />
+                    <InputField label="Migrations" type="number" {...register("migrations", { valueAsNumber: true })} error={errors.migrations?.message} />
                     <InputField label="HSI" type="number" {...register("hsiSold", { valueAsNumber: true })} error={errors.hsiSold?.message} />
                     <InputField label="Tablets" type="number" {...register("tabletsSold", { valueAsNumber: true })} error={errors.tabletsSold?.message} />
                     <InputField label="Watches" type="number" {...register("watchesSold", { valueAsNumber: true })} error={errors.watchesSold?.message} />
@@ -292,6 +297,7 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
                         I understand that, I'm updating the report of {employeeName} worked at {storeName} on the date {saleDate}.
                     </label>
                 </div>
+                <pre className="text-xs text-red-600">{JSON.stringify(watch("saleDate"), null, 2)}</pre>
 
                 <Button type="submit" variant="primary" isLoading={loading} fullWidth disabled={!confirmClockOut}>
                     Submit Report

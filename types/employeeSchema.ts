@@ -35,6 +35,7 @@ export const eodReportSchema = z.object({
     cashExpense: z.number().nonnegative("Cash Expense cannot be negative").optional(),
     expenseReason: z.string().optional(),
     boxesSold: z.number().nonnegative("Boxes Sold cannot be negative"),
+    migrations: z.number().nonnegative("Migrations cannot be negative"),
     hsiSold: z.number().nonnegative("HSI Sold cannot be negative"),
     upgrade: z.number().nonnegative("Upgrades Sold cannot be negative"),
     tabletsSold: z.number().nonnegative("Tablets Sold cannot be negative"),
@@ -46,3 +47,4 @@ export const eodReportSchema = z.object({
 });
 
 export type EodReport = z.infer<typeof eodReportSchema>;
+
