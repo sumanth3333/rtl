@@ -10,6 +10,7 @@ export interface WorkDetails {
     totalAccessories: number;
     boxesSold: number;
     upgradesSold: number;
+    migrations: number;
     tabletsSold: number;
     hsiSold: number;
     watchesSold: number;
@@ -38,6 +39,7 @@ export interface Store {
 export interface Sale {
     boxesSold: number;
     upgrade: number;
+    migrations: number;
     accessories: number;
     tabletsSold: number;
     hsiSold: number;

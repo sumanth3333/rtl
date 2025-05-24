@@ -6,7 +6,7 @@ export interface Company {
 
 export interface Threshold {
     thresholdId?: number,
-    itemType: "Boxes" | "Upgrades" | "Tablets" | "Watches" | "HSI";
+    itemType: "Boxes" | "Upgrades" | "Tablets" | "Watches" | "HSI" | "Migrations";
     minimumThreshold: number;
     threshold: number;
     payAmount: number;

@@ -17,6 +17,7 @@ export interface StoreTarget {
     hsiTargetToStore: number;
     tabletsTargetToStore: number;
     smartwatchTragetToStore: number;
+    migrationTargetToStore: number;
     targetMonth: string;
 }
 
@@ -47,6 +48,7 @@ export interface EmployeeTarget {
     hsiTarget: number;
     tabletsTargetByEmployee: number;
     smartwatchTargetByEmployee: number;
+    migrationTargetToEmployee: number;
     targetMonth: string;
 }
 

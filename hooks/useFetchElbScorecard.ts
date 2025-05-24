@@ -6,6 +6,7 @@ import apiClient from "@/services/api/apiClient";
 interface StoreMTD {
     activationTargetToStore: number;
     accessoriesTargetToStore: number;
+    migrationTargetToStore: number;
     hsiTargetToStore: number;
     tabletsTargetToStore: number;
     smartwatchTargetToStore: number;
@@ -15,6 +16,7 @@ interface StoreMTD {
 interface EmployeeMTD {
     phonesTargetToEmployee: number;
     accessoriesTargetByEmployee: number;
+    migrationTargetToEmployee: number;
     hsiTarget: number;
     tabletsTargetByEmployee: number;
     smartwatchTargetByEmployee: number;

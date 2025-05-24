@@ -18,6 +18,7 @@ export default function EmployeeTargetTable({ targets, onEdit, month }: Employee
                             <th className="p-3 text-left">Employee</th>
                             <th className="p-3 text-right">Activations</th>
                             <th className="p-3 text-right">Upgrades</th>
+                            <th className="p-3 text-right">Migrations</th>
                             <th className="p-3 text-right">Accessories</th>
                             <th className="p-3 text-right">HSI</th>
                             <th className="p-3 text-right">Tablets</th>
@@ -31,6 +32,7 @@ export default function EmployeeTargetTable({ targets, onEdit, month }: Employee
                             const validTarget: EmployeeTarget = target ?? {
                                 phonesTargetToEmployee: 0,
                                 upgradeTargetToEmployee: 0,
+                                migrationTargetToEmployee: 0,
                                 accessoriesTargetByEmployee: 0.0,
                                 hsiTarget: 0,
                                 tabletsTargetByEmployee: 0,
@@ -45,6 +47,7 @@ export default function EmployeeTargetTable({ targets, onEdit, month }: Employee
                                         <>
                                             <td className="p-3 text-right">{target.phonesTargetToEmployee}</td>
                                             <td className="p-3 text-right">{target.upgradeTargetToEmployee}</td>
+                                            <td className="p-3 text-right">{target.migrationTargetToEmployee}</td>
                                             <td className="p-3 text-right">${target.accessoriesTargetByEmployee.toFixed(2)}</td>
                                             <td className="p-3 text-right">{target.hsiTarget}</td>
                                             <td className="p-3 text-right">{target.tabletsTargetByEmployee}</td>

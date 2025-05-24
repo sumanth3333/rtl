@@ -32,6 +32,7 @@ export default function TargetUpdateModal({ isOpen, onClose, target, month }: Ta
                         ...(prev.target ?? {
                             activationTargetToStore: 0,
                             upgradeTargetToStore: 0,
+                            migrationTargetToStore: 0,
                             accessoriesTargetToStore: 0.0,
                             hsiTargetToStore: 0,
                             tabletsTargetToStore: 0,
@@ -49,6 +50,7 @@ export default function TargetUpdateModal({ isOpen, onClose, target, month }: Ta
                         ...(prev.target ?? {
                             phonesTargetToEmployee: 0,
                             upgradeTargetToEmployee: 0,
+                            migrationTargetToEmployee: 0,
                             accessoriesTargetByEmployee: 0.0,
                             hsiTarget: 0,
                             tabletsTargetByEmployee: 0,

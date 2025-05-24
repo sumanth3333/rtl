@@ -55,6 +55,7 @@ export default function MonthlyTargets() {
                 accessoriesTargetToStore: 0.0,
                 hsiTargetToStore: 0,
                 tabletsTargetToStore: 0,
+                migrationTargetToStore: 0,
                 smartwatchTragetToStore: 0,
                 targetMonth,
             } as StoreTarget
@@ -65,6 +66,7 @@ export default function MonthlyTargets() {
                 hsiTarget: 0,
                 tabletsTargetByEmployee: 0,
                 smartwatchTargetByEmployee: 0,
+                migrationTargetToEmployee: 0,
                 targetMonth,
 
             } as EmployeeTarget;

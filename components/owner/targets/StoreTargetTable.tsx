@@ -18,6 +18,7 @@ export default function StoreTargetTable({ targets, month, onEdit }: StoreTarget
                             <th className="p-3 text-left">Store</th>
                             <th className="p-3 text-right">Activations</th>
                             <th className="p-3 text-right">Upgrades</th>
+                            <th className="p-3 text-right">Migrations</th>
                             <th className="p-3 text-right">Accessories</th>
                             <th className="p-3 text-right">HSI</th>
                             <th className="p-3 text-right">Tablets</th>
@@ -34,6 +35,7 @@ export default function StoreTargetTable({ targets, month, onEdit }: StoreTarget
                                 accessoriesTargetToStore: 0.0,
                                 hsiTargetToStore: 0,
                                 tabletsTargetToStore: 0,
+                                migrationTargetToStore: 0,
                                 smartwatchTragetToStore: 0,
                                 targetMonth: month, // Format: YYYY-MM
                             };
@@ -45,6 +47,7 @@ export default function StoreTargetTable({ targets, month, onEdit }: StoreTarget
                                         <>
                                             <td className="p-3 text-right">{target.activationTargetToStore}</td>
                                             <td className="p-3 text-right">{target.upgradeTargetToStore}</td>
+                                            <td className="p-3 text-right">{target.migrationTargetToStore}</td>
                                             <td className="p-3 text-right">${target.accessoriesTargetToStore.toFixed(2)}</td>
                                             <td className="p-3 text-right">{target.hsiTargetToStore}</td>
                                             <td className="p-3 text-right">{target.tabletsTargetToStore}</td>

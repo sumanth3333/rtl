@@ -38,6 +38,7 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 totalAccessories: paycheck.work.totalAccessories,
                 boxesSold: paycheck.work.boxesSold,
                 upgrade: paycheck.work.upgradesSold,
+                migrations: paycheck.work.migrations,
                 tabletsSold: paycheck.work.tabletsSold,
                 hsiSold: paycheck.work.hsiSold,
                 watchesSold: paycheck.work.watchesSold,
@@ -117,6 +118,7 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                         ["Accessories Sold", paycheck.work.totalAccessories],
                         ["Activations", paycheck.work.boxesSold],
                         ["Upgrades", paycheck.work.upgradesSold],
+                        ["Migrations", paycheck.work.migrations],
                         ["Tablets", paycheck.work.tabletsSold],
                         ["HSI", paycheck.work.hsiSold],
                         ["Watches", paycheck.work.watchesSold],
@@ -229,6 +231,7 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                                             <th className="p-3 text-left">Store</th>
                                             <th className="p-3 text-center">Activations</th>
                                             <th className="p-3 text-center">Upgrades</th>
+                                            <th className="p-3 text-center">Migrations</th>
                                             <th className="p-3 text-center">Accessories ($)</th>
                                             <th className="p-3 text-center">Tablets</th>
                                             <th className="p-3 text-center">HSI</th>
@@ -264,6 +267,9 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                                                 </td>
                                                 <td className="p-3 text-center text-blue-600 dark:text-blue-400 font-bold">
                                                     {sale.upgrade}
+                                                </td>
+                                                <td className="p-3 text-center text-blue-600 dark:text-blue-400 font-bold">
+                                                    {sale.migrations}
                                                 </td>
                                                 <td className="p-3 text-center text-green-600 dark:text-green-400 font-semibold">
                                                     ${sale.accessories.toFixed(2)}

@@ -15,6 +15,7 @@ export default function TargetSummary({ title, targetData, isEmployee, cardStyle
                 {[
                     { label: "Activations", key: isEmployee ? "phonesTargetToEmployee" : "activationTargetToStore" },
                     { label: "Upgrades", key: isEmployee ? "upgradeTargetToEmployee" : "upgradeTargetToStore" },
+                    { label: "Migrations", key: isEmployee ? "migrationTargetToEmployee" : "migrationTargetToStore" },
                     { label: "Accessories", key: isEmployee ? "accessoriesTargetByEmployee" : "accessoriesTargetToStore" },
                     { label: "HSI", key: isEmployee ? "hsiTarget" : "hsiTargetToStore" },
                     { label: "Tablets", key: isEmployee ? "tabletsTargetByEmployee" : "tabletsTargetToStore" },

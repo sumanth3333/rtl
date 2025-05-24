@@ -11,6 +11,7 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
     const [includeUpgrades, setIncludeUpgrades] = useState(true);
     const [includeTablet, setIncludeTablet] = useState(false);
     const [includeHSI, setIncludeHSI] = useState(true);
+    const [includeMigrations, setIncludeMigrations] = useState(true);
     const [includeWatch, setIncludeWatch] = useState(false);
 
     // ✅ Handle threshold updates
@@ -25,7 +26,7 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
         setThresholds(thresholds.filter((_, i) => i !== index));
     };
 
-    const handleAdd = (itemType: "Boxes" | "Upgrades" | "Tablets" | "Watches" | "HSI") => {
+    const handleAdd = (itemType: "Boxes" | "Upgrades" | "Tablets" | "Watches" | "HSI" | "Migrations") => {
         setThresholds([
             ...thresholds,
             { thresholdId: Date.now(), itemType, minimumThreshold: 0, threshold: 30, payAmount: 0 }, // ✅ Use Date.now() for a temporary unique ID
@@ -43,7 +44,7 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
             <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4">
                 <h4 className="text-md font-semibold text-gray-900 dark:text-gray-300 mb-2">Include in Box Count?</h4>
 
-                {/* Include Tablets in Box Count */}
+                {/* Include Upgrades in Box Count */}
                 <div className="flex items-center gap-4 mb-2">
                     <label className="text-gray-800 dark:text-gray-200">Upgrades:</label>
                     <select
@@ -53,6 +54,19 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
                     >
                         <option value="yes">Yes</option>
                         <option value="no">No (Set Custom $/Upgrade)</option>
+                    </select>
+                </div>
+
+                {/* Include Migrations in Box Count */}
+                <div className="flex items-center gap-4 mb-2">
+                    <label className="text-gray-800 dark:text-gray-200">Migrations:</label>
+                    <select
+                        className="p-2 border rounded-md bg-white dark:bg-gray-900 dark:text-white"
+                        value={includeMigrations ? "yes" : "no"}
+                        onChange={(e) => setIncludeMigrations(e.target.value === "yes")}
+                    >
+                        <option value="yes">Yes</option>
+                        <option value="no">No (Set Custom $/Migration)</option>
                     </select>
                 </div>
 
@@ -119,6 +133,7 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
                                     >
                                         <option value="Boxes">Boxes</option>
                                         {!includeTablet && <option value="Tablets">Tablets</option>}
+                                        {!includeMigrations && <option value="Migrations">Migrations</option>}
                                         {!includeHSI && <option value="HSI">HSI</option>}
                                         {!includeWatch && <option value="Watches">Watches</option>}
                                     </select>
@@ -184,6 +199,14 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
                             className="px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-green-700"
                         >
                             ➕ Add Upgrade Threshold
+                        </button>
+                    )}
+                    {!includeMigrations && (
+                        <button
+                            onClick={() => handleAdd("Migrations")}
+                            className="px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-green-700"
+                        >
+                            ➕ Add Migrations Threshold
                         </button>
                     )}
                     {!includeTablet && (

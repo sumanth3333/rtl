@@ -4,7 +4,8 @@ interface EodSummary {
     dealerStoreId: string;
     employeeName: string;
     boxesSold: string;
-    upgrade: string
+    upgrade: string;
+    migrations: string;
     accessories: string;
     hsiSold: string;
     tabletsSold: string;
@@ -29,6 +30,7 @@ export default function LatestEodList({ eodList }: LatestEodListProps) {
                             <th className="p-3 text-left">Employee</th>
                             <th className="p-3 text-center">Activations</th>
                             <th className="p-3 text-center">Upgrades</th>
+                            <th className="p-3 text-center">Migrations</th>
                             <th className="p-3 text-center">HSI</th>
                             <th className="p-3 text-center">Tablets</th>
                             <th className="p-3 text-center">Watches</th>
@@ -43,6 +45,7 @@ export default function LatestEodList({ eodList }: LatestEodListProps) {
                                 <td className="p-3 text-gray-700 dark:text-gray-300">{eod.employeeName}</td>
                                 <td className="p-3 text-center font-semibold text-blue-600 dark:text-blue-400">{eod.boxesSold}</td>
                                 <td className="p-3 text-center font-semibold text-blue-600 dark:text-blue-400">{eod.upgrade}</td>
+                                <td className="p-3 text-center font-semibold text-blue-600 dark:text-blue-400">{eod.migrations}</td>
                                 <td className="p-3 text-center font-semibold text-green-600 dark:text-green-400">{eod.hsiSold}</td>
                                 <td className="p-3 text-center font-semibold text-indigo-600 dark:text-indigo-400">{eod.tabletsSold}</td>
                                 <td className="p-3 text-center font-semibold text-purple-600 dark:text-purple-400">{eod.watchesSold}</td>
@@ -92,6 +95,12 @@ export default function LatestEodList({ eodList }: LatestEodListProps) {
                                 <span>Upgrades</span>
                                 <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
                                     {eod.upgrade}
+                                </span>
+                            </div>
+                            <div className="flex justify-between bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
+                                <span>Migrations</span>
+                                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                                    {eod.migrations}
                                 </span>
                             </div>
                             <div className="flex justify-between bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
