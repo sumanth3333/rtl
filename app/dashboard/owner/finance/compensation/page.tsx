@@ -14,7 +14,6 @@ export default function CompensationPage() {
     const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toISOString().slice(0, 7));
     const [stores, setStores] = useState<Store[]>([]);
     const [compensations, setCompensations] = useState<Record<string, string>>({});
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchStores = async () => {
@@ -34,15 +33,14 @@ export default function CompensationPage() {
 
     const handleSave = async () => {
         try {
-            const payload = {
-                month: selectedMonth.split("-").reverse().join("-"), // MM-YYYY
-                storeCompensations: stores.map((store) => ({
-                    dealerStoreId: store.dealerStoreId,
-                    compensation: parseFloat(compensations[store.dealerStoreId] || "0"),
-                })),
-            };
+            const payload = stores.map((store) => ({
+                dealerStoreId: store.dealerStoreId,
+                compensationEarned: parseFloat(compensations[store.dealerStoreId] || "0"),
+                compensationEarnedMonth: selectedMonth,
+            }));
 
-            await apiClient.post("/company/updateStoreCompensations", payload);
+            await apiClient.post("/company/recordCompensation", payload);
+
             toast.success("Compensations saved successfully.");
         } catch (err: any) {
             toast.error(err?.response?.data?.message || "Failed to save compensation.");

@@ -28,7 +28,7 @@ export default function GeneratePayPage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto p-6">
+        <div className="mx-auto p-6">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">💰 Generate Paychecks</h1>
 
             {/* ✅ Fixed PaycheckFilters Props */}

@@ -9,7 +9,7 @@ export default function PaycheckLayout({ children }: { children: React.ReactNode
             <PaycheckNavbar />
 
             {/* ✅ Main Content (Starts Below Navbar) */}
-            <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-6 mt-14">
+            <section className="w-full mx-auto px-4 sm:px-6 md:px-8 py-6 mt-14">
                 {children}
             </section>
         </main>
