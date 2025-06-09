@@ -60,7 +60,7 @@ export default function ManagePage<T extends Record<string, any>>({
                 </Button>
             </div>
 
-            {/* 🔹 Add Form */}
+            {/* Add Form */}
             {showForm && <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md">{addForm}</div>}
         </div>
     );

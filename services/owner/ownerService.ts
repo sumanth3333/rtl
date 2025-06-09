@@ -26,7 +26,7 @@ export const getEmployees = async (companyName: string): Promise<Employee[]> => 
         const response = await apiClient.get(`/company/viewAllEmployeesUnderTheCompany`, {
             params: { companyName },
         });
-        //console.log(response.data);
+        // console.log(response.data);
         return response.data.employees || [];
     } catch (error) {
         console.error("❌ Error fetching employees:", error);

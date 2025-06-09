@@ -10,7 +10,7 @@ export interface WorkDetails {
     totalAccessories: number;
     boxesSold: number;
     upgradesSold: number;
-    migrations: number;
+    migration: number;
     tabletsSold: number;
     hsiSold: number;
     watchesSold: number;

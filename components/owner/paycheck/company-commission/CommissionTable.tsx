@@ -11,7 +11,7 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
     const [includeUpgrades, setIncludeUpgrades] = useState(true);
     const [includeTablet, setIncludeTablet] = useState(false);
     const [includeHSI, setIncludeHSI] = useState(true);
-    const [includeMigrations, setIncludeMigrations] = useState(true);
+    const [includeMigrations, setIncludeMigrations] = useState(false);
     const [includeWatch, setIncludeWatch] = useState(false);
 
     // ✅ Handle threshold updates

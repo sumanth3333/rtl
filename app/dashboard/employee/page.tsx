@@ -6,6 +6,7 @@ import { useEmployee } from "@/hooks/useEmployee";
 import { getEmployeeTargets, getPendingTodosCount, getStoreTargets } from "@/services/employee/employeeService";
 import WelcomeSection from "@/components/employee/WelcomeSection";
 import TargetSummary from "@/components/employee/TargetSummary";
+import ReminderSummary from "@/components/employee/ReminderSummary";
 
 export default function EmployeeDashboard() {
     const { role, isLoading } = useAuth();
@@ -49,7 +50,7 @@ export default function EmployeeDashboard() {
                 store={store}
                 pendingTodos={pendingTodos}
             />
-
+            <ReminderSummary />
             <section className="grid grid-cols-1 gap-6">
                 <TargetSummary
                     title="📊 Store Target Progress"

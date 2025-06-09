@@ -3,7 +3,8 @@ import {
     ClockIcon, PencilSquareIcon, PresentationChartLineIcon,
     DocumentMagnifyingGlassIcon,
     ArrowsRightLeftIcon,
-    CheckCircleIcon
+    CheckCircleIcon,
+    BellAlertIcon
 } from "@heroicons/react/24/outline";
 import { Clock, MapPin, Settings } from "lucide-react";
 import React from "react";
@@ -48,11 +49,11 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/employee",
             icon: HomeIcon
         },
-        // {
-        //     name: "Today's Goal",  // ✅ Added goal tracking
-        //     path: "/dashboard/employee/todays-goal",
-        //     icon: CheckCircleIcon
-        // },
+        {
+            name: "Remainders",
+            path: "/dashboard/employee/remainders",
+            icon: BellAlertIcon
+        },
         {
             name: "Tasks",
             path: "/dashboard/employee/todos",

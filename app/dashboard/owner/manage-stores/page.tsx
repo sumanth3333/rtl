@@ -42,6 +42,7 @@ export default function ManageStores() {
             columns={[
                 { key: "dealerStoreId", label: "Store ID" },
                 { key: "storeName", label: "Store Name" },
+                { key: "storeManager", label: "Store Manager" },
             ]}
             onAdd={() => { }}
             onEdit={() => { }}

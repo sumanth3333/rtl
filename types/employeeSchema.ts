@@ -15,6 +15,8 @@ export const employeeSchema = z.object({
     employeePayRatePerHour: z.number().min(0, "Please enter pay rate per hour"),
     commissionPercentage: z.number().min(0, "Please enter accessories commission %"),
     perBoxCommission: z.number().min(0, "Please enter commission per box"),
+    accessLevel: z.string(),
+    AssignedManager: z.string(),
     company: z.object({
         companyName: z.string(),
     }),

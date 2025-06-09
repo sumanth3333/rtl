@@ -10,6 +10,7 @@ export const storeSchema = z.object({
         state: z.string().min(2, "State is required."),
         zipcode: z.string().length(5, "Zipcode must be 5 digits."),
     }),
+    storeManager: z.string(),
     storeContactNumber: z.string().regex(/^\d{10,15}$/, "Invalid phone number."),
     company: z.object({
         companyName: z.string(),

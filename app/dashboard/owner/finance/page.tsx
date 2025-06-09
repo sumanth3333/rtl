@@ -9,6 +9,7 @@ import { useOwner } from "@/hooks/useOwner";
 import LegalExpensesTable from "@/components/owner/finance/LegalExpensesTable";
 import StoreExpensesDisplay from "@/components/owner/finance/StoreExpensesDisplay";
 import InvoicesDisplayTable from "@/components/owner/finance/InvoicesDisplayTable";
+import DealerExpensesTable from "@/components/owner/finance/DealerExpensesTable";
 
 export default function ProfitsAndExpensesPage() {
     const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toISOString().slice(0, 7));
@@ -38,6 +39,7 @@ export default function ProfitsAndExpensesPage() {
                     params: { companyName, month: selectedMonth }
                 });
                 const fetchedBills = billResponse.data;
+                console.log(fetchedBills);
                 setBills(fetchedBills);
 
                 if (fetchedBills.length > 0) {
@@ -73,7 +75,6 @@ export default function ProfitsAndExpensesPage() {
                     }))
                 );
                 setStoreExpenses(flattenedStoreExpenses);
-                console.log(storeRes);
                 // Dealer expenses
                 const dealerRes = await apiClient.get("/expense/fetchDealerExpenses", {
                     params: { companyName, month: selectedMonth }
@@ -134,18 +135,30 @@ export default function ProfitsAndExpensesPage() {
 
 
     const handleSaveDealerExpenses = async (data: any[]) => {
-        await apiClient.post("/expense/saveDealerExpenses", {
-            companyName,
-            expenses: data,
-        });
+        const payload = data.map((item) => ({
+            dealerStoreId: item.dealerStoreId,
+            expenseType: item.expenseType ?? "Flat Management Fee",
+            amount: parseFloat(item.amount || 0),
+            month: selectedMonth
+        }));
+        await apiClient.post("/expense/recordDealerExpenses", payload);
     };
 
     const handleSaveLegalExpenses = async (data: any[]) => {
-        await apiClient.post("/expense/saveLegalExpenses", {
+        const payload = {
             companyName,
-            expenses: data,
-        });
+            legalExpenses: data.map((item) => ({
+                legalExpenseId: item.expenseId ?? undefined, // ✅ Include ID if present
+                expenseType: item.expenseType,
+                amount: parseFloat(item.amount || 0),
+                recordedDate: item.recordedDate,
+                month: selectedMonth,
+            })),
+        };
+
+        await apiClient.post("/expense/recordLegalExpenses", payload);
     };
+
 
     return (
         <>
@@ -182,10 +195,7 @@ export default function ProfitsAndExpensesPage() {
                     onSave={handleSaveOtherExpenses}
                 />
 
-                <EditableTable
-                    title="📦 Dealer Expenses"
-                    columnKeys={["dealerStoreId", "amount"]}
-                    columnLabels={["Store ID", "Amount"]}
+                <DealerExpensesTable
                     data={dealerExpenses}
                     onUpdate={setDealerExpenses}
                     onSave={handleSaveDealerExpenses}
@@ -193,9 +203,11 @@ export default function ProfitsAndExpensesPage() {
 
                 <LegalExpensesTable
                     data={legalExpenses}
+                    month={selectedMonth}
                     onUpdate={setLegalExpenses}
                     onSave={handleSaveLegalExpenses}
                 />
+
                 <InvoicesDisplayTable data={invoiceExpenses} />
             </div>
         </>

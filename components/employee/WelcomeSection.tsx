@@ -9,9 +9,9 @@ export default function WelcomeSection({ employee, store, pendingTodos }: any) {
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold">
                 Hey {employeeName}, you've logged into {storeName}.
             </h2>
-            <p className="mt-2 text-sm sm:text-base md:text-lg">
+            <p className="mt-2 text-sm sm:text-base md:text-lg text-red-500 ">
                 To-dos left for today:{" "}
-                <Link href="/dashboard/employee/todos" className="underline font-bold text-blue-600 dark:text-blue-400">
+                <Link href="/dashboard/employee/todos" className="underline font-bold text-red-500 dark:text-red-500">
                     {pendingTodos !== null ? pendingTodos : "Loading..."}
                 </Link>
             </p>

@@ -14,7 +14,7 @@ export default function ManageEmployees() {
     const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
     useEffect(() => {
-        if (!companyName) {return;}
+        if (!companyName) { return; }
         setLoading(true);
         Promise.all([getEmployees(companyName)]).then(([employeesData]) => {
             setEmployees(employeesData);
@@ -24,7 +24,7 @@ export default function ManageEmployees() {
     }, [companyName]);
 
     const handleAdd = async (newEmployee: Employee) => {
-        if (!companyName) {return;}
+        if (!companyName) { return; }
         setLoading(true);
         const updatedEmployees = await addEmployee(companyName, newEmployee);
         setEmployees(updatedEmployees);
@@ -32,7 +32,7 @@ export default function ManageEmployees() {
     };
 
     const handleDelete = async (employeeNtid: string) => {
-        if (!employeeNtid) {return;} // ✅ Prevents accidental calls with empty NTID
+        if (!employeeNtid) { return; } // ✅ Prevents accidental calls with empty NTID
 
         setLoading(true);
         try {
@@ -57,9 +57,8 @@ export default function ManageEmployees() {
             columns={[
                 { key: "employeeNtid", label: "Employee NTID" },
                 { key: "employeeName", label: "Employee Name" },
-                { key: "employeePayRatePerHour", label: "$/Hour" },
-                { key: "commissionPercentage", label: "Accessories %" },
-                { key: "perBoxCommission", label: "$/Box" },
+                { key: "accessLevel", label: "Access Level" },
+                { key: "AssignedManager", label: "Handled By" },
             ]}
             onAdd={() => { }}
             onEdit={handleEdit} // ✅ Now updates state

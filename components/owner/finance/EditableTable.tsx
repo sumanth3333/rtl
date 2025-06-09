@@ -17,6 +17,12 @@ export default function EditableTable({ title, columnKeys, columnLabels, data, o
     const [totals, setTotals] = useState<Record<string, number>>({});
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<string | null>(null);
+    const grandTotal = tableData.reduce((sum, row) => {
+        return sum + columnKeys.reduce((subSum, key) => {
+            const val = parseFloat(row[key] as string);
+            return subSum + (isNaN(val) ? 0 : val);
+        }, 0);
+    }, 0);
 
     useEffect(() => {
         setTableData(data);
@@ -80,38 +86,46 @@ export default function EditableTable({ title, columnKeys, columnLabels, data, o
                             {columnLabels.map((label) => (
                                 <th key={label} className="p-3 text-center">{label}</th>
                             ))}
+                            <th className="p-3 text-center">Total</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        {tableData.map((row, rowIndex) => (
-                            <tr key={rowIndex} className="border-b border-gray-300 dark:border-gray-700">
-                                <td className="p-3 font-semibold">{row.dealerStoreId}</td>
-                                {columnKeys.map((key) => (
-                                    <td key={key} className="p-2 text-center">
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            value={String(row[key] ?? "")} // ✅ Safe casting
-                                            onChange={(e) => handleChange(rowIndex, key, e.target.value)}
-                                            className="w-full p-2 border rounded-md bg-white dark:bg-gray-900 dark:text-white text-center"
-                                        />
+                        {tableData.map((row, rowIndex) => {
+                            const rowTotal = columnKeys.reduce((sum, key) => {
+                                const val = parseFloat(row[key] as string);
+                                return sum + (isNaN(val) ? 0 : val);
+                            }, 0);
 
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-
+                            return (
+                                <tr key={rowIndex} className="border-b border-gray-300 dark:border-gray-700">
+                                    <td className="p-3 font-semibold">{row.dealerStoreId}</td>
+                                    {columnKeys.map((key) => (
+                                        <td key={key} className="p-2 text-center">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                value={String(row[key] ?? "")}
+                                                onChange={(e) => handleChange(rowIndex, key, e.target.value)}
+                                                className="w-full p-2 border rounded-md bg-white dark:bg-gray-900 dark:text-white text-center"
+                                            />
+                                        </td>
+                                    ))}
+                                    <td className="p-3 text-center font-medium text-gray-800 dark:text-white">{rowTotal.toFixed(2)}</td>
+                                </tr>
+                            );
+                        })}
                         <tr className="bg-gray-300 dark:bg-gray-700 font-bold text-gray-800 dark:text-white">
                             <td className="p-3">TOTAL</td>
                             {columnKeys.map((key) => (
-                                <td key={key} className="p-3 text-center">
-                                    {totals[key]?.toFixed(2) ?? "0.00"}
-                                </td>
+                                <td key={key} className="p-3 text-center">{totals[key]?.toFixed(2) ?? "0.00"}</td>
                             ))}
+                            <td className="p-3 text-center">{grandTotal.toFixed(2)}</td>
                         </tr>
                     </tbody>
+
                 </table>
             </div>
-        </div>
+        </div >
     );
 }

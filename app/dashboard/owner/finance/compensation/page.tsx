@@ -16,13 +16,34 @@ export default function CompensationPage() {
     const [compensations, setCompensations] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        const fetchStores = async () => {
-            if (!companyName) { return };
-            const list = await getStores(companyName);
-            setStores(list);
+        if (!companyName) { return };
+
+        const fetchData = async () => {
+            try {
+                const storesList = await getStores(companyName);
+                setStores(storesList);
+
+                const res = await apiClient.get("/company/fetchCompensation", {
+                    params: {
+                        companyName,
+                        month: selectedMonth,
+                    },
+                });
+
+                const existingComp: Record<string, string> = {};
+                for (const item of res.data || []) {
+                    existingComp[item.dealerStoreId] = item.compensationEarned?.toString() ?? "";
+                }
+
+                setCompensations(existingComp);
+            } catch (err) {
+                console.error("Error fetching data:", err);
+                toast.error("Failed to fetch stores or compensation.");
+            }
         };
-        fetchStores();
-    }, [companyName]);
+
+        fetchData();
+    }, [companyName, selectedMonth]);
 
     const handleCompChange = (storeId: string, value: string) => {
         setCompensations((prev) => ({
@@ -46,6 +67,11 @@ export default function CompensationPage() {
             toast.error(err?.response?.data?.message || "Failed to save compensation.");
         }
     };
+
+    const totalCompensation = stores.reduce((sum, store) => {
+        const value = parseFloat(compensations[store.dealerStoreId] || "0");
+        return sum + (isNaN(value) ? 0 : value);
+    }, 0);
 
     return (
         <>
@@ -82,6 +108,10 @@ export default function CompensationPage() {
                                     </td>
                                 </tr>
                             ))}
+                            <tr className="bg-gray-100 dark:bg-gray-800 font-semibold border-t">
+                                <td className="p-3 text-right" colSpan={2}>Total Compensation</td>
+                                <td className="p-3">${totalCompensation.toFixed(2)}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
