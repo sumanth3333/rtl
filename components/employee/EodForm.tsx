@@ -279,7 +279,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 <div className="grid grid-cols-3 gap-2 md:gap-2 mt-4">
                     <InputField label="System Accessories" type="number" step="0.01" {...register("systemAccessories", { valueAsNumber: true })} error={errors.systemAccessories?.message} />
                     <InputField label="Total(Cash+Card) Accessories" type="number" step="0.01" value={accessoriesByEmployee.toFixed(2)} error={errors.accessoriesByEmployee?.message} readOnly />
-                    <InputField label="Last transaction at?(refer Invoice Listing)" type="time" step="1" placeholder="HH:mm:ss" {...register("lastTransactionTime")} error={errors.lastTransactionTime?.message} />
+                    <InputField label="Last transaction time" type="time" step="1" placeholder="HH:mm:ss" {...register("lastTransactionTime")} error={errors.lastTransactionTime?.message} />
                 </div>
 
                 {/* Sales Data Fields */}
