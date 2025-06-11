@@ -101,7 +101,7 @@ export default function RemaindersPage() {
 
     const markAsDone = async (id: number) => {
         try {
-            await apiClient.get("/remainder/markAsCompleted", { params: { id } });
+            await apiClient.post("/remainder/markAsCompleted", { params: { id } });
             toast.success("Reminder marked as completed");
             fetchRemainders();
         } catch (err) {

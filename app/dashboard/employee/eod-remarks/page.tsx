@@ -18,13 +18,9 @@ export default function EodRemarksPage() {
         remarksDate: today,
         numberOfWalkins: 0,
         numberOfBillPayments: 0,
-        whatWentWell: "",
-        whatNotWentWell: "",
         howManyEdgeAccountsAccessed: 0,
         howManyEdgeAccountsNotAccessed: 0,
-        reasonForNotAccessingCustomerAccountInEdge: "",
         howManyGoogleReviewsTaken: 0,
-        reasonForNotTakingGoogleReviews: "",
     });
 
     const fetchRemarks = async () => {
@@ -110,27 +106,6 @@ export default function EodRemarksPage() {
                     onChange={(e) => handleChange("howManyGoogleReviewsTaken", Number(e.target.value))}
                 />
             </div>
-
-            <Textarea
-                label="What Went Well"
-                value={remarks.whatWentWell}
-                onChange={(e) => handleChange("whatWentWell", e.target.value)}
-            />
-            <Textarea
-                label="What Didn't Go Well"
-                value={remarks.whatNotWentWell}
-                onChange={(e) => handleChange("whatNotWentWell", e.target.value)}
-            />
-            <Textarea
-                label="Reason for Not Accessing Edge Accounts"
-                value={remarks.reasonForNotAccessingCustomerAccountInEdge}
-                onChange={(e) => handleChange("reasonForNotAccessingCustomerAccountInEdge", e.target.value)}
-            />
-            <Textarea
-                label="Reason for Not Taking Google Reviews"
-                value={remarks.reasonForNotTakingGoogleReviews}
-                onChange={(e) => handleChange("reasonForNotTakingGoogleReviews", e.target.value)}
-            />
 
             <Button onClick={handleSubmit} disabled={loading}>
                 {loading ? "Saving..." : "Submit EOD Remarks"}

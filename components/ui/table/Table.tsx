@@ -5,6 +5,7 @@ interface TableProps<T extends Record<string, any>> {
     columns: { key: keyof T; label: string }[];
     onEdit: (item: T) => void;
     onDelete: (id: string) => void;
+    renderActions?: (item: T) => React.ReactNode; // ✅ included in props
     managers?: { id: string; name: string }[];
 }
 
@@ -13,6 +14,7 @@ export default function Table<T extends Record<string, any>>({
     columns,
     onEdit,
     onDelete,
+    renderActions, // ✅ properly extracted
     managers = [],
 }: TableProps<T>) {
     if (!Array.isArray(data)) {
@@ -23,7 +25,6 @@ export default function Table<T extends Record<string, any>>({
     return (
         <div className="w-full overflow-x-auto rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
             <table className="w-full min-w-[600px] border-collapse bg-white dark:bg-gray-900 dark:text-gray-200">
-                {/* 🔹 Sticky Header for Large Datasets */}
                 <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 uppercase text-sm tracking-wide">
                     <tr>
                         {columns.map((col) => (
@@ -37,8 +38,6 @@ export default function Table<T extends Record<string, any>>({
                         <th className="py-4 px-4 text-center font-medium">Actions</th>
                     </tr>
                 </thead>
-
-                {/* 🔹 Table Body */}
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {data.length > 0 ? (
                         data.map((item, index) => (
@@ -48,6 +47,7 @@ export default function Table<T extends Record<string, any>>({
                                 columns={columns}
                                 onEdit={onEdit}
                                 onDelete={onDelete}
+                                renderActions={renderActions} // ✅ passed to TableRow
                                 managers={managers}
                             />
                         ))

@@ -136,13 +136,9 @@ export default function ViewEmployeeEodRemarksPage() {
                             </p>
                             <p><strong>Walk-ins:</strong> {r.numberOfWalkins}</p>
                             <p><strong>Bill Payments:</strong> {r.numberOfBillPayments}</p>
-                            <p><strong>What Went Well:</strong> {r.whatWentWell}</p>
-                            <p><strong>What Didn't Go Well:</strong> {r.whatNotWentWell}</p>
                             <p><strong>Edge Accessed:</strong> {r.howManyEdgeAccountsAccessed}</p>
                             <p><strong>Edge Not Accessed:</strong> {r.howManyEdgeAccountsNotAccessed}</p>
-                            <p><strong>Reason for Not Accessing Edge:</strong> {r.reasonForNotAccessingCustomerAccountInEdge}</p>
                             <p><strong>Google Reviews:</strong> {r.howManyGoogleReviewsTaken}</p>
-                            <p><strong>Reason for No Reviews:</strong> {r.reasonForNotTakingGoogleReviews}</p>
                         </div>
                     ))}
                 </div>
