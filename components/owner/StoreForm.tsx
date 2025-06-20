@@ -74,7 +74,17 @@ export default function StoreForm({ onSubmit }: StoreFormProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputField label="Dealer Store ID" {...register("dealerStoreId")} error={errors.dealerStoreId?.message} />
                     <InputField label="Store Name" {...register("storeName")} error={errors.storeName?.message} />
-                    <InputField label="Contact Number" type="tel" {...register("storeContactNumber")} error={errors.storeContactNumber?.message} />
+                    <InputField
+                        label="Contact Number"
+                        type="tel"
+                        {...register("storeContactNumber")}
+                        onInput={(e) => {
+                            const input = e.currentTarget;
+                            input.value = input.value.replace(/\D/g, "").slice(0, 10); // allow only digits, max 10
+                        }}
+                        error={errors.storeContactNumber?.message}
+                    />
+
                 </div>
 
                 {/* 🔹 Store Address */}
@@ -109,7 +119,9 @@ export default function StoreForm({ onSubmit }: StoreFormProps) {
                     data={storeData}
                     onConfirm={handleConfirm}
                     onClose={() => setShowConfirmation(false)}
+                    isLoadingConfirm={loading}
                 />
+
 
                 {/* 🔹 Success Modal */}
                 <SuccessModal

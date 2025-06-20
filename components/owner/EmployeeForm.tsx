@@ -1,10 +1,10 @@
 "use client";
 
+import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import InputField from "@/components/ui/InputField";
 import AddressFields from "@/components/ui/addressFields/AddressFields";
-import { useContext, useState } from "react";
 import { OwnerContext } from "@/contexts/OwnerContext";
 import { Employee, employeeSchema } from "@/types/employeeSchema";
 import Button from "@/components/ui/Button";
@@ -21,12 +21,17 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
 
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loadingConfirm, setLoadingConfirm] = useState(false);
     const [employeeData, setEmployeeData] = useState<Employee | null>(null);
 
-    const { register, handleSubmit, formState: { errors, isValid }, reset } = useForm<Employee>({
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isValid },
+        reset,
+    } = useForm<Employee>({
         resolver: zodResolver(employeeSchema),
-        mode: "onChange", // ✅ Ensures validation updates dynamically
+        mode: "all",
         defaultValues: {
             employeeNtid: "",
             employeeName: "",
@@ -43,14 +48,13 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
             perBoxCommission: 5,
             company: {
                 companyName: companyName,
-            }
-        }
+            },
+        },
     });
 
     const handleConfirm = async () => {
-        if (!employeeData) { return; }
-        setLoading(true);
-        //console.log("🚀 Submitting employee data:", employeeData);
+        if (!employeeData) { return };
+        setLoadingConfirm(true);
         try {
             await onSubmit(employeeData);
             setShowSuccess(true);
@@ -58,7 +62,7 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
         } catch (error) {
             console.error("❌ Error adding employee:", error);
         }
-        setLoading(false);
+        setLoadingConfirm(false);
         setShowConfirmation(false);
     };
 
@@ -66,12 +70,10 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
         <div className="flex justify-center items-center min-h-screen py-8 bg-gray-100 dark:bg-gray-900 transition-all">
             <form
                 onSubmit={handleSubmit((data) => {
-                    //console.log("✅ Form data captured:", data);
                     setEmployeeData(data);
                     setShowConfirmation(true);
                 })}
-                className="p-8 bg-white dark:bg-gray-800 shadow-xl rounded-xl w-full max-w-3xl space-y-6 
-                           transition-all duration-300 border border-gray-200 dark:border-gray-700"
+                className="p-8 bg-white dark:bg-gray-800 shadow-xl rounded-xl w-full max-w-3xl space-y-6 border border-gray-200 dark:border-gray-700"
             >
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center">
                     Add New Employee
@@ -80,19 +82,29 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
                 {/* 🔹 Employee Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputField
-                        label="Employee NTID" {...register("employeeNtid")}
+                        label="Employee NTID"
+                        {...register("employeeNtid")}
                         error={errors.employeeNtid?.message}
                     />
                     <InputField
-                        label="Employee Name" {...register("employeeName")}
+                        label="Employee Name"
+                        {...register("employeeName")}
                         error={errors.employeeName?.message}
                     />
                     <InputField
-                        label="Phone Number" type="tel" {...register("phoneNumber")}
+                        label="Phone Number"
+                        type="tel"
+                        {...register("phoneNumber")}
                         error={errors.phoneNumber?.message}
+                        onInput={(e) => {
+                            const input = e.currentTarget;
+                            input.value = input.value.replace(/\D/g, "").slice(0, 10);
+                        }}
                     />
                     <InputField
-                        label="Email" type="email" {...register("email")}
+                        label="Email"
+                        type="email"
+                        {...register("email")}
                         error={errors.email?.message}
                     />
                 </div>
@@ -108,17 +120,23 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
                 {/* 🔹 Pay and Commission */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <InputField
-                        label="$/hour" type="number" step="0.01"
+                        label="$/hour"
+                        type="number"
+                        step="0.01"
                         {...register("employeePayRatePerHour", { valueAsNumber: true })}
                         error={errors.employeePayRatePerHour?.message}
                     />
                     <InputField
-                        label="Commission %" type="number" step="0.01"
+                        label="Commission %"
+                        type="number"
+                        step="0.01"
                         {...register("commissionPercentage", { valueAsNumber: true })}
                         error={errors.commissionPercentage?.message}
                     />
                     <InputField
-                        label="$/Box" type="number" step="0.01"
+                        label="$/Box"
+                        type="number"
+                        step="0.01"
                         {...register("perBoxCommission", { valueAsNumber: true })}
                         error={errors.perBoxCommission?.message}
                     />
@@ -127,10 +145,13 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
                 {/* 🔹 Submit Button */}
                 <div className="flex justify-center">
                     <Button
-                        type="submit" variant="primary"
-                        isLoading={loading} fullWidth disabled={!isValid}
+                        type="submit"
+                        variant="primary"
+                        isLoading={false}
+                        fullWidth
+                        disabled={!isValid}
                     >
-                        {loading ? "Processing..." : "Add Employee"}
+                        Add Employee
                     </Button>
                 </div>
 
@@ -142,6 +163,7 @@ export default function EmployeeForm({ onSubmit }: EmployeeFormProps) {
                     data={employeeData}
                     onConfirm={handleConfirm}
                     onClose={() => setShowConfirmation(false)}
+                    isLoadingConfirm={loadingConfirm}
                 />
 
                 {/* 🔹 Success Modal */}

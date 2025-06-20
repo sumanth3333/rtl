@@ -7,20 +7,22 @@ import { Store } from "@/schemas/storeSchema";
 import { Employee } from "@/types/employeeSchema";
 import EodForm from "@/components/owner/EodForm";
 import EodSummaryByDate from "@/components/owner/EodSummaryByDate";
+import ChangeEmployeeStore from "@/components/owner/ChangeEmployeeStore";
 
 export default function LogEodReportOwnerPage() {
     const { companyName } = useOwner();
     const [stores, setStores] = useState<Store[]>([]);
     const [employees, setEmployees] = useState<Employee[]>([]);
-    const [formReady, setFormReady] = useState(false); // 👈 New flag
+    const [formReady, setFormReady] = useState(false);
     const [dealerStoreId, setDealerStoreId] = useState("");
     const [employeeNtid, setEmployeeNtid] = useState("");
     const [selectedDate, setSelectedDate] = useState("");
     const [summaryDate, setSummaryDate] = useState("");
+    const [activeTab, setActiveTab] = useState<"summary" | "log" | "assignment">("summary");
 
     const [eodFormValues, setEodFormValues] = useState({
-        store: { dealerStoreId: dealerStoreId ?? "" },
-        employee: { employeeNtid: employeeNtid ?? "" },
+        store: { dealerStoreId },
+        employee: { employeeNtid },
         clockinTime: "10:00:00",
         clockoutTime: "10:00:00",
         actualCash: 0,
@@ -51,11 +53,9 @@ export default function LogEodReportOwnerPage() {
         })();
     }, [companyName]);
 
-
     useEffect(() => {
         if (dealerStoreId && employeeNtid && selectedDate) {
-            setFormReady(false); // ⏳ Reset readiness
-
+            setFormReady(false);
             getEodDetails(dealerStoreId, employeeNtid, selectedDate)
                 .then((data) => {
                     setEodFormValues({
@@ -80,8 +80,7 @@ export default function LogEodReportOwnerPage() {
                         tabletsSold: data.tabletsSold ?? 0,
                         watchesSold: data.watchesSold ?? 0,
                     });
-
-                    setFormReady(true); // ✅ Form is ready to render
+                    setFormReady(true);
                 })
                 .catch(() => {
                     setEodFormValues({
@@ -106,17 +105,47 @@ export default function LogEodReportOwnerPage() {
                         tabletsSold: 0,
                         watchesSold: 0,
                     });
-
-                    setFormReady(true); // ✅ Even fallback data is ready
+                    setFormReady(true);
                 });
         }
     }, [dealerStoreId, employeeNtid, selectedDate]);
 
-
     return (
-        <>
-            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4">
-                <div className="w-full max-w-3xl mb-4">
+        <div className="min-h-screen px-4 bg-gray-50 dark:bg-gray-900">
+            {/* Navigation Tabs */}
+            <div className="flex justify-center gap-4 mt-6 mb-8">
+                <button
+                    onClick={() => setActiveTab("summary")}
+                    className={`px-4 py-2 rounded-lg font-medium ${activeTab === "summary"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white"
+                        }`}
+                >
+                    View EOD Summary
+                </button>
+                <button
+                    onClick={() => setActiveTab("log")}
+                    className={`px-4 py-2 rounded-lg font-medium ${activeTab === "log"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white"
+                        }`}
+                >
+                    Log EOD Report
+                </button>
+                <button
+                    onClick={() => setActiveTab("assignment")}
+                    className={`px-4 py-2 rounded-lg font-medium ${activeTab === "assignment"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white"
+                        }`}
+                >
+                    Change Employee Store
+                </button>
+            </div>
+
+            {/* EOD Summary */}
+            {activeTab === "summary" && (
+                <div className="w-full max-w-3xl mx-auto">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                         View Submitted EODs For:
                     </label>
@@ -125,66 +154,76 @@ export default function LogEodReportOwnerPage() {
                         max={new Date().toISOString().split("T")[0]}
                         value={summaryDate}
                         onChange={(e) => setSummaryDate(e.target.value)}
-                        className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white"
+                        className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white mb-4"
                     />
+                    {summaryDate && companyName && (
+                        <EodSummaryByDate date={summaryDate} companyName={companyName} />
+                    )}
                 </div>
+            )}
 
-                {summaryDate && companyName && (
-                    <EodSummaryByDate date={summaryDate} companyName={companyName} />
-                )}
+            {/* Log EOD Report */}
+            {activeTab === "log" && (
+                <div className="flex flex-col items-center w-full max-w-3xl mx-auto mb-10">
+                    <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 dark:text-gray-100 my-4 text-center">
+                        End Of Day Report
+                    </h1>
 
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 dark:text-gray-100 my-4 text-center">
-                    End Of Day Report
-                </h1>
+                    <div className="w-full space-y-4 mb-6">
+                        <select
+                            value={dealerStoreId}
+                            onChange={(e) => setDealerStoreId(e.target.value)}
+                            className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white"
+                        >
+                            <option value="">Select Store</option>
+                            {stores.map((store) => (
+                                <option key={store.dealerStoreId} value={store.dealerStoreId}>
+                                    {store.storeName}
+                                </option>
+                            ))}
+                        </select>
 
-                <div className="w-full max-w-3xl space-y-4 mb-6">
-                    <select
-                        value={dealerStoreId}
-                        onChange={(e) => setDealerStoreId(e.target.value)}
-                        className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white"
-                    >
-                        <option value="">Select Store</option>
-                        {stores.map((store) => (
-                            <option key={store.dealerStoreId} value={store.dealerStoreId}>
-                                {store.storeName}
-                            </option>
-                        ))}
-                    </select>
+                        <select
+                            value={employeeNtid}
+                            onChange={(e) => setEmployeeNtid(e.target.value)}
+                            className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white"
+                        >
+                            <option value="">Select Employee</option>
+                            {employees.map((emp) => (
+                                <option key={emp.employeeNtid} value={emp.employeeNtid}>
+                                    {emp.employeeName}
+                                </option>
+                            ))}
+                        </select>
 
-                    <select
-                        value={employeeNtid}
-                        onChange={(e) => setEmployeeNtid(e.target.value)}
-                        className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white"
-                    >
-                        <option value="">Select Employee</option>
-                        {employees.map((emp) => (
-                            <option key={emp.employeeNtid} value={emp.employeeNtid}>
-                                {emp.employeeName}
-                            </option>
-                        ))}
-                    </select>
-
-                    <input
-                        type="date"
-                        max={new Date().toISOString().split("T")[0]}
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white"
-                    />
-                </div>
-
-                {formReady && (
-                    <div className="w-full max-w-3xl">
-                        <EodForm
-                            initialValues={eodFormValues}
-                            storeName={stores.find((s) => s.dealerStoreId === dealerStoreId)?.storeName || ""}
-                            employeeName={employees.find((e) => e.employeeNtid === employeeNtid)?.employeeName || ""}
-                            saleDate={selectedDate}
+                        <input
+                            type="date"
+                            max={new Date().toISOString().split("T")[0]}
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white"
                         />
                     </div>
-                )}
 
-            </div>
-        </>
+                    {formReady && (
+                        <div className="w-full">
+                            <EodForm
+                                initialValues={eodFormValues}
+                                storeName={stores.find((s) => s.dealerStoreId === dealerStoreId)?.storeName || ""}
+                                employeeName={employees.find((e) => e.employeeNtid === employeeNtid)?.employeeName || ""}
+                                saleDate={selectedDate}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Change Employee Store Assignment */}
+            {activeTab === "assignment" && (
+                <div className="w-full max-w-3xl mx-auto mb-10">
+                    <ChangeEmployeeStore companyName={companyName} />
+                </div>
+            )}
+        </div>
     );
 }

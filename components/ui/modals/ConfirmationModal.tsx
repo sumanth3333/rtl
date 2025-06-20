@@ -11,7 +11,9 @@ interface ConfirmationModalProps {
     confirmText?: string;
     cancelText?: string;
     data?: Record<string, any> | null;
+    isLoadingConfirm?: boolean; // <-- new
 }
+
 export default function ConfirmationModal({
     isOpen,
     onClose,
@@ -21,6 +23,7 @@ export default function ConfirmationModal({
     confirmText = "Confirm",
     cancelText = "Cancel",
     data = null,
+    isLoadingConfirm = false,
 }: ConfirmationModalProps) {
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -95,10 +98,22 @@ export default function ConfirmationModal({
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="px-5 py-2 bg-teal-900 text-white rounded-md hover:bg-teal-700 transition"
+                        className="px-5 py-2 bg-teal-900 text-white rounded-md hover:bg-teal-700 transition flex items-center justify-center min-w-[100px]"
+                        disabled={isLoadingConfirm}
                     >
-                        {confirmText}
+                        {isLoadingConfirm ? (
+                            <svg className="animate-spin h-4 w-4 mr-2 text-white" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 00-8 8z"
+                                />
+                            </svg>
+                        ) : null}
+                        {isLoadingConfirm ? "Processing..." : confirmText}
                     </button>
+
                 </div>
             </div>
         </div>
