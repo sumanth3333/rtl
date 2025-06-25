@@ -43,7 +43,6 @@ export default function ManagePage<T extends Record<string, any>>({
                 <Table
                     data={data}
                     columns={columns}
-                    onEdit={onEdit}
                     onDelete={onDelete}
                     managers={managers}
                     renderActions={renderActions} // ✅ passed down

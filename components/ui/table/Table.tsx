@@ -3,7 +3,6 @@ import TableRow from "./TableRow";
 interface TableProps<T extends Record<string, any>> {
     data: T[] | undefined;
     columns: { key: keyof T; label: string }[];
-    onEdit: (item: T) => void;
     onDelete: (id: string) => void;
     renderActions?: (item: T) => React.ReactNode; // ✅ included in props
     managers?: { id: string; name: string }[];
@@ -12,7 +11,6 @@ interface TableProps<T extends Record<string, any>> {
 export default function Table<T extends Record<string, any>>({
     data = [],
     columns,
-    onEdit,
     onDelete,
     renderActions, // ✅ properly extracted
     managers = [],
@@ -45,7 +43,6 @@ export default function Table<T extends Record<string, any>>({
                                 key={index}
                                 item={item}
                                 columns={columns}
-                                onEdit={onEdit}
                                 onDelete={onDelete}
                                 renderActions={renderActions} // ✅ passed to TableRow
                                 managers={managers}

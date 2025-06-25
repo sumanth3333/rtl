@@ -3,7 +3,6 @@ import Button from "../Button";
 interface TableRowProps<T> {
     item: T;
     columns: { key: keyof T; label: string }[];
-    onEdit: (item: T) => void;
     onDelete: (id: string) => void;
     renderActions?: (item: T) => React.ReactNode; // ✅ Optional custom actions
     managers?: { id: string; name: string }[];
@@ -12,7 +11,6 @@ interface TableRowProps<T> {
 export default function TableRow<T extends Record<string, any>>({
     item,
     columns,
-    onEdit,
     onDelete,
     renderActions,
     managers = [],
@@ -43,7 +41,7 @@ export default function TableRow<T extends Record<string, any>>({
                     renderActions(item) // ✅ Custom buttons from parent
                 ) : (
                     <>
-                        <Button onClick={() => onEdit(item)} variant="primary">Update</Button>
+                        {/* <Button onClick={() => onEdit(item)} variant="primary">Update</Button> */}
                         <Button
                             onClick={() =>
                                 onDelete((item as any).employeeNtid || (item as any).dealerStoreId)

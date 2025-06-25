@@ -25,7 +25,9 @@ export const receiveDeviceAPI = async (payload: { employeeNtid: string; receivin
 
 export const cancelTransferAPI = async (deviceId: string) => {
     try {
-        const response = await apiClient.post(`/upgradePhones/cancelTransfer`, { deviceId });
+        const response = await apiClient.delete(`/upgradePhones/cancelTransfer`, {
+            params: { imei: deviceId },
+        });
         return response.data;
     } catch (error) {
         console.error("Error canceling transfer:", error);
