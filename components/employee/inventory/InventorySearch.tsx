@@ -40,11 +40,12 @@ export default function InventorySearch({ data }: InventorySearchProps) {
         <div className="mb-8">
             <input
                 type="text"
-                placeholder="Search device across all stores..."
+                placeholder="Type in device name to search availability across all stores..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full p-3 text-lg font-semibold placeholder-sky-700 dark:placeholder-sky-300 rounded-2xl border-4 border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-300 dark:border-sky-700 dark:bg-gray-800 dark:text-white dark:focus:ring-sky-600"
             />
+
 
             {query && groupedResults.length === 0 && (
                 <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">

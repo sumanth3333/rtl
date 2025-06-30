@@ -1,7 +1,7 @@
 
 import { CompanyPayStructure } from "@/types/companyTypes";
 import apiClient from "../api/apiClient";
-import { EmployeePaycheck } from "@/types/paycheckTypes";
+import { EmployeePaycheck, PaycheckResponse } from "@/types/paycheckTypes";
 
 export const fetchCommissionSettings = async () => {
     const response = await fetch("/api/commission-settings");
@@ -34,20 +34,22 @@ export const fetchEmployeePaychecks = async (
     startDate: string,
     endDate: string,
     includeBoxes: string,
-    includeAccessories: string
+    includeAccessories: string,
+    includeTaxes: string,
 ): Promise<{ success: boolean; data?: EmployeePaycheck[]; error?: string }> => {
     try {
-        const response = await apiClient.get<EmployeePaycheck[]>("/company/paycheckForEmployees", {
+        const response = await apiClient.get<PaycheckResponse>("/company/paycheckForEmployees", {
             params: {
                 companyName,
                 startDate,
                 endDate,
                 includeBoxesInPaycheck: includeBoxes,
                 includeAccessoriesInPaycheck: includeAccessories,
+                isTaxesIncluded: includeTaxes,
             },
         });
 
-        return { success: true, data: response.data };
+        return { success: true, data: response.data.paychecks };
     } catch (error) {
         return { success: false, error: "Failed to fetch paycheck data." };
     }

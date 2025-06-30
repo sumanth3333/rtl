@@ -15,10 +15,11 @@ export default function GeneratePayPage() {
     const [endDate, setEndDate] = useState<string>("");
     const [includeBoxes, setIncludeBoxes] = useState<string>("NO");
     const [includeAccessories, setIncludeAccessories] = useState<string>("NO");
+    const [includeTaxes, setIncludeTaxes] = useState<string>("NO");
 
     // ✅ Fetch Paychecks
     const fetchPaychecks = async () => {
-        const response = await fetchEmployeePaychecks(companyName, startDate, endDate, includeBoxes, includeAccessories);
+        const response = await fetchEmployeePaychecks(companyName, startDate, endDate, includeBoxes, includeAccessories, includeTaxes);
 
         if (response.success && response.data) {
             setPaychecks(response.data); // ✅ Only set if data is present
@@ -37,9 +38,11 @@ export default function GeneratePayPage() {
                 endDate={endDate}
                 includeBoxes={includeBoxes}
                 includeAccessories={includeAccessories}
+                includeTaxes={includeTaxes}
                 setStartDate={setStartDate}
                 setEndDate={setEndDate}
                 setIncludeBoxes={setIncludeBoxes}
+                setIncludeTaxes={setIncludeTaxes}
                 setIncludeAccessories={setIncludeAccessories}
                 fetchPaychecks={fetchPaychecks}
             />
@@ -48,7 +51,7 @@ export default function GeneratePayPage() {
             {paychecks.length > 0 ? (
                 <div className="mt-4">
                     {paychecks.map((pay) => (
-                        <EmployeePaycheckCard paycheck={pay} fromDate={startDate} toDate={endDate} key={pay.employee.employeeNtid} includeBoxes={includeBoxes} includeAccessories={includeAccessories} />
+                        <EmployeePaycheckCard paycheck={pay} fromDate={startDate} toDate={endDate} key={pay.employee.employeeNtid} includeBoxes={includeBoxes} includeAccessories={includeAccessories} includeTaxes={includeTaxes} />
                     ))}
                 </div>
             ) : (

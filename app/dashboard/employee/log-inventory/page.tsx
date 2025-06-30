@@ -62,16 +62,22 @@ export default function InventoryPage() {
     }, [dealerStoreId, store, employee]);
 
     // ✅ Handle Save Action
-    const handleSave = async (updatedProducts: { id: number; productName: string; quantity: number }[]) => {
+    const handleSave = async (
+        updatedProducts: { id: number; productName: string; quantity: number }[]
+    ) => {
         try {
             await updateInventory(dealerStoreId, updatedProducts, employeeNtid);
             setInventory(updatedProducts);
             setUpdateSuccess(true); // ✅ Show success message
-            setTimeout(() => setUpdateSuccess(false), 3000); // ✅ Hide message after 3 seconds
+            setTimeout(() => {
+                setUpdateSuccess(false); // ✅ Hide message
+                location.reload();       // ✅ Refresh the page after 3 seconds
+            }, 3000);
         } catch (error) {
-            setError("Failed to update inventory." + error);
+            setError("Failed to update inventory. " + error);
         }
     };
+
 
     return (
         <main className="w-full min-h-screen px-4 sm:px-8 md:px-12 lg:px-16 py-8 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-200 transition-all duration-300">
@@ -99,13 +105,14 @@ export default function InventoryPage() {
                     <p className="text-center text-red-500">{error}</p>
                 ) : (
                     <>
-                        <InventoryTable inventory={inventory} dealerStoreId={dealerStoreId} onSubmit={handleSave} />
                         {/* ✅ Success Message (Displays after update) */}
                         {updateSuccess && (
                             <p className="mt-4 text-green-600 dark:text-green-400 text-sm text-center font-semibold">
                                 ✅ Inventory updated successfully!
                             </p>
                         )}
+                        <InventoryTable inventory={inventory} dealerStoreId={dealerStoreId} onSubmit={handleSave} />
+
                     </>
                 )}
             </section>

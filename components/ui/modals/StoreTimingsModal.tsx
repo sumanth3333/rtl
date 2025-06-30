@@ -36,7 +36,7 @@ export default function StoreTimingsModal({
     useEffect(() => {
         const defaultTimings: StoreTiming[] = weekdays.map((_, idx) => ({
             weekdayId: idx + 1,
-            openTime: "10:00",
+            openTime: idx === 6 ? "12:00" : "10:00",
             closeTime: idx === 6 ? "17:00" : "19:00",
         }));
 
@@ -65,7 +65,7 @@ export default function StoreTimingsModal({
                 dealerStoreId,
                 storeTimings: timings,
             });
-            if (!isAuto) { toast.success("Store timings saved successfully."); }
+            if (!isAuto) { toast.success(`Timings for ${dealerStoreId} saved successfully.`); }
             if (onSave) { onSave(); }
             onClose(); // Optional: close on save
         } catch (err) {

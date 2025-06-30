@@ -5,8 +5,10 @@ interface PaycheckFiltersProps {
     endDate: string;
     includeBoxes: string;
     includeAccessories: string;
+    includeTaxes: string
     setStartDate: (date: string) => void;
     setEndDate: (date: string) => void;
+    setIncludeTaxes: (value: string) => void;
     setIncludeBoxes: (value: string) => void;
     setIncludeAccessories: (value: string) => void;
     fetchPaychecks: () => void;
@@ -17,9 +19,11 @@ export default function PaycheckFilters({
     endDate,
     includeBoxes,
     includeAccessories,
+    includeTaxes,
     setStartDate,
     setEndDate,
     setIncludeBoxes,
+    setIncludeTaxes,
     setIncludeAccessories,
     fetchPaychecks,
 }: PaycheckFiltersProps) {
@@ -44,7 +48,7 @@ export default function PaycheckFilters({
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg mb-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">🔍 Filter Paychecks</h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* ✅ Start Date */}
                 <div className="flex flex-col">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
@@ -91,6 +95,19 @@ export default function PaycheckFilters({
                     <select
                         value={includeAccessories}
                         onChange={(e) => setIncludeAccessories(e.target.value)}
+                        className="p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    >
+                        <option value="YES">Yes</option>
+                        <option value="NO">No</option>
+                    </select>
+                </div>
+
+                {/* Include Taxes */}
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deduct Taxes?</label>
+                    <select
+                        value={includeTaxes}
+                        onChange={(e) => setIncludeTaxes(e.target.value)}
                         className="p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                     >
                         <option value="YES">Yes</option>

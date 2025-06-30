@@ -9,13 +9,21 @@ interface EmployeePaycheckProps {
     toDate: string;
     includeBoxes: string;
     includeAccessories: string;
+    includeTaxes: string;
 }
 
-export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, includeBoxes, includeAccessories }: EmployeePaycheckProps) {
+export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, includeBoxes, includeAccessories, includeTaxes }: EmployeePaycheckProps) {
     const [expanded, setExpanded] = useState(false);
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [adjustReason, setAdjustReason] = useState<string>("");
+    const [adjustAmount, setAdjustAmount] = useState<string>("0");
+    const [showAdjustments, setShowAdjustments] = useState(false);
+
+    // And wherever needed, convert it back:
+    const numericAdjust = parseFloat(adjustAmount || "0");
+    const adjustedPay = paycheck.netPay.netPay + (isNaN(numericAdjust) ? 0 : numericAdjust);
 
     const handleGeneratePay = async () => {
         setLoading(true);
@@ -27,6 +35,7 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
             toDate,
             includeBoxesInPaycheck: includeBoxes,
             includeAccessoriesInPaycheck: includeAccessories,
+            isTaxesIncluded: includeTaxes,
             employee: {
                 employeeNtid: paycheck.employee.employeeNtid,
                 employeeName: paycheck.employee.employeeName,
@@ -54,6 +63,11 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 },
                 netPay: paycheck.netPay.netPay,
             },
+            Adjustment: {
+                amount: adjustAmount,
+                reason: adjustReason,
+            }
+
         };
         try {
             const response = await apiClient.post("/company/payslip", payload);
@@ -103,8 +117,14 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                     className={`text-lg font-bold ${paycheck.netPay.netPay < 0 ? "text-red-500" : "text-green-600"
                         }`}
                 >
-                    ${paycheck.netPay.netPay.toFixed(2)}
+                    ${adjustedPay.toFixed(2)}
                 </span>
+                <p className="text-xs italic text-gray-500 dark:text-gray-400 mt-1">
+                    Adjustment of {numericAdjust >= 0 ? "+" : ""}
+                    ${isNaN(numericAdjust) ? "0.00" : numericAdjust.toFixed(2)} applied for "{adjustReason || "N/A"}"
+                </p>
+
+
             </div>
 
             {/* Work Summary */}
@@ -122,6 +142,11 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                         ["Tablets", paycheck.work.tabletsSold],
                         ["HSI", paycheck.work.hsiSold],
                         ["Watches", paycheck.work.watchesSold],
+                        ["Preacts Activated", paycheck.preActivations.numberOfPreActivationPhonesActivated,],
+                        ["Preacts Sold", paycheck.preActivations.numberOfPreActivatedPhonesSold],
+                        ["Preacts Activation Cost", paycheck.preActivations.activatedValue],
+                        ["Total Preacts Sold Price", paycheck.preActivations.soldValue],
+                        ["Total Deduction for preacts", paycheck.preActivations.deductedAmountForPreActivationFromAccessories],
                     ].map(([label, value], index) => (
                         <div key={index} className="flex flex-col items-center">
                             <span className="text-gray-500 dark:text-gray-400 text-xs uppercase">{label}</span>
@@ -180,6 +205,59 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                     </span>
                 </div>
             </div>
+            <div className="mt-6 flex justify-start">
+                <button
+                    onClick={() => setShowAdjustments(!showAdjustments)}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition"
+                >
+                    {showAdjustments ? "Hide Pay Adjustment" : "➕ Add Pay Adjustment"}
+                </button>
+            </div>
+
+            {/* Adjustments Section */}
+            {showAdjustments && (
+                <div className="mt-6 border-t border-gray-300 dark:border-gray-700 pt-4">
+                    <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                        Pay Adjustments (Optional)
+                    </h4>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Adjustment Amount */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Adjustment Amount ($)
+                            </label>
+                            <input
+                                type="number"
+                                inputMode="decimal"
+                                step="any"
+                                value={adjustAmount}
+                                onChange={(e) => setAdjustAmount(e.target.value)}
+                                className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="e.g., -20 for deduction, +50 for bonus"
+                            />
+
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                Enter negative values for deductions and positive for bonuses.
+                            </p>
+                        </div>
+
+                        {/* Adjustment Reason */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Adjustment Reason
+                            </label>
+                            <input
+                                type="text"
+                                value={adjustReason}
+                                onChange={(e) => setAdjustReason(e.target.value)}
+                                className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="e.g., late penalty, bonus, adjustment"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ✅ Generate Pay Button */}
             <div className="mt-4 flex justify-center">

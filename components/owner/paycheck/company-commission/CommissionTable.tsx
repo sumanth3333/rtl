@@ -36,6 +36,7 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
 
     return (
         <div className="mt-6">
+
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-3">
                 Commission Structure
             </h3>

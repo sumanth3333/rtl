@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import CommissionTable from "@/components/owner/paycheck/company-commission/CommissionTable";
 import PayFrequencySelect from "@/components/owner/paycheck/company-commission/PayFrequencySelect";
 import { useOwner } from "@/hooks/useOwner";
+import PreactivationDeductionTable from "@/components/owner/paycheck/company-commission/PreactivationDeductionTable";
 
 export default function CompanyPayStructurePage() {
     const { companyName } = useOwner();
@@ -18,6 +19,10 @@ export default function CompanyPayStructurePage() {
 
     const [saving, setSaving] = useState<boolean>(false);
     const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+    useEffect(() => {
+    }, [payStructure.thresholds]);
+
 
     useEffect(() => {
         const loadPayStructure = async () => {
@@ -63,12 +68,30 @@ export default function CompanyPayStructurePage() {
                 selected={payStructure.payFrequency}
                 onChange={(value: PayFrequency) => setPayStructure((prev) => ({ ...prev, payFrequency: value }))}
             />
-
+            <PreactivationDeductionTable
+                thresholds={payStructure.thresholds}
+                setThresholds={(updatedThresholds: Threshold[]) =>
+                    setPayStructure((prev) => ({ ...prev, thresholds: updatedThresholds }))
+                }
+            />
             {/* ✅ Commission Table */}
             <CommissionTable
-                thresholds={payStructure.thresholds}
-                setThresholds={(updatedThresholds) => setPayStructure((prev) => ({ ...prev, thresholds: updatedThresholds }))}
+                thresholds={payStructure.thresholds.filter(
+                    (t) => !["PERCENTAGE", "INVOICE", "PERBOX"].includes(t.itemType)
+                )}
+                setThresholds={(commissionThresholds) => {
+                    const preactThreshold = payStructure.thresholds.find((t) =>
+                        ["PERCENTAGE", "INVOICE", "PERBOX"].includes(t.itemType)
+                    );
+                    setPayStructure((prev) => ({
+                        ...prev,
+                        thresholds: preactThreshold
+                            ? [...commissionThresholds, preactThreshold]
+                            : commissionThresholds,
+                    }));
+                }}
             />
+
 
             {/* ✅ Save Button & Message */}
             <div className="mt-6 flex flex-col items-end">

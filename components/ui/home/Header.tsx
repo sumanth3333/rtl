@@ -48,8 +48,8 @@ export default function Header({ title, onToggleSidebar }: { title: string; onTo
                         px-3 py-1 border border-gray-900 dark:border-gray-100 rounded-md transition-all duration-300
                         select-none pointer-events-none"
                     >
-                        <span className="hidden sm:inline">RealTime Logging</span>
-                        <span className="sm:hidden">RTL</span>
+                        <span className="hidden sm:inline">OneClick</span>
+                        <span className="sm:hidden">OneClick</span>
                     </motion.div>
                 </Link>
             </div>
