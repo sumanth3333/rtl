@@ -63,7 +63,7 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 },
                 netPay: paycheck.netPay.netPay,
             },
-            Adjustment: {
+            adjustment: {
                 amount: adjustAmount,
                 reason: adjustReason,
             }
@@ -113,18 +113,6 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                     {paycheck.employee.employeeName}{" "}
                     <span className="text-gray-500 text-sm">({paycheck.employee.employeeNtid})</span>
                 </h3>
-                <span
-                    className={`text-lg font-bold ${paycheck.netPay.netPay < 0 ? "text-red-500" : "text-green-600"
-                        }`}
-                >
-                    ${adjustedPay.toFixed(2)}
-                </span>
-                <p className="text-xs italic text-gray-500 dark:text-gray-400 mt-1">
-                    Adjustment of {numericAdjust >= 0 ? "+" : ""}
-                    ${isNaN(numericAdjust) ? "0.00" : numericAdjust.toFixed(2)} applied for "{adjustReason || "N/A"}"
-                </p>
-
-
             </div>
 
             {/* Work Summary */}
@@ -201,18 +189,36 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                         className={`text-2xl font-bold ${paycheck.netPay.netPay >= 0 ? "text-green-600" : "text-red-500"
                             }`}
                     >
-                        ${paycheck.netPay.netPay.toFixed(2)}
+                        ${adjustedPay.toFixed(2)}
                     </span>
+                    <p className="text-xs italic text-gray-500 dark:text-gray-400 mt-1">
+                        Adjustment of {numericAdjust >= 0 ? "+" : ""}
+                        ${isNaN(numericAdjust) ? "0.00" : numericAdjust.toFixed(2)} applied for "{adjustReason || "N/A"}"
+                    </p>
                 </div>
             </div>
-            <div className="mt-6 flex justify-start">
+            <div className="mt-6 flex flex-wrap justify-between items-center gap-4">
+                {/* Add Pay Adjustment Button */}
                 <button
                     onClick={() => setShowAdjustments(!showAdjustments)}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition"
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 border border-blue-300 rounded-md shadow-sm hover:bg-blue-200 hover:text-blue-800 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                     {showAdjustments ? "Hide Pay Adjustment" : "➕ Add Pay Adjustment"}
                 </button>
+
+                {/* Generate Pay Button */}
+                <button
+                    onClick={handleGeneratePay}
+                    className={`px-5 py-3 text-white font-semibold rounded-md shadow-md transition-all ${loading
+                        ? "bg-gray-500 cursor-not-allowed"
+                        : "bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600"
+                        }`}
+                    disabled={loading}
+                >
+                    {loading ? "Processing..." : "✅ Verified & Generate Pay"}
+                </button>
             </div>
+
 
             {/* Adjustments Section */}
             {showAdjustments && (
@@ -258,20 +264,6 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                     </div>
                 </div>
             )}
-
-            {/* ✅ Generate Pay Button */}
-            <div className="mt-4 flex justify-center">
-                <button
-                    onClick={handleGeneratePay}
-                    className={`px-5 py-3 text-white font-semibold rounded-md transition-all ${loading
-                        ? "bg-gray-500 cursor-not-allowed"
-                        : "bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600"
-                        }`}
-                    disabled={loading}
-                >
-                    {loading ? "Processing..." : "✅ Verified & Generate Pay"}
-                </button>
-            </div>
 
             {/* ✅ Success/Error Messages */}
             {successMessage && (
