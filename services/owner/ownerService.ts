@@ -187,6 +187,7 @@ export const getEodDetails = async (dealerStoreId: string, employeeNtid: string,
 
 export const submitEodReport = async (data: EodReportByOwner) => {
     try {
+        console.log(data);
         const response = await apiClient.post("/company/submitSaleOnBehalfOfEmployee", data);
         //console.log("✅ EOD Report Submitted Successfully:", response.data);
         return response.data; // Return the API response if needed

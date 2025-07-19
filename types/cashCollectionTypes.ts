@@ -11,6 +11,14 @@ export interface CashData {
     systemAccessories: number;
     cashAccessories: number;
     cardAccessories: number;
+    totalAccessories?: number; // optional if sometimes omitted from API
+}
+
+export interface Expense {
+    reason: string;
+    amount: number;
+    paymentType: string | null; // e.g., 'Cash', 'Card', or null
+    expenseType: string;        // e.g., 'Short', 'Over'
 }
 
 export interface SaleHistory {
@@ -27,8 +35,10 @@ export interface SaleHistory {
     actualCash: number;
     actualCard: number;
     cashExpense: number;
-    expenseReason: string;
+    expenseReason: string; // this is now a legacy field; use `expenses[]` instead
     saleDate: string;
+    lastTransactionTime?: string;
+    expenses: Expense[]; // NEW: multiple expense records per sale
 }
 
 export interface CashCollectionData {

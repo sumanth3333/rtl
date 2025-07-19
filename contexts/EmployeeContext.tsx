@@ -34,10 +34,10 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const fetchClockInStatus = async (employeeNtid: string, date: string) => {
+    const fetchClockInStatus = async (employeeNtid: string, dealerStoreId: string, date: string) => {
         try {
             const response = await apiClient.get(`/employee/isClockedin`, {
-                params: { employeeNtid, date },
+                params: { employeeNtid, dealerStoreId, date },
             });
 
             const data = response.data;
@@ -58,7 +58,7 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
         setStore(data.store);
 
         const today = new Date().toLocaleDateString("en-CA");
-        fetchClockInStatus(data.employee.employeeNtid, today);
+        fetchClockInStatus(data.employee.employeeNtid, data.store.dealerStoreId, today);
 
         if (typeof window !== "undefined") {
             localStorage.setItem("employeeData", JSON.stringify(data.employee));
@@ -99,7 +99,7 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
 
             const today = new Date().toLocaleDateString("en-CA");
             if (parsedEmployee?.employeeNtid) {
-                fetchClockInStatus(parsedEmployee?.employeeNtid, today);
+                fetchClockInStatus(parsedEmployee?.employeeNtid, parsedStore.dealerStoreId, today);
             }
         }
     }, []);

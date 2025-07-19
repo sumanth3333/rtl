@@ -56,10 +56,10 @@ const getAccessTokenFromCookie = (): string | null => {
 
 // ✅ Logout function (backend clears cookies)
 export const logoutAPI = async () => {
-    //console.log("🚀 Logging out...");
+    // console.log("🚀 Logging out...");
     try {
         const response = await apiClient.post("/auth/logout");
-        //console.log("✅ Logout successful.");
+        // console.log("✅ Logout successful.");
         return response;
     } catch (error) {
         console.error("🚨 Logout failed:", error);

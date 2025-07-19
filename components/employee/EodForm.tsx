@@ -12,12 +12,12 @@ import { useRouter } from "next/navigation";
 import ConfirmationModal from "../ui/modals/ConfirmationModal";
 import SuccessModal from "../ui/modals/SuccessModal";
 import { useLogout } from "@/hooks/useLogout";
+import { useFieldArray } from "react-hook-form";
 
 export default function EodForm({ initialValues }: { initialValues: EodReport }) {
     const { employee, store } = useEmployee();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [hasExpense, setHasExpense] = useState(false);
     const [confirmClockOut, setConfirmClockOut] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -26,12 +26,16 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const [individualEntries, setIndividualEntries] = useState<EodReport[]>([]);
     const [showIndividualForm, setShowIndividualForm] = useState(false);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+    const [isActivationsFocused, setIsActivationsFocused] = useState(false);
+    const [isUpgradesFocused, setIsUpgradesFocused] = useState(false);
+    const [isMigrationsFocused, setIsMigrationsFocused] = useState(false);
 
     const logout = useLogout();
 
     const {
         register,
         handleSubmit,
+        control, // ✅ Add this line
         formState: { errors, isValid },
         watch,
         reset,
@@ -39,6 +43,11 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         resolver: zodResolver(eodReportSchema),
         mode: "onChange",
         defaultValues: initialValues,
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "expenses"
     });
 
     // Fetch employees working in the store
@@ -69,8 +78,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 systemAccessories: initialValues.systemAccessories ?? 0,
                 accessoriesByEmployee: initialValues.accessoriesByEmployee ?? 0,
                 lastTransactionTime: initialValues.lastTransactionTime ?? "10:00:00",
-                cashExpense: initialValues.cashExpense ?? 0,
-                expenseReason: initialValues.expenseReason ?? "NONE",
                 boxesSold: initialValues.boxesSold ?? 0,
                 migrations: initialValues.migrations ?? 0,
                 upgrade: initialValues.upgrade ?? 0,
@@ -81,26 +88,18 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         }
     }, [store, employee, reset, initialValues]);
 
-    const actualCashRaw = watch("actualCash") ?? 0;
     const systemCash = watch("systemCash") ?? 0;
-    const actualCardRaw = watch("actualCard") ?? 0;
     const systemCard = watch("systemCard") ?? 0;
-    const cashExpense = watch("cashExpense") ?? 0;
-    const expenseType = watch("expenseType");
-    const paymentMethod = watch("paymentMethod");
+    const expenses = watch("expenses") ?? [];
 
-    let adjustedActualCash = actualCashRaw;
-    let adjustedActualCard = actualCardRaw;
+    let adjustedActualCash = watch("actualCash") ?? 0;
+    let adjustedActualCard = watch("actualCard") ?? 0;
 
-    if (hasExpense && expenseType && paymentMethod && cashExpense) {
-        if (paymentMethod === "Cash") {
-            adjustedActualCash = expenseType === "Short"
-                ? actualCashRaw + cashExpense
-                : actualCashRaw - cashExpense;
-        } else if (paymentMethod === "Card") {
-            adjustedActualCard = expenseType === "Short"
-                ? actualCardRaw + cashExpense
-                : actualCardRaw - cashExpense;
+    for (const exp of expenses) {
+        if (exp.paymentType === "Cash") {
+            adjustedActualCash += exp.expenseType === "Short" ? exp.amount : -exp.amount;
+        } else if (exp.paymentType === "Card") {
+            adjustedActualCard += exp.expenseType === "Short" ? exp.amount : -exp.amount;
         }
     }
 
@@ -108,7 +107,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const cardDifference = parseFloat((adjustedActualCard - systemCard).toFixed(2));
     const accessoriesByEmployee = parseFloat((cashDifference + cardDifference).toFixed(2));
 
-    const expenseReason = watch("expenseReason");
 
     // Handle individual employee data change
     const handleEmployeeDataChange = (index: number, field: string, value: number) => {
@@ -125,15 +123,13 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 systemCard: systemCard,
                 actualCard: adjustedActualCard,
                 lastTransactionTime: watch("lastTransactionTime"),
-                cashExpense: watch("cashExpense"),
-                expenseReason: expenseReason,
             };
             return updatedEntries;
         });
     };
 
     const onSubmit = async (data: EodReport) => {
-
+        console.log(data);
         if (!confirmClockOut) {
             alert("⚠️ You must confirm clock-out before submitting.");
             return;
@@ -141,27 +137,16 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         let adjustedActualCash = data.actualCash ?? 0;
         let adjustedActualCard = data.actualCard ?? 0;
 
-        if (hasExpense) {
-            const expenseAmount = data.cashExpense ?? 0;
-            const expenseType = data.expenseType;
-            const paymentMethod = data.paymentMethod;
-
-            if (expenseType && paymentMethod && expenseAmount) {
-                if (paymentMethod === "Cash") {
-                    if (expenseType === "Short") {
-                        adjustedActualCash += expenseAmount;
-                    } else if (expenseType === "Over") {
-                        adjustedActualCash -= expenseAmount;
-                    }
-                } else if (paymentMethod === "Card") {
-                    if (expenseType === "Short") {
-                        adjustedActualCard += expenseAmount;
-                    } else if (expenseType === "Over") {
-                        adjustedActualCard -= expenseAmount;
-                    }
+        if (data.expenses && data.expenses.length > 0) {
+            for (const exp of data.expenses) {
+                if (exp.paymentType === "Cash") {
+                    adjustedActualCash += exp.expenseType === "Short" ? exp.amount : -exp.amount;
+                } else if (exp.paymentType === "Card") {
+                    adjustedActualCard += exp.expenseType === "Short" ? exp.amount : -exp.amount;
                 }
             }
         }
+
         if (showIndividualForm) {
             // Calculate totals
             const totalBoxesSold = individualEntries.reduce((sum, entry) => sum + (entry.boxesSold || 0), 0);
@@ -209,11 +194,14 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             hsiSold: parseFloat((data.hsiSold ?? 0).toFixed(2)),
             tabletsSold: parseFloat((data.tabletsSold ?? 0).toFixed(2)),
             watchesSold: parseFloat((data.watchesSold ?? 0).toFixed(2)),
-            cashExpense: hasExpense ? parseFloat((data.cashExpense ?? 0).toFixed(2)) : 0,
-            expenseReason: hasExpense ? data.expenseReason ?? "NONE" : "NONE",
+            expenses: data.expenses?.map(exp => ({
+                amount: parseFloat(exp.amount.toFixed(2)),
+                reason: exp.reason,
+                expenseType: exp.expenseType,
+                paymentType: exp.paymentType,
+            })) ?? [],
         };
 
-        console.log(formattedData);
         setFormData(formattedData);
         setShowConfirm(true);
     };
@@ -253,110 +241,319 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
 
     return (
         <>
-            <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6 bg-white dark:bg-gray-900 shadow-lg rounded-lg">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-6 w-full mt-6"
+            >
 
-                {/* Cash Group */}
-                <div className="mt-4">
-                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-2">Cash</h3>
-                    <div className="grid grid-cols-3 gap-2 md:gap-4">
-                        <InputField label="Actual" type="number" step="0.01" {...register("actualCash", { valueAsNumber: true })} error={errors.actualCash?.message} />
-                        <InputField label="System" type="number" step="0.01" {...register("systemCash", { valueAsNumber: true })} error={errors.systemCash?.message} />
-                        <InputField label="Difference" type="text" value={`$${cashDifference.toFixed(2)}`} readOnly />
+                <section className="mt-10">
+                    <div className="border-b border-gray-300 dark:border-gray-700 pb-2 mb-4">
+                        <h3 className="text-sm sm:text-base font-semibold tracking-wide text-gray-800 dark:text-gray-100 uppercase">
+                            Cash Summary
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            cash collected vs. recorded in the system. Difference is auto-calculated.
+                        </p>
                     </div>
-                </div>
 
-                {/* Card Group */}
-                <div className="mt-4">
-                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-2">Card</h3>
-                    <div className="grid grid-cols-3 gap-2 md:gap-4">
-                        <InputField label="Actual" type="number" step="0.01" {...register("actualCard", { valueAsNumber: true })} error={errors.actualCard?.message} />
-                        <InputField label="System" type="number" step="0.01" {...register("systemCard", { valueAsNumber: true })} error={errors.systemCard?.message} />
-                        <InputField label="Difference" type="text" value={`$${cardDifference.toFixed(2)}`} readOnly />
+                    <div className="grid grid-cols-3 gap-4">
+                        <InputField
+                            label="Actual Cash"
+                            type="number"
+                            step="0.01"
+                            className="text-sm"
+                            {...register("actualCash", { valueAsNumber: true })}
+                            error={errors.actualCash?.message}
+                        />
+                        <InputField
+                            label="System Cash"
+                            type="number"
+                            step="0.01"
+                            className="text-sm"
+                            {...register("systemCash", { valueAsNumber: true })}
+                            error={errors.systemCash?.message}
+                        />
+                        <InputField
+                            label="Cash Accessories"
+                            type="text"
+                            className="text-sm font-semibold text-blue-700 dark:text-blue-300"
+                            value={`$${cashDifference.toFixed(2)}`}
+                            readOnly
+                        />
                     </div>
-                </div>
+                </section>
 
-                {/* System Accessories Field */}
-                <div className="grid grid-cols-3 gap-2 md:gap-2 mt-4">
-                    <InputField label="System Accessories" type="number" step="0.01" {...register("systemAccessories", { valueAsNumber: true })} error={errors.systemAccessories?.message} />
-                    <InputField label="Total(Cash+Card) Accessories" type="number" step="0.01" value={accessoriesByEmployee.toFixed(2)} error={errors.accessoriesByEmployee?.message} readOnly />
-                    <InputField label="Last transaction time" type="time" step="1" placeholder="HH:mm:ss" {...register("lastTransactionTime")} error={errors.lastTransactionTime?.message} />
-                </div>
+                <section className="mt-10">
+                    <div className="border-b border-gray-300 dark:border-gray-700 pb-2 mb-4">
+                        <h3 className="text-sm sm:text-base font-semibold tracking-wide text-gray-800 dark:text-gray-100 uppercase">
+                            Card Summary
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Payments in credit card machine vs. recorded in the system. Difference is auto-calculated.
+                        </p>
+                    </div>
 
-                {/* Sales Data Fields */}
-                <div className="grid grid-cols-3 gap-2 md:gap-3 mt-6">
-                    <InputField label="Activations(inc. reactivations & BYOD)" type="number" {...register("boxesSold", { valueAsNumber: true })} error={errors.boxesSold?.message} />
-                    <InputField label="Upgrades" type="number" {...register("upgrade", { valueAsNumber: true })} error={errors.upgrade?.message} />
-                    <InputField label="Migrations" type="number" {...register("migrations", { valueAsNumber: true })} error={errors.migrations?.message} />
-                    <InputField label="HSI" type="number" {...register("hsiSold", { valueAsNumber: true })} error={errors.hsiSold?.message} />
-                    <InputField label="Tablets" type="number" {...register("tabletsSold", { valueAsNumber: true })} error={errors.tabletsSold?.message} />
-                    <InputField label="Watches" type="number" {...register("watchesSold", { valueAsNumber: true })} error={errors.watchesSold?.message} />
-                </div>
+                    <div className="grid grid-cols-3 gap-4">
+                        <InputField
+                            label="Actual Card"
+                            type="number"
+                            step="0.01"
+                            className="text-sm"
+                            {...register("actualCard", { valueAsNumber: true })}
+                            error={errors.actualCard?.message}
+                        />
+                        <InputField
+                            label="System Card"
+                            type="number"
+                            step="0.01"
+                            className="text-sm"
+                            {...register("systemCard", { valueAsNumber: true })}
+                            error={errors.systemCard?.message}
+                        />
+                        <InputField
+                            label="Card Accessories"
+                            type="text"
+                            className="text-sm font-semibold text-blue-700 dark:text-blue-300"
+                            value={`$${cardDifference.toFixed(2)}`}
+                            readOnly
+                        />
+                    </div>
+                </section>
 
-                {/* Toggle Expense Fields */}
-                <div className="mt-4 flex items-center gap-2">
-                    <input type="checkbox" id="hasExpense" checked={hasExpense} onChange={() => setHasExpense(!hasExpense)} className="w-4 h-4" />
-                    <label htmlFor="hasExpense" className="text-gray-800 dark:text-gray-300 text-sm">
-                        Add reason for Over/(Short)
-                    </label>
-                </div>
 
-                {/* Expense Fields if Selected */}
-                {hasExpense && (
-                    <div>
-                        <div className="grid grid-cols-3 gap-2 md:gap-4 mt-3">
-                            {/* Expense Amount */}
+                <section className="mt-10">
+                    <div className="border-b border-gray-300 dark:border-gray-700 pb-2 mb-4">
+                        <h3 className="text-sm sm:text-base font-semibold tracking-wide text-gray-800 dark:text-gray-100 uppercase">
+                            Accessories
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            accessories sold in system and extra cash and card totals shown here.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                        <InputField
+                            label="System Accessories($)"
+                            type="number"
+                            step="0.01"
+                            className="text-sm"
+                            {...register("systemAccessories", { valueAsNumber: true })}
+                            error={errors.systemAccessories?.message}
+                        />
+                        <InputField
+                            label="Cash/Card Accessories($)"
+                            type="number"
+                            step="0.01"
+                            className="text-sm font-medium"
+                            value={accessoriesByEmployee.toFixed(2)}
+                            error={errors.accessoriesByEmployee?.message}
+                            readOnly
+                        />
+                        <InputField
+                            label="Last Transaction Time"
+                            type="time"
+                            step="1"
+                            placeholder="HH:mm:ss"
+                            className="text-sm"
+                            {...register("lastTransactionTime")}
+                            error={errors.lastTransactionTime?.message}
+                        />
+                    </div>
+                </section>
+
+
+                {/* Sales Section */}
+                <div className="mt-6">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3">SALES SUMMARY</h3>
+                    {/* ⚠️ Activations Warning */}
+                    {isActivationsFocused && (
+                        <div className="mb-4 px-4 py-3 rounded-md border-l-4 border-yellow-500 bg-yellow-100 dark:bg-yellow-800 animate-pulse-slow">
+                            <div className="flex items-start gap-2">
+                                <span className="text-yellow-700 dark:text-yellow-200 text-xl">⚠️</span>
+                                <div className="text-sm text-yellow-900 dark:text-yellow-100 leading-snug">
+                                    <strong>Important:</strong> This count must include <strong>preactivated phones</strong>.<br />
+                                    An invoice must be created if you <strong>preactivated any phones</strong> today.<br />
+                                    <span className="underline">Do not</span> include <strong>Tablets</strong>, <strong>HSI</strong>, or <strong>Watches</strong> here.
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ⚠️ Upgrades Warning */}
+                    {isUpgradesFocused && (
+                        <div className="mb-4 px-4 py-3 rounded-md border-l-4 border-orange-500 bg-orange-100 dark:bg-orange-800 animate-pulse-slow">
+                            <div className="flex items-start gap-2">
+                                <span className="text-orange-700 dark:text-orange-200 text-xl">⚠️</span>
+                                <div className="text-sm text-orange-900 dark:text-orange-100 leading-snug">
+                                    <strong>Important:</strong> Selling a <strong>preactivated phone does not count</strong> as an upgrade.
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ⚠️ Migrations Warning */}
+                    {isMigrationsFocused && (
+                        <div className="mb-4 px-4 py-3 rounded-md border-l-4 border-blue-500 bg-blue-100 dark:bg-blue-800 animate-pulse-slow">
+                            <div className="flex items-start gap-2">
+                                <span className="text-blue-700 dark:text-blue-200 text-xl">⚠️</span>
+                                <div className="text-sm text-blue-900 dark:text-blue-100 leading-snug">
+                                    <strong>Important:</strong> Migration count is <strong>1 per account, not per line</strong>.
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-3 gap-3">
+                        <div>
                             <InputField
-                                label="Amount"
+                                label="Activations (incl. BYOD)"
                                 type="number"
-                                step="0.01"
-                                {...register("cashExpense", { valueAsNumber: true })}
-                                error={errors.cashExpense?.message}
-                            />
-
-                            {/* Expense Type: Short or Over */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium mb-1">Expense Type</label>
-                                <select
-                                    {...register("expenseType")}
-                                    className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                >
-                                    <option value="">Select</option>
-                                    <option value="Short">Short</option>
-                                    <option value="Over">Over</option>
-                                </select>
-                                {errors.expenseType && (
-                                    <span className="text-xs text-red-500 mt-1">{errors.expenseType.message}</span>
-                                )}
-                            </div>
-
-                            {/* Payment Method: Cash or Card */}
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium mb-1">Payment Method</label>
-                                <select
-                                    {...register("paymentMethod")}
-                                    className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                                >
-                                    <option value="">Select</option>
-                                    <option value="Cash">Cash</option>
-                                    <option value="Card">Card</option>
-                                </select>
-                                {errors.paymentMethod && (
-                                    <span className="text-xs text-red-500 mt-1">{errors.paymentMethod.message}</span>
-                                )}
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1">
-                            {/* Expense Reason */}
-                            <InputField
-                                label="Reason"
-                                type="text"
-                                {...register("expenseReason")}
-                                error={errors.expenseReason?.message}
+                                {...register("boxesSold", { valueAsNumber: true })}
+                                error={errors.boxesSold?.message}
+                                onFocus={() => setIsActivationsFocused(true)}
+                                onBlur={() => setIsActivationsFocused(false)}
                             />
                         </div>
 
+                        <InputField
+                            label="Upgrades"
+                            type="number"
+                            {...register("upgrade", { valueAsNumber: true })}
+                            error={errors.upgrade?.message}
+                            onFocus={() => setIsUpgradesFocused(true)}
+                            onBlur={() => setIsUpgradesFocused(false)}
+                        />
+                        <InputField
+                            label="Migrations"
+                            type="number"
+                            {...register("migrations", { valueAsNumber: true })}
+                            error={errors.migrations?.message}
+                            onFocus={() => setIsMigrationsFocused(true)}
+                            onBlur={() => setIsMigrationsFocused(false)}
+                        />
+                        <InputField
+                            label="HSI"
+                            type="number"
+                            {...register("hsiSold", { valueAsNumber: true })}
+                            error={errors.hsiSold?.message}
+                        />
+                        <InputField
+                            label="Tablets"
+                            type="number"
+                            {...register("tabletsSold", { valueAsNumber: true })}
+                            error={errors.tabletsSold?.message}
+                        />
+                        <InputField
+                            label="Watches"
+                            type="number"
+                            {...register("watchesSold", { valueAsNumber: true })}
+                            error={errors.watchesSold?.message}
+                        />
                     </div>
-                )}
+                </div>
+
+
+                {/* Expenses Section */}
+                <div className="mt-8">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                        Expenses (Short / Over)
+                    </h3>
+
+                    <div className="space-y-6">
+                        {fields.map((field, index) => (
+                            <div
+                                key={field.id}
+                                className="relative border border-gray-300 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800 shadow-sm"
+                            >
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                                    <InputField
+                                        label="Amount"
+                                        type="number"
+                                        step="0.01"
+                                        {...register(`expenses.${index}.amount`, { valueAsNumber: true })}
+                                        error={errors.expenses?.[index]?.amount?.message}
+                                    />
+
+                                    <InputField
+                                        label="Reason"
+                                        type="text"
+                                        {...register(`expenses.${index}.reason`)}
+                                        error={errors.expenses?.[index]?.reason?.message}
+                                    />
+
+                                    <div className="flex flex-col">
+                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Type
+                                        </label>
+                                        <select
+                                            {...register(`expenses.${index}.expenseType`)}
+                                            className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="">Select</option>
+                                            <option value="Short">Short</option>
+                                            <option value="Over">Over</option>
+                                        </select>
+                                        {errors.expenses?.[index]?.expenseType?.message && (
+                                            <span className="text-xs text-red-500 mt-1">
+                                                {errors.expenses[index]?.expenseType?.message}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="flex flex-col">
+                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Method
+                                        </label>
+                                        <select
+                                            {...register(`expenses.${index}.paymentType`)}
+                                            className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="">Select</option>
+                                            <option value="Cash">Cash</option>
+                                            <option value="Card">Card</option>
+                                        </select>
+                                        {errors.expenses?.[index]?.paymentType?.message && (
+                                            <span className="text-xs text-red-500 mt-1">
+                                                {errors.expenses[index]?.paymentType?.message}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Remove Button */}
+                                <div className="absolute top-2 right-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => remove(index)}
+                                        className="text-red-600 text-xs font-medium hover:underline"
+                                    >
+                                        ✕ Remove
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Add Expense Button */}
+                    <div className="mt-4">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                append({
+                                    amount: 0,
+                                    reason: "",
+                                    expenseType: "Short",
+                                    paymentType: "Cash",
+                                })
+                            }
+                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition"
+                        >
+                            + Add Expense
+                        </button>
+                    </div>
+                </div>
+
+
 
 
                 {/* Individual Employee Sales Entry */}

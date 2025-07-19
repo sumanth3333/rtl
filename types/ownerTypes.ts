@@ -17,16 +17,20 @@ export const eodReportSchema = z.object({
     systemCard: z.number().nonnegative("System Card cannot be negative"),
     systemAccessories: z.number().nonnegative("System Accessories cannot be negative"),
     accessories: z.number().optional(), // ✅ Updated
-    cashExpense: z.number().nonnegative("Cash Expense cannot be negative").optional(),
-    expenseReason: z.string().optional(),
-    expenseType: z.string().optional(),
-    paymentMethod: z.string().optional(),
     boxesSold: z.number().nonnegative("Activations cannot be negative"),
     upgrade: z.number().nonnegative("Upgrades cannot be negative"),
     migrations: z.number().nonnegative("Migrations cannot be negative"),
     hsiSold: z.number().nonnegative("HSI cannot be negative"),
     tabletsSold: z.number().nonnegative("Tablets cannot be negative"),
     watchesSold: z.number().nonnegative("Watches cannot be negative"),
+    expenses: z.array(
+        z.object({
+            amount: z.number().nonnegative(),
+            reason: z.string().min(1),
+            expenseType: z.enum(["Short", "Over"]),
+            paymentType: z.enum(["Cash", "Card"]),
+        })
+    ).optional(),
     clockinTime: z.string().regex(
         /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/,
         "Invalid time format. Please enter time in HH:mm or HH:mm:ss format."
