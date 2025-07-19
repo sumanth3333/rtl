@@ -84,6 +84,12 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 hsiSold: initialValues.hsiSold ?? 0,
                 tabletsSold: initialValues.tabletsSold ?? 0,
                 watchesSold: initialValues.watchesSold ?? 0,
+                expenses: initialValues.expenses?.map((exp) => ({
+                    amount: exp.amount ?? 0,
+                    reason: exp.reason ?? "",
+                    expenseType: exp.expenseType ?? "Short",
+                    paymentType: exp.paymentType ?? "Cash",
+                })) ?? [],
             });
         }
     }, [store, employee, reset, initialValues]);
