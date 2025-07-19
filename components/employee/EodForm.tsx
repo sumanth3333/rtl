@@ -377,7 +377,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                             <div className="flex items-start gap-2">
                                 <span className="text-yellow-700 dark:text-yellow-200 text-xl">⚠️</span>
                                 <div className="text-sm text-yellow-900 dark:text-yellow-100 leading-snug">
-                                    <strong>Important:</strong> This count must include <strong>preactivated phones</strong>.<br />
+                                    <strong>Important:</strong> This count must include <strong>newly preactivated phones, not preact sold</strong>.<br />
                                     An invoice must be created if you <strong>preactivated any phones</strong> today.<br />
                                     <span className="underline">Do not</span> include <strong>Tablets</strong>, <strong>HSI</strong>, or <strong>Watches</strong> here.
                                 </div>
