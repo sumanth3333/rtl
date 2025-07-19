@@ -52,7 +52,7 @@ export default function PreactivationDeductionTable({
     }, [thresholds, setThresholds]);
 
 
-    if (!localPreact) return (
+    if (!localPreact) { return } (
         <div className="p-4 text-sm text-gray-500 dark:text-gray-400">
             Loading preactivation deduction settings...
         </div>
