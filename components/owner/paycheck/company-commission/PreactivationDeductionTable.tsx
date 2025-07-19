@@ -21,20 +21,13 @@ export default function PreactivationDeductionTable({
         preactOptions.includes(type as typeof preactOptions[number]);
 
     useEffect(() => {
-        // Skip if already initialized
-        if (initializedRef.current) { return; }
-
-        // Avoid running on placeholder-only thresholds
-        const isLoadedFromBackend = thresholds.some(t => t.thresholdId !== undefined);
-        if (!isLoadedFromBackend) { return };
-
         const preactThresholds = thresholds.filter((t) => isPreactType(t.itemType));
 
         if (preactThresholds.length === 1) {
             const existing = preactThresholds[0];
             setLocalPreact(existing);
             if (existing.itemType === "PERCENTAGE") {
-                setPercentageInput(existing.payAmount); // ✅ Already scaled
+                setPercentageInput(existing.payAmount);
             }
         } else if (preactThresholds.length === 0) {
             const defaultRule: Threshold = {
@@ -44,6 +37,7 @@ export default function PreactivationDeductionTable({
                 payAmount: 0,
             };
             setThresholds([...thresholds, defaultRule]);
+            setLocalPreact(defaultRule);
         } else {
             console.warn("⚠️ Multiple preact rules found. Keeping the first.");
             setThresholds([
@@ -55,12 +49,14 @@ export default function PreactivationDeductionTable({
                 setPercentageInput(preactThresholds[0].payAmount);
             }
         }
-
-        initializedRef.current = true;
     }, [thresholds, setThresholds]);
 
 
-    if (!localPreact) { return null; }
+    if (!localPreact) return (
+        <div className="p-4 text-sm text-gray-500 dark:text-gray-400">
+            Loading preactivation deduction settings...
+        </div>
+    );
 
     const updateThreshold = (updatedRule: Threshold) => {
         const updatedThresholds = thresholds
@@ -72,14 +68,14 @@ export default function PreactivationDeductionTable({
 
     const handleTypeChange = (type: Threshold["itemType"]) => {
         const updatedRule: Threshold = {
-            ...localPreact,
+            ...localPreact!,
             itemType: type,
             payAmount:
                 type === "PERCENTAGE"
                     ? percentageInput
                     : type === "INVOICE"
                         ? 0
-                        : localPreact.payAmount,
+                        : localPreact!.payAmount,
             minimumThreshold: 0,
             threshold: 0,
         };
@@ -89,14 +85,14 @@ export default function PreactivationDeductionTable({
     };
 
     const handleAmountChange = (value: number) => {
-        if (localPreact.itemType === "PERCENTAGE") {
+        if (localPreact!.itemType === "PERCENTAGE") {
             if (value < 0 || value > 100) {
                 setError("❌ Enter a value between 0 and 100%");
                 return;
             }
 
             const updatedRule: Threshold = {
-                ...localPreact,
+                ...localPreact!,
                 payAmount: value,
             };
 
@@ -104,7 +100,7 @@ export default function PreactivationDeductionTable({
             setPercentageInput(value);
         } else {
             const updatedRule: Threshold = {
-                ...localPreact,
+                ...localPreact!,
                 payAmount: value,
             };
 
@@ -116,10 +112,10 @@ export default function PreactivationDeductionTable({
 
     const sampleAccessories = 300;
     const estimatedDeduction =
-        localPreact.itemType === "PERCENTAGE"
-            ? (localPreact.payAmount / 100) * sampleAccessories
-            : localPreact.itemType === "PERBOX"
-                ? localPreact.payAmount
+        localPreact!.itemType === "PERCENTAGE"
+            ? (localPreact!.payAmount / 100) * sampleAccessories
+            : localPreact!.itemType === "PERBOX"
+                ? localPreact!.payAmount
                 : 0;
 
     return (
@@ -134,7 +130,7 @@ export default function PreactivationDeductionTable({
                         Deduction Type
                     </label>
                     <select
-                        value={localPreact.itemType}
+                        value={localPreact!.itemType}
                         onChange={(e) =>
                             handleTypeChange(e.target.value as Threshold["itemType"])
                         }
@@ -152,11 +148,11 @@ export default function PreactivationDeductionTable({
                     </select>
                 </div>
 
-                {(localPreact.itemType === "PERCENTAGE" ||
-                    localPreact.itemType === "PERBOX") && (
+                {(localPreact!.itemType === "PERCENTAGE" ||
+                    localPreact!.itemType === "PERBOX") && (
                         <div>
                             <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
-                                {localPreact.itemType === "PERCENTAGE"
+                                {localPreact!.itemType === "PERCENTAGE"
                                     ? "Deduction Percentage (1 to 100%)"
                                     : "Flat Deduction per Box ($)"}
                             </label>
@@ -164,11 +160,11 @@ export default function PreactivationDeductionTable({
                                 type="number"
                                 step="0.1"
                                 min={0}
-                                max={localPreact.itemType === "PERCENTAGE" ? 100 : undefined}
+                                max={localPreact!.itemType === "PERCENTAGE" ? 100 : undefined}
                                 value={
-                                    localPreact.itemType === "PERCENTAGE"
+                                    localPreact!.itemType === "PERCENTAGE"
                                         ? percentageInput
-                                        : localPreact.payAmount
+                                        : localPreact!.payAmount
                                 }
                                 onChange={(e) =>
                                     handleAmountChange(parseFloat(e.target.value) || 0)
@@ -179,12 +175,12 @@ export default function PreactivationDeductionTable({
                         </div>
                     )}
 
-                {(localPreact.itemType === "PERCENTAGE" ||
-                    localPreact.itemType === "PERBOX") && (
+                {(localPreact!.itemType === "PERCENTAGE" ||
+                    localPreact!.itemType === "PERBOX") && (
                         <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
                             🧮 Estimated Deduction:{" "}
                             <strong>${estimatedDeduction.toFixed(2)}</strong>{" "}
-                            {localPreact.itemType === "PERCENTAGE"
+                            {localPreact!.itemType === "PERCENTAGE"
                                 ? `(on $${sampleAccessories} accessories)`
                                 : ""}
                         </p>
