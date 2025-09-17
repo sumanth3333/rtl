@@ -97,3 +97,116 @@ pre {
   background-color: theme(colors.zinc.800);
   transition: background 0.3s ease-in-out;
 }
+
+/* ===================== PRINT FIXES (robust) ===================== */
+@media print {
+  @page {
+    margin: 12mm;
+    /* adjust as you like */
+    size: auto;
+  }
+
+  /* Ensure the app expands naturally on paper */
+  html,
+  body,
+  #__next,
+  #__next>div {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Kill sticky/fixed so sections flow across pages */
+  .fixed,
+  .sticky {
+    position: static !important;
+    inset: auto !important;
+  }
+
+  /* Neutralize common height & overflow culprits */
+  .h-screen,
+  .min-h-screen,
+  .max-h-screen,
+  .h-full,
+  .min-h-full,
+  .max-h-full,
+  .overflow-hidden,
+  .overflow-auto,
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .overflow-scroll,
+  .overscroll-none,
+  .overscroll-y-none,
+  .overscroll-x-none {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Handle Tailwind arbitrary heights like h-[calc(100vh-64px)] / max-h-[...] */
+  [class*="h-["],
+  [class*="max-h-["],
+  [class*="min-h-["] {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Some layouts use transforms to create layers; disable to avoid “print only what you see” */
+  [style*="transform"],
+  [class*="transform"],
+  .transform,
+  .transform-gpu,
+  .transform-cpu,
+  .scale-100,
+  .scale-95,
+  .scale-90 {
+    transform: none !important;
+  }
+
+  /* Make sure widths aren’t constrained to centered containers */
+  .container,
+  [class*="max-w-"],
+  .mx-auto {
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  /* Hide pure UI chrome / controls you don’t want on paper */
+  .print-hidden,
+  .no-print,
+  nav,
+  aside,
+  button,
+  [role="button"],
+  .btn,
+  .toggle,
+  .switch {
+    display: none !important;
+  }
+
+  /* Remove decorative effects that look odd on paper */
+  .shadow,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg,
+  .backdrop-blur,
+  .backdrop-blur-sm {
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Optional helpers */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+}

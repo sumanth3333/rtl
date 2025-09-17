@@ -13,6 +13,7 @@ import ConfirmationModal from "../ui/modals/ConfirmationModal";
 import SuccessModal from "../ui/modals/SuccessModal";
 import { useLogout } from "@/hooks/useLogout";
 import { useFieldArray } from "react-hook-form";
+import apiClient from "@/services/api/apiClient";
 
 export default function EodForm({ initialValues }: { initialValues: EodReport }) {
     const { employee, store } = useEmployee();
@@ -29,6 +30,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const [isActivationsFocused, setIsActivationsFocused] = useState(false);
     const [isUpgradesFocused, setIsUpgradesFocused] = useState(false);
     const [isMigrationsFocused, setIsMigrationsFocused] = useState(false);
+    const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
 
     const logout = useLogout();
 
@@ -85,6 +87,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 tabletsSold: initialValues.tabletsSold ?? 0,
                 watchesSold: initialValues.watchesSold ?? 0,
                 expenses: initialValues.expenses?.map((exp) => ({
+                    expenseId: exp.id,
                     amount: exp.amount ?? 0,
                     reason: exp.reason ?? "",
                     expenseType: exp.expenseType ?? "Short",
@@ -100,7 +103,27 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
 
     let adjustedActualCash = watch("actualCash") ?? 0;
     let adjustedActualCard = watch("actualCard") ?? 0;
+    async function handleDeleteExpense(expenseId: number, index: number) {
+        console.log(expenseId, index);
+        if (expenseId === 0) {
+            // 🟢 Just remove locally
+            remove(index);
+            return;
+        }
 
+        try {
+            setDeletingIndex(index);
+            await apiClient.delete(`/expense/deleteEodExpense`, {
+                params: { expenseId },
+            });
+            remove(index); // ✅ Remove from UI only after success
+        } catch (err) {
+            console.error("❌ Failed to delete expense:", err);
+            alert("Failed to delete expense. Please try again.");
+        } finally {
+            setDeletingIndex(null);
+        }
+    }
     for (const exp of expenses) {
         if (exp.paymentType === "Cash") {
             adjustedActualCash += exp.expenseType === "Short" ? exp.amount : -exp.amount;
@@ -137,7 +160,10 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const onSubmit = async (data: EodReport) => {
         console.log(data);
         if (!confirmClockOut) {
-            alert("⚠️ You must confirm clock-out before submitting.");
+            setValidationErrors((prev) => ({
+                ...prev,
+                confirmClockOut: "You must confirm clock-out before submitting.",
+            }));
             return;
         }
         let adjustedActualCash = data.actualCash ?? 0;
@@ -201,6 +227,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             tabletsSold: parseFloat((data.tabletsSold ?? 0).toFixed(2)),
             watchesSold: parseFloat((data.watchesSold ?? 0).toFixed(2)),
             expenses: data.expenses?.map(exp => ({
+                id: exp.id,
                 amount: parseFloat(exp.amount.toFixed(2)),
                 reason: exp.reason,
                 expenseType: exp.expenseType,
@@ -526,16 +553,37 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                     </div>
                                 </div>
 
-                                {/* Remove Button */}
                                 <div className="absolute top-2 right-2">
                                     <button
                                         type="button"
-                                        onClick={() => remove(index)}
+                                        onClick={async () => {
+                                            const expense = fields[index] as typeof fields[number] & { expenseId?: number };
+                                            console.log("Expense clicked for removal:", expense);
+
+                                            if (!expense.expenseId || expense.expenseId === 0) {
+                                                // 🟢 Just added, not in DB → remove locally
+                                                remove(index);
+                                            } else {
+                                                try {
+                                                    await apiClient.delete(`/expense/deleteEodExpense`, {
+                                                        params: { expenseId: expense.expenseId },
+                                                    });
+
+                                                    // 🟢 Remove locally only after success
+                                                    remove(index);
+                                                } catch (err) {
+                                                    console.error("❌ Error deleting expense:", err);
+                                                    alert("Failed to delete expense. Please try again.");
+                                                }
+                                            }
+                                        }}
                                         className="text-red-600 text-xs font-medium hover:underline"
                                     >
                                         ✕ Remove
                                     </button>
                                 </div>
+
+
                             </div>
                         ))}
                     </div>
@@ -546,6 +594,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                             type="button"
                             onClick={() =>
                                 append({
+                                    id: 0,
                                     amount: 0,
                                     reason: "",
                                     expenseType: "Short",
@@ -558,9 +607,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                         </button>
                     </div>
                 </div>
-
-
-
 
                 {/* Individual Employee Sales Entry */}
                 {showIndividualForm && (
@@ -648,21 +694,23 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                     </div>
                 )}
 
-
-                {/* Confirm Clock-Out */}
                 <div className="my-6 flex items-center gap-2">
-                    <input type="checkbox" id="confirmClockOut" checked={confirmClockOut}
-                        onChange={() => {
-                            setConfirmClockOut(!confirmClockOut);
-                        }
-                        }
+                    <input
+                        type="checkbox"
+                        id="confirmClockOut"
+                        checked={confirmClockOut}
+                        onChange={() => setConfirmClockOut(!confirmClockOut)}
                         className="w-4 h-4"
                     />
                     <label htmlFor="confirmClockOut" className="text-gray-800 dark:text-gray-300 text-sm">
-                        I understand that, any inaccurate information provided leads to <strong>loss of pay (or) termination </strong>
-                        & submitting this form <strong>automatically clocks me out</strong>.
+                        I understand that, any inaccurate information provided leads to <strong>loss of pay (or) termination</strong> &
+                        submitting this form <strong>automatically clocks me out</strong>.
                     </label>
                 </div>
+                {validationErrors.confirmClockOut && (
+                    <p className="text-xs text-red-600 mt-1">{validationErrors.confirmClockOut}</p>
+                )}
+
 
                 <Button type="submit" variant="primary" isLoading={loading} fullWidth disabled={!confirmClockOut}>
                     Submit Report

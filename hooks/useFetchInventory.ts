@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchInventory, InventoryItem } from "@/services/inventory/inventoryService";
+import { fetchInventory, InventoryGrouped, InventoryItem } from "@/services/inventory/inventoryService";
 import { useState, useEffect } from "react";
 
 export function useFetchInventory(dealerStoreId: string) {
@@ -9,13 +9,20 @@ export function useFetchInventory(dealerStoreId: string) {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!dealerStoreId) { return; }
+        if (!dealerStoreId) return;
 
         const fetchAvailableInventory = async () => {
             try {
                 const data = await fetchInventory(dealerStoreId);
-                setInventory(data.products);
+
+                // ✅ Flatten all inStock arrays from all brands
+                const allInStock = data.storeInventory.flatMap(
+                    (group: InventoryGrouped) => group.inStock
+                );
+
+                setInventory(allInStock);
             } catch (err) {
+                console.error("❌ Error fetching inventory:", err);
                 setError("Failed to fetch inventory");
             } finally {
                 setIsLoading(false);
