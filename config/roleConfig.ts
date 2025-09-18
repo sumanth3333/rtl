@@ -64,11 +64,11 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/employee/eod-report",
             icon: DocumentTextIcon
         },
-        {
-            name: "EOD Remarks",
-            path: "/dashboard/employee/eod-remarks",
-            icon: ClipboardDocumentCheckIcon
-        },
+        // {
+        //     name: "EOD Remarks",
+        //     path: "/dashboard/employee/eod-remarks",
+        //     icon: ClipboardDocumentCheckIcon
+        // },
         {
             name: "Inventory Management",
             path: "/dashboard/employee/log-inventory",
@@ -83,6 +83,11 @@ export const sidebarLinks: Record<Role, {
             name: "Raise A Request",
             path: "/dashboard/employee/raise-request",
             icon: PencilSquareIcon
+        },
+        {
+            name: "Settings",
+            path: "/dashboard/employee/settings",
+            icon: Settings,
         }
 
     ],

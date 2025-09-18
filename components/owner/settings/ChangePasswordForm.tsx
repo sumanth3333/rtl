@@ -77,7 +77,6 @@ export default function ChangePasswordForm() {
                 currentPassword: oldPwd,
                 password: newPwd,
             });
-            console.log(response);
             toast.success("Password changed successfully.");
             playNotificationSound();
             setOldPwd("");

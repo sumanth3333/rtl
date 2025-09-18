@@ -7,6 +7,7 @@ import { useOwner } from "./useOwner";
 import { useEmployee } from "./useEmployee";
 import { AxiosError } from "axios";
 import { login } from "@/services/auth/authService";
+import { isPhoneDevice } from "@/utils/deviceType";
 
 const loginSchema = z.object({
     userName: z.string().min(6, "Valid Username or Store ID is required"),
@@ -31,6 +32,11 @@ export function useLogin(onLoginSuccess: () => void) {
         // 🚨 Determine if the user is an employee by checking for '@' in username
         const isEmployee = !data.userName.includes("@");
 
+        // Block employees on phones (UA-based, not just width)
+        if (isEmployee && isPhoneDevice()) {
+            setErrorMessage("Employee login is not available on phones. Please use a store tablet.");
+            return;
+        }
         // 🚨 Block employees from logging in on small screens before making any request
         if (isEmployee && window.innerWidth < 768) {
             setErrorMessage("Employee login is not available on phones. Please use a store tablet.");

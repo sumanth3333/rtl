@@ -1,4 +1,3 @@
-// components/employee/inventory/InventoryGroupedTable.tsx
 "use client";
 
 import {
@@ -18,7 +17,7 @@ interface Props {
     idToIndex: Map<number, number>;
     getValues: UseFormGetValues<InventoryFormValues>;
     setValue: UseFormSetValue<InventoryFormValues>;
-    onQuantityChange: (id: number, qty: number) => void;
+    onQuantityChange: (id: number, qty: number, regroup?: boolean) => void;
 }
 
 export default function InventoryGroupedTable({
@@ -62,9 +61,12 @@ export default function InventoryGroupedTable({
                 key={item.id}
                 className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
             >
-                {/* Name wraps; never hidden */}
+                {/* Product Name */}
                 <div className="min-w-0 flex items-center gap-2">
-                    <span className={`whitespace-normal break-words ${variant === "out" ? "text-gray-700 dark:text-gray-300" : "font-medium"}`}>
+                    <span
+                        className={`whitespace-normal break-words ${variant === "out" ? "text-gray-700 dark:text-gray-300" : "font-medium"
+                            }`}
+                    >
                         {item.productName}
                     </span>
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${badge}`}>
@@ -72,7 +74,7 @@ export default function InventoryGroupedTable({
                     </span>
                 </div>
 
-                {/* Qty right-aligned */}
+                {/* Editable Quantity */}
                 <Controller
                     name={`products.${idx}.quantity`}
                     control={control}
@@ -81,23 +83,28 @@ export default function InventoryGroupedTable({
                             {...field}
                             type="number"
                             min={0}
-                            className={`w-20 h-9 text-center rounded-md border shadow-sm transition
-                ${hasError ? "border-red-500 focus:ring-red-500"
-                                    : "border-gray-300 focus:border-blue-500 focus:ring-blue-300 dark:focus:ring-blue-600"}
+                            className={`w-20 h-10 sm:h-11 text-center rounded-md border shadow-sm transition
+                ${hasError
+                                    ? "border-red-500 focus:ring-red-500"
+                                    : "border-gray-300 focus:border-blue-500 focus:ring-blue-300 dark:focus:ring-blue-600"
+                                }
                 bg-gray-50 dark:bg-gray-800 dark:text-white`}
                             value={Number.isFinite(field.value as number) ? field.value : 0}
                             onChange={(e) => {
                                 const v = Number(e.target.value);
                                 field.onChange(v);
-                                onQuantityChange(Number(item.id), v);
+                                onQuantityChange(Number(item.id), v, false); // ✅ update but don't regroup
                             }}
+                            onBlur={() => onQuantityChange(Number(item.id), Number(field.value), true)} // ✅ regroup after leaving input
                             aria-label={`${item.productName} quantity`}
                         />
                     )}
                 />
                 {hasError && (
                     <div className="col-span-2 text-right">
-                        <p className="text-xs text-red-500">{errors.products?.[idx]?.quantity?.message as string}</p>
+                        <p className="text-xs text-red-500">
+                            {errors.products?.[idx]?.quantity?.message as string}
+                        </p>
                     </div>
                 )}
             </div>
@@ -105,7 +112,14 @@ export default function InventoryGroupedTable({
     };
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div
+            className="
+        grid gap-5 
+        grid-cols-1
+        sm:grid-cols-2
+        md:grid-cols-[repeat(auto-fit,minmax(320px,1fr))]
+      "
+        >
             {groupedInventory.map((group) => (
                 <div
                     key={group.brand}
@@ -117,10 +131,15 @@ export default function InventoryGroupedTable({
 
                     {group.inStock.length > 0 && (
                         <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-                            <div className="mb-2 text-xs font-semibold text-green-700 dark:text-green-400">In Stock</div>
+                            <div className="mb-2 text-xs font-semibold text-green-700 dark:text-green-400">
+                                In Stock
+                            </div>
                             <div className="flex flex-col gap-2">
                                 {group.inStock.map((item) =>
-                                    GridRow({ ...item, id: Number(item.id), quantity: item.quantity ?? 0 }, "in")
+                                    GridRow(
+                                        { ...item, id: Number(item.id), quantity: item.quantity ?? 0 },
+                                        "in"
+                                    )
                                 )}
                             </div>
                         </div>
@@ -128,10 +147,15 @@ export default function InventoryGroupedTable({
 
                     {group.outofStock.length > 0 && (
                         <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-                            <div className="mb-2 text-xs font-semibold text-red-700 dark:text-red-400">Out of Stock</div>
+                            <div className="mb-2 text-xs font-semibold text-red-700 dark:text-red-400">
+                                Out of Stock
+                            </div>
                             <div className="flex flex-col gap-2">
                                 {group.outofStock.map((item) =>
-                                    GridRow({ ...item, id: Number(item.id), quantity: item.quantity ?? 0 }, "out")
+                                    GridRow(
+                                        { ...item, id: Number(item.id), quantity: item.quantity ?? 0 },
+                                        "out"
+                                    )
                                 )}
                             </div>
                         </div>

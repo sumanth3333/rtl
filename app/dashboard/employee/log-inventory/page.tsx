@@ -1,4 +1,3 @@
-// app/(employee)/inventory/page.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -6,7 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { fetchInventory, updateInventory } from "@/services/inventory/inventoryService";
-import type { InventoryGrouped, InventoryItem, StoreInventoryResponse } from "@/services/inventory/inventoryService";
+import type {
+    InventoryGrouped,
+    InventoryItem,
+    StoreInventoryResponse,
+} from "@/services/inventory/inventoryService";
 import { inventorySchema, type InventoryFormValues } from "@/schemas/InventoryFormSchema";
 
 import { useEmployee } from "@/hooks/useEmployee";
@@ -18,7 +21,6 @@ import InventoryGroupedTable from "@/components/employee/inventory/InventoryGrou
 
 export default function InventoryPage() {
     const [groupedInventory, setGroupedInventory] = useState<InventoryGrouped[]>([]);
-    const [flatProducts, setFlatProducts] = useState<InventoryItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>("");
     const [updatedPerson, setUpdatedPerson] = useState<string | null>(null);
@@ -71,18 +73,24 @@ export default function InventoryPage() {
                 const flattened: InventoryItem[] = [];
                 resp.storeInventory.forEach((group) => {
                     group.inStock.forEach((i) =>
-                        flattened.push({ id: Number(i.id), productName: i.productName, quantity: i.quantity ?? 0 })
+                        flattened.push({
+                            id: Number(i.id),
+                            productName: i.productName,
+                            quantity: i.quantity ?? 0,
+                        })
                     );
                     group.outofStock.forEach((i) =>
-                        flattened.push({ id: Number(i.id), productName: i.productName, quantity: i.quantity ?? 0 })
+                        flattened.push({
+                            id: Number(i.id),
+                            productName: i.productName,
+                            quantity: i.quantity ?? 0,
+                        })
                     );
                 });
-                setFlatProducts(flattened);
 
                 setUpdatedPerson(resp.updatedPerson);
                 setUpdatedTime(resp.updatedTime);
                 setUpdatedDate(resp.updatedDate);
-
                 reset({ dealerStoreId, products: flattened });
             } catch (err) {
                 setError("Failed to load inventory. " + err);
@@ -90,8 +98,7 @@ export default function InventoryPage() {
                 setLoading(false);
             }
         })();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dealerStoreId, store, employee]);
+    }, [dealerStoreId, store, employee, reset]);
 
     const productsWatch = watch("products") ?? [];
     const idToIndex = useMemo(() => {
@@ -100,41 +107,35 @@ export default function InventoryPage() {
         return map;
     }, [productsWatch]);
 
-    // Live mover + keep form in sync
-    const onQuantityChange = (id: number, newQty: number) => {
+    // ✅ Updated quantity change logic (no live re-group)
+    const onQuantityChange = (id: number, newQty: number, regroup = false) => {
         const idx = idToIndex.get(Number(id));
         if (idx !== undefined) {
             setValue(`products.${idx}.quantity`, newQty, { shouldDirty: true });
         }
 
-        setGroupedInventory((prev) => {
-            const next = prev.map((g) => ({
-                brand: g.brand,
-                inStock: [...g.inStock],
-                outofStock: [...g.outofStock],
-            }));
+        setGroupedInventory((prev) =>
+            prev.map((g) => {
+                const updatedInStock = g.inStock.map((x) =>
+                    Number(x.id) === id ? { ...x, quantity: newQty } : x
+                );
+                const updatedOutStock = g.outofStock.map((x) =>
+                    Number(x.id) === id ? { ...x, quantity: newQty } : x
+                );
 
-            for (const group of next) {
-                let source: "in" | "out" | null = null;
-                let pos = group.inStock.findIndex((x) => Number(x.id) === Number(id));
-                if (pos > -1) { source = "in"; }
-                if (source === null) {
-                    pos = group.outofStock.findIndex((x) => Number(x.id) === Number(id));
-                    if (pos > -1) { source = "out"; }
+                // regroup only after blur/save
+                if (regroup) {
+                    const all = [...updatedInStock, ...updatedOutStock];
+                    return {
+                        ...g,
+                        inStock: all.filter((p) => p.quantity > 0),
+                        outofStock: all.filter((p) => p.quantity === 0),
+                    };
                 }
-                if (source === null) { continue; }
 
-                const item = source === "in" ? group.inStock.splice(pos, 1)[0] : group.outofStock.splice(pos, 1)[0];
-                item.quantity = newQty;
-                const target = newQty > 0 ? "inStock" : "outofStock";
-                (group as any)[target].push(item);
-
-                group.inStock.sort((a, b) => a.productName.localeCompare(b.productName));
-                group.outofStock.sort((a, b) => a.productName.localeCompare(b.productName));
-                break;
-            }
-            return next;
-        });
+                return { ...g, inStock: updatedInStock, outofStock: updatedOutStock };
+            })
+        );
     };
 
     const onSave = handleSubmit(async (form) => {
@@ -142,7 +143,7 @@ export default function InventoryPage() {
             await updateInventory(dealerStoreId, form.products, employeeNtid);
             setUpdateSuccess(true);
             setTimeout(() => {
-                window.location.reload(); // hard refresh regardless of changes
+                window.location.reload();
             }, 600);
         } catch (err) {
             setError("Failed to update inventory. " + err);
@@ -150,15 +151,19 @@ export default function InventoryPage() {
     });
 
     return (
-        <main className="w-full min-h-screen px-4 sm:px-8 md:px-12 lg:px-16 pb-8 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-200 transition-all duration-300">
-            {/* Sticky Header */}
-            <header className="sticky top-0 z-40 bg-gray-50 dark:bg-gray-900 shadow-sm border-b border-gray-300 dark:border-gray-700 py-4 mb-6">
+        <main className="w-full min-h-screen px-4 sm:px-8 md:px-12 lg:px-16 pb-8 bg-gray-50 dark:bg-gray-900">
+            {/* ✅ TRUE sticky header */}
+            <header className="sticky top-0 z-50 bg-gray-50 dark:bg-gray-900 shadow border-b border-gray-300 dark:border-gray-700 py-3 mb-4">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Store Inventory</h1>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                            Store Inventory
+                        </h1>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             Last Updated by{" "}
-                            <span className="font-semibold text-gray-700 dark:text-gray-300">{updatedPerson}</span>{" "}
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">
+                                {updatedPerson}
+                            </span>{" "}
                             on <span className="font-semibold">{updatedDate}</span> at{" "}
                             <span className="font-semibold">{updatedTime}</span>
                         </p>
@@ -173,16 +178,16 @@ export default function InventoryPage() {
                     </button>
                 </div>
             </header>
+
             {/* --- SEARCH PANEL --- */}
-            <section
-                aria-label="Inventory search across locations"
-                className="mb-8 rounded-3xl border border-sky-200 dark:border-sky-900/60 bg-sky-50/60 dark:bg-sky-950/30 shadow-sm backdrop-blur-sm"
-            >
+            <section className="mb-8 rounded-3xl border border-sky-200 dark:border-sky-900/60 bg-sky-50/60 dark:bg-sky-950/30 shadow-sm backdrop-blur-sm">
                 <div className="px-4 sm:px-6 py-4 flex items-center gap-2 border-b border-sky-200/70 dark:border-sky-800/60">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200">
                         Search
                     </span>
-                    <h2 className="text-sm font-semibold text-sky-900 dark:text-sky-200">Find devices across stores</h2>
+                    <h2 className="text-sm font-semibold text-sky-900 dark:text-sky-200">
+                        Find devices across stores
+                    </h2>
                 </div>
 
                 <div className="px-4 sm:px-6 py-4">
@@ -190,7 +195,7 @@ export default function InventoryPage() {
                 </div>
             </section>
 
-            {/* --- SECTION DIVIDER --- */}
+            {/* Divider */}
             <div className="relative my-6">
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent" />
                 <div className="absolute -top-3 left-4 sm:left-6">
@@ -203,7 +208,9 @@ export default function InventoryPage() {
             {/* Content */}
             <section aria-label="Editable inventory by brand" className="w-full mt-4">
                 {loading ? (
-                    <p className="text-center text-gray-600 dark:text-gray-300">Loading inventory...</p>
+                    <p className="text-center text-gray-600 dark:text-gray-300">
+                        Loading inventory...
+                    </p>
                 ) : error ? (
                     <p className="text-center text-red-500">{error}</p>
                 ) : (

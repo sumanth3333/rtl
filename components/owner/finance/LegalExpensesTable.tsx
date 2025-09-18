@@ -102,8 +102,6 @@ export default function LegalExpensesTable({ data, month, onUpdate, onSave }: Pr
                 month: row.month,
             }));
 
-            console.log("Saving payload:", payload);
-
             await onSave(payload);
 
             const cleaned = tableData.map(row => ({
