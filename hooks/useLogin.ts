@@ -34,12 +34,16 @@ export function useLogin(onLoginSuccess: () => void) {
 
         // Block employees on phones (UA-based, not just width)
         if (isEmployee && isPhoneDevice()) {
-            setErrorMessage("Employee login is not available on phones. Please use a store tablet.");
+            setErrorMessage("📱 Oh, look who’s back on their phone! 👀\n\n" +
+                "Nice try — but employee logins are *officially* blocked on phones now. " +
+                "Grab a store tablet like everyone else. 😎");
             return;
         }
         // 🚨 Block employees from logging in on small screens before making any request
         if (isEmployee && window.innerWidth < 768) {
-            setErrorMessage("Employee login is not available on phones. Please use a store tablet.");
+            setErrorMessage("📱 Oh, look who’s back on their phone! 👀\n\n" +
+                "Nice try — but employee logins are *officially* blocked on phones now. " +
+                "Grab a store tablet like everyone else. 😎");
             return; // ❌ STOP LOGIN PROCESS HERE
         }
 
