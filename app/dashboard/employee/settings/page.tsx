@@ -19,13 +19,13 @@ export default function SettingsPage() {
     const [darkMode, setDarkMode] = useState(false);
     const [notifications, setNotifications] = useState(false);
     const [wifiRestriction, setWifiRestriction] = useState(false);
+    const [uaDetails, setUaDetails] = useState("");
 
     useEffect(() => {
         const ua = navigator.userAgent || navigator.vendor || (window as any).opera || "";
-
         // ✅ Device detection using your util
         const deviceType = isPhoneDevice() ? "Phone" : /iPad|Tablet/i.test(ua) ? "Tablet" : "Desktop";
-
+        setUaDetails(ua);
         // ✅ Browser detection
         let browser = "Unknown";
         if (/chrome|crios|crmo/i.test(ua)) { browser = "Chrome"; }
@@ -61,6 +61,7 @@ export default function SettingsPage() {
                         <li><strong>Device Type:</strong> {deviceInfo.deviceType}</li>
                         <li><strong>Browser:</strong> {deviceInfo.browser}</li>
                         <li><strong>Operating System:</strong> {deviceInfo.os}</li>
+                        <li>{uaDetails}</li>
                     </ul>
                 </div>
 
