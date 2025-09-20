@@ -1,6 +1,8 @@
 // utils/deviceType.ts
 export function isPhoneDevice(): boolean {
-    if (typeof navigator === "undefined") return false;
+    if (typeof navigator === "undefined") {
+        return false;
+    }
 
     const ua = navigator.userAgent || navigator.vendor || (window as any).opera || "";
 
@@ -9,17 +11,28 @@ export function isPhoneDevice(): boolean {
         (navigator as any).userAgentData?.platform === "macOS" &&
         (navigator as any).maxTouchPoints > 1;
 
-    const isIPad = /iPad/.test(ua) || isIpadOSDesktopUA;
+    let isIPad = false;
+    if (/iPad/.test(ua) || isIpadOSDesktopUA) {
+        isIPad = true;
+    }
 
-    // ✅ Detect Android & Tablet
     const isAndroid = /Android/.test(ua);
-    const isAndroidTablet = isAndroid && !/Mobile/.test(ua);
+    let isAndroidTablet = false;
+    if (isAndroid && !/Mobile/.test(ua)) {
+        isAndroidTablet = true;
+    }
 
-    const isTablet = isIPad || isAndroidTablet;
+    let isTablet = false;
+    if (isIPad || isAndroidTablet) {
+        isTablet = true;
+    }
 
-    // ✅ Detect Phone UA
     const isPhoneUA =
         /Mobi|iPhone|iPod|Android.*Mobile|Windows Phone|Mobile Safari/i.test(ua);
 
-    return isPhoneUA && !isTablet;
+    if (isPhoneUA && !isTablet) {
+        return true;
+    } else {
+        return false;
+    }
 }

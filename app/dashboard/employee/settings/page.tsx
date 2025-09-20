@@ -16,45 +16,47 @@ export default function SettingsPage() {
         os: "Detecting...",
     });
 
-    const [darkMode, setDarkMode] = useState(false);
-    const [notifications, setNotifications] = useState(false);
-    const [wifiRestriction, setWifiRestriction] = useState(false);
     const [uaDetails, setUaDetails] = useState("");
 
     useEffect(() => {
         const ua = navigator.userAgent || navigator.vendor || (window as any).opera || "";
+        setUaDetails(ua);
 
-        // ✅ Touch detection
-        const hasTouch = (navigator as any).maxTouchPoints > 1;
-
-        // ✅ Viewport width heuristic (phones usually < 768px)
-        const isSmallScreen = window.innerWidth < 768;
-
-        // ✅ Device Type
+        // ✅ Use the util
         let deviceType = "Desktop";
-
-        if (hasTouch && isSmallScreen) {
+        if (isPhoneDevice()) {
             deviceType = "Phone";
-        } else if (hasTouch && !isSmallScreen) {
+        } else if ((navigator as any).maxTouchPoints > 1 && window.innerWidth >= 768) {
             deviceType = "Tablet";
         }
 
         // ✅ Browser detection
         let browser = "Unknown";
-        if (/chrome|crios|crmo/i.test(ua)) browser = "Chrome";
-        else if (/firefox|fxios/i.test(ua)) browser = "Firefox";
-        else if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) browser = "Safari";
-        else if (/edg/i.test(ua)) browser = "Edge";
+        if (/chrome|crios|crmo/i.test(ua)) {
+            browser = "Chrome";
+        } else if (/firefox|fxios/i.test(ua)) {
+            browser = "Firefox";
+        } else if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) {
+            browser = "Safari";
+        } else if (/edg/i.test(ua)) {
+            browser = "Edge";
+        }
 
-        // ✅ OS detection (use userAgentData if available)
+        // ✅ OS detection
         let os = "Unknown";
         if ((navigator as any).userAgentData?.platform) {
             os = (navigator as any).userAgentData.platform;
-        } else if (/windows/i.test(ua)) os = "Windows";
-        else if (/macintosh|mac os x/i.test(ua)) os = "MacOS";
-        else if (/android/i.test(ua)) os = "Android";
-        else if (/ios|iphone|ipad/i.test(ua)) os = "iOS";
-        else if (/linux/i.test(ua)) os = "Linux";
+        } else if (/windows/i.test(ua)) {
+            os = "Windows";
+        } else if (/macintosh|mac os x/i.test(ua)) {
+            os = "MacOS";
+        } else if (/android/i.test(ua)) {
+            os = "Android";
+        } else if (/ios|iphone|ipad/i.test(ua)) {
+            os = "iOS";
+        } else if (/linux/i.test(ua)) {
+            os = "Linux";
+        }
 
         setDeviceInfo({ deviceType, browser, os });
     }, []);
@@ -76,59 +78,9 @@ export default function SettingsPage() {
                         <li><strong>Device Type:</strong> {deviceInfo.deviceType}</li>
                         <li><strong>Browser:</strong> {deviceInfo.browser}</li>
                         <li><strong>Operating System:</strong> {deviceInfo.os}</li>
-                        <li>{window.innerWidth < 768}</li>
-                        <li>{(navigator as any).maxTouchPoints}</li>
+                        <li className="break-all text-xs text-gray-500 dark:text-gray-400">{uaDetails}</li>
                     </ul>
                 </div>
-
-                {/* Preferences Section */}
-                {/* <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mb-6">
-                    <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">
-                        Preferences
-                    </h2>
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">Enable Dark Mode</span>
-                        <input
-                            type="checkbox"
-                            checked={darkMode}
-                            onChange={() => setDarkMode(!darkMode)}
-                            className="w-5 h-5 accent-blue-600"
-                        />
-                    </div>
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">Allow Notifications</span>
-                        <input
-                            type="checkbox"
-                            checked={notifications}
-                            onChange={() => setNotifications(!notifications)}
-                            className="w-5 h-5 accent-blue-600"
-                        />
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-gray-300">
-                            Restrict Login to Store Wi-Fi
-                        </span>
-                        <input
-                            type="checkbox"
-                            checked={wifiRestriction}
-                            onChange={() => setWifiRestriction(!wifiRestriction)}
-                            className="w-5 h-5 accent-blue-600"
-                        />
-                    </div>
-                </div> */}
-
-                {/* Save Button */}
-                {/* <div className="flex justify-center">
-                    <button
-                        onClick={() => {
-                            console.log("Saved settings:", { darkMode, notifications, wifiRestriction });
-                            alert("Settings saved successfully!");
-                        }}
-                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow transition"
-                    >
-                        Save Changes
-                    </button>
-                </div> */}
             </div>
         </div>
     );
