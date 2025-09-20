@@ -17,17 +17,35 @@ export default function SettingsPage() {
     });
 
     const [uaDetails, setUaDetails] = useState("");
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
     useEffect(() => {
         const ua = navigator.userAgent || navigator.vendor || (window as any).opera || "";
         setUaDetails(ua);
 
-        // ✅ Use the util
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        setDimensions({ width, height });
+
         let deviceType = "Desktop";
+
         if (isPhoneDevice()) {
             deviceType = "Phone";
-        } else if ((navigator as any).maxTouchPoints > 1 && window.innerWidth >= 820) {
+        }
+        else if ((navigator as any).maxTouchPoints > 1 && width >= 820) {
             deviceType = "Tablet";
+
+            const aspectRatio = height / width;
+
+            // ✅ 1) Portrait phones in desktop site mode
+            if (aspectRatio > 1.65) {
+                deviceType = "Phone";
+            }
+
+            // ✅ 2) Landscape phones (too short height)
+            if (height < 550) {
+                deviceType = "Phone";
+            }
         }
 
         // ✅ Browser detection
@@ -61,7 +79,6 @@ export default function SettingsPage() {
         setDeviceInfo({ deviceType, browser, os });
     }, []);
 
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#E3F2FD] via-[#BBDEFB] to-[#90CAF9] dark:from-[#0F172A] dark:via-[#1E293B] dark:to-[#334155] py-10 px-6">
             <div className="max-w-3xl mx-auto bg-white/30 dark:bg-gray-900/30 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6">
@@ -69,7 +86,6 @@ export default function SettingsPage() {
                     Settings
                 </h1>
 
-                {/* Device Info Card */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mb-6">
                     <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">
                         Device Information
@@ -78,6 +94,7 @@ export default function SettingsPage() {
                         <li><strong>Device Type:</strong> {deviceInfo.deviceType}</li>
                         <li><strong>Browser:</strong> {deviceInfo.browser}</li>
                         <li><strong>Operating System:</strong> {deviceInfo.os}</li>
+                        <li><strong>Viewport:</strong> {dimensions.width} × {dimensions.height}</li>
                         <li className="break-all text-xs text-gray-500 dark:text-gray-400">{uaDetails}</li>
                     </ul>
                 </div>
