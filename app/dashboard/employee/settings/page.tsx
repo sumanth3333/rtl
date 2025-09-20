@@ -26,7 +26,7 @@ export default function SettingsPage() {
         let deviceType = "Desktop";
         if (isPhoneDevice()) {
             deviceType = "Phone";
-        } else if ((navigator as any).maxTouchPoints > 1 && window.innerWidth >= 768) {
+        } else if ((navigator as any).maxTouchPoints > 1 && window.innerWidth >= 820) {
             deviceType = "Tablet";
         }
 

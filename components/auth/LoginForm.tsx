@@ -1,14 +1,30 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { useLogin } from "@/hooks/useLogin"; // ✅ Import updated hook
-import InputField from "@/components/ui/InputField"; // ✅ Import enhanced input field
-import Button from "@/components/ui/Button"; // ✅ Import enhanced button
+import { useLogin } from "@/hooks/useLogin";
+import InputField from "@/components/ui/InputField";
+import Button from "@/components/ui/Button";
 import { motion } from "framer-motion";
 
 export default function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => void }) {
     const { register, handleSubmit, errors, errorMessage, onSubmit, isLoading } = useLogin(onLoginSuccess);
     const [showPassword, setShowPassword] = useState(false);
+
+    // ✅ Track viewport dimensions
+    const [viewport, setViewport] = useState({ width: 0, height: 0 });
+
+    useEffect(() => {
+        const updateDimensions = () => {
+            setViewport({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+        };
+
+        updateDimensions(); // Set initial value
+        window.addEventListener("resize", updateDimensions);
+        return () => window.removeEventListener("resize", updateDimensions);
+    }, []);
 
     return (
         <motion.form
@@ -18,6 +34,11 @@ export default function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => vo
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="space-y-6 w-full max-w-sm mx-auto"
         >
+            {/* ✅ Viewport Info */}
+            <div className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 mb-4">
+                Viewport: {viewport.width}px × {viewport.height}px
+            </div>
+
             {/* ✅ Username / Store ID Field */}
             <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -33,6 +54,7 @@ export default function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => vo
                 />
             </motion.div>
 
+            {/* ✅ Password Field */}
             <motion.div
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -46,8 +68,6 @@ export default function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => vo
                         {...register("password")}
                         error={errors.password?.message}
                     />
-
-                    {/* Eye toggle icon (positioned absolutely, doesn't affect InputField layout) */}
                     <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
@@ -62,7 +82,6 @@ export default function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => vo
                     </button>
                 </div>
             </motion.div>
-
 
             {/* ✅ Display Error Messages */}
             {errorMessage && (
