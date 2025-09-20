@@ -23,27 +23,42 @@ export default function SettingsPage() {
 
     useEffect(() => {
         const ua = navigator.userAgent || navigator.vendor || (window as any).opera || "";
-        // ✅ Device detection using your util
-        const deviceType = isPhoneDevice() ? "Phone" : /iPad|Tablet/i.test(ua) ? "Tablet" : "Desktop";
-        setUaDetails(ua);
+
+        // ✅ Touch detection
+        const hasTouch = (navigator as any).maxTouchPoints > 1;
+
+        // ✅ Viewport width heuristic (phones usually < 768px)
+        const isSmallScreen = window.innerWidth < 768;
+
+        // ✅ Device Type
+        let deviceType = "Desktop";
+
+        if (hasTouch && isSmallScreen) {
+            deviceType = "Phone";
+        } else if (hasTouch && !isSmallScreen) {
+            deviceType = "Tablet";
+        }
+
         // ✅ Browser detection
         let browser = "Unknown";
-        if (/chrome|crios|crmo/i.test(ua)) { browser = "Chrome"; }
-        else if (/firefox|fxios/i.test(ua)) { browser = "Firefox"; }
-        else if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) { browser = "Safari"; }
-        else if (/edg/i.test(ua)) { browser = "Edge"; }
+        if (/chrome|crios|crmo/i.test(ua)) browser = "Chrome";
+        else if (/firefox|fxios/i.test(ua)) browser = "Firefox";
+        else if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) browser = "Safari";
+        else if (/edg/i.test(ua)) browser = "Edge";
 
-        // ✅ OS detection (no navigator.platform)
+        // ✅ OS detection (use userAgentData if available)
         let os = "Unknown";
         if ((navigator as any).userAgentData?.platform) {
             os = (navigator as any).userAgentData.platform;
-        } else if (/windows/i.test(ua)) { os = "Windows"; }
-        else if (/macintosh|mac os x/i.test(ua)) { os = "MacOS"; }
-        else if (/android/i.test(ua)) { os = "Android"; }
-        else if (/ios|iphone|ipad/i.test(ua)) { os = "iOS"; }
+        } else if (/windows/i.test(ua)) os = "Windows";
+        else if (/macintosh|mac os x/i.test(ua)) os = "MacOS";
+        else if (/android/i.test(ua)) os = "Android";
+        else if (/ios|iphone|ipad/i.test(ua)) os = "iOS";
+        else if (/linux/i.test(ua)) os = "Linux";
 
         setDeviceInfo({ deviceType, browser, os });
     }, []);
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#E3F2FD] via-[#BBDEFB] to-[#90CAF9] dark:from-[#0F172A] dark:via-[#1E293B] dark:to-[#334155] py-10 px-6">
@@ -61,7 +76,8 @@ export default function SettingsPage() {
                         <li><strong>Device Type:</strong> {deviceInfo.deviceType}</li>
                         <li><strong>Browser:</strong> {deviceInfo.browser}</li>
                         <li><strong>Operating System:</strong> {deviceInfo.os}</li>
-                        <li>{uaDetails}</li>
+                        <li>{window.innerWidth < 768}</li>
+                        <li>{(navigator as any).maxTouchPoints}</li>
                     </ul>
                 </div>
 
