@@ -52,6 +52,12 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         name: "expenses"
     });
 
+    useEffect(() => {
+        if (Object.keys(errors).length > 0) {
+            console.log("❌ Validation Errors:", errors);
+        }
+    }, [errors]);
+
     // Fetch employees working in the store
     useEffect(() => {
         if (store?.dealerStoreId) {
@@ -87,7 +93,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 tabletsSold: initialValues.tabletsSold ?? 0,
                 watchesSold: initialValues.watchesSold ?? 0,
                 expenses: initialValues.expenses?.map((exp) => ({
-                    expenseId: exp.id,
+                    id: exp.id ?? 0,
                     amount: exp.amount ?? 0,
                     reason: exp.reason ?? "",
                     expenseType: exp.expenseType ?? "Short",
@@ -103,27 +109,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
 
     let adjustedActualCash = watch("actualCash") ?? 0;
     let adjustedActualCard = watch("actualCard") ?? 0;
-    async function handleDeleteExpense(expenseId: number, index: number) {
-        console.log(expenseId, index);
-        if (expenseId === 0) {
-            // 🟢 Just remove locally
-            remove(index);
-            return;
-        }
 
-        try {
-            setDeletingIndex(index);
-            await apiClient.delete(`/expense/deleteEodExpense`, {
-                params: { expenseId },
-            });
-            remove(index); // ✅ Remove from UI only after success
-        } catch (err) {
-            console.error("❌ Failed to delete expense:", err);
-            alert("Failed to delete expense. Please try again.");
-        } finally {
-            setDeletingIndex(null);
-        }
-    }
     for (const exp of expenses) {
         if (exp.paymentType === "Cash") {
             adjustedActualCash += exp.expenseType === "Short" ? exp.amount : -exp.amount;
@@ -238,8 +224,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         setFormData(formattedData);
         setShowConfirm(true);
     };
-
-
     const handleConfirm = async () => {
         setShowConfirm(false);
         setLoading(true);

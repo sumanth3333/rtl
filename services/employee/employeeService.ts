@@ -20,6 +20,7 @@ export const clockInEmployee = async (employeeNtid: string, dealerStoreId: strin
 
 export const submitEodReport = async (data: EodReport) => {
     try {
+        console.log(data);
         const response = await apiClient.post("/sale/saveSaleDetails", data);
         //console.log("✅ EOD Report Submitted Successfully:", response.data);
         return response.data; // Return the API response if needed

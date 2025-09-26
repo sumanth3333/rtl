@@ -42,7 +42,7 @@ export const eodReportSchema = z.object({
     watchesSold: z.number().nonnegative("Watches Sold cannot be negative"),
     expenses: z.array(
         z.object({
-            id: z.number().nonnegative(),
+            id: z.number().nonnegative().default(0),
             amount: z.number().nonnegative(),
             reason: z.string().min(1),
             expenseType: z.enum(["Short", "Over"]),
