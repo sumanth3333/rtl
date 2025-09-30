@@ -173,12 +173,18 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
             const totalHSISold = individualEntries.reduce((sum, entry) => sum + (entry.hsiSold || 0), 0);
             const totalTabletsSold = individualEntries.reduce((sum, entry) => sum + (entry.tabletsSold || 0), 0);
             const totalWatchesSold = individualEntries.reduce((sum, entry) => sum + (entry.watchesSold || 0), 0);
-            const totalAccessoriesByEmployee = individualEntries.reduce((sum, entry) => sum + (entry.accessoriesByEmployee || 0), 0);
+            const totalAccessoriesByEmployee = parseFloat(individualEntries.reduce((sum, entry) => sum + (entry.accessoriesByEmployee || 0), 0).toFixed(2));;
             const totalsystemAccessories = parseFloat(
                 individualEntries.reduce((sum, entry) => sum + (entry.systemAccessories || 0), 0).toFixed(2)
             );
             const errors: Record<string, string> = {};
+            console.log("Sum Of all employees Accessories");
+            console.log("cash/card sum - " + totalAccessoriesByEmployee);
+            console.log("system accessories sum - " + totalsystemAccessories);
 
+            console.log("\nactual total Accessories");
+            console.log("cash/card - " + accessoriesByEmployee);
+            console.log("system accessories - " + watch("systemAccessories"));
             if (totalBoxesSold !== watch("boxesSold")) { errors["boxesSold"] = "Total does not match sum of individual entries." };
             if (totalMigrations !== watch("migrations")) { errors["migrations"] = "Total does not match sum of individual entries." };
             if (totalUpgrades !== watch("upgrade")) { errors["upgrade"] = "Total does not match sum of individual entries." };
