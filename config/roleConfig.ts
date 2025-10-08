@@ -64,11 +64,11 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/employee/eod-report",
             icon: DocumentTextIcon
         },
-        // {
-        //     name: "EOD Remarks",
-        //     path: "/dashboard/employee/eod-remarks",
-        //     icon: ClipboardDocumentCheckIcon
-        // },
+        {
+            name: "Record IMEI",
+            path: "/dashboard/employee/record-imei",
+            icon: ClipboardDocumentCheckIcon
+        },
         {
             name: "Inventory Management",
             path: "/dashboard/employee/log-inventory",
