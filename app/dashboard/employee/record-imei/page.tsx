@@ -179,6 +179,7 @@ export default function ImeiManagement() {
             });
 
             setMessage("✅ IMEI registered successfully.");
+
             // reset entry flow
             setStep(1);
             setImei1("");
@@ -195,6 +196,8 @@ export default function ImeiManagement() {
                 "Failed to register IMEI";
 
             setError(backendMsg);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -216,7 +219,6 @@ export default function ImeiManagement() {
 
             const imeiVal = res?.data;
             if (imeiVal && String(imeiVal).length == 15) {
-                console.log("condition satisfied");
                 // success: lock with reservation
                 setFetchedImei(String(imeiVal));
                 setMessage("✅ IMEI fetched and reserved");
@@ -225,7 +227,6 @@ export default function ImeiManagement() {
                 setFetchedImei(""); // stay unlocked so you can switch type and fetch again
                 setMessage(res?.data || "No IMEIs available for the selected device type.");
             }
-            console.log(fetchedImei);
         } catch (err: any) {
             setFetchedImei(""); // keep unlocked on error
             setError(err?.response?.data?.message || "Failed to fetch IMEI");

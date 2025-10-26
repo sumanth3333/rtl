@@ -7,6 +7,8 @@ import { getEmployeeTargets, getPendingTodosCount, getStoreTargets } from "@/ser
 import WelcomeSection from "@/components/employee/WelcomeSection";
 import TargetSummary from "@/components/employee/TargetSummary";
 import ReminderSummary from "@/components/employee/ReminderSummary";
+import { getTodayGoal } from "@/services/employee/employeeService";
+import DailyGoalSummary from "@/components/employee/DailyGoalSummary";
 
 export default function EmployeeDashboard() {
     const { role, isLoading } = useAuth();
@@ -15,6 +17,7 @@ export default function EmployeeDashboard() {
     const [employeeTargets, setEmployeeTargets] = useState(null);
     const [pendingTodos, setPendingTodos] = useState(0);
     const [showClockinReminder, setShowClockinReminder] = useState(false);
+    const [dailyGoal, setDailyGoal] = useState(null);
 
     useEffect(() => {
 
@@ -26,10 +29,16 @@ export default function EmployeeDashboard() {
             getPendingTodosCount(store.dealerStoreId)
                 .then((count) => setPendingTodos(count))
                 .catch((error) => console.error("Failed to fetch pending todos:", error));
+
+            getTodayGoal(store.dealerStoreId)
+                .then(setDailyGoal)
+                .catch((error) => console.error("Failed to fetch today's goal:", error));
         }
         if (employee?.employeeNtid) {
             getEmployeeTargets(employee.employeeNtid).then(setEmployeeTargets);
         }
+
+
 
         if (
             employee?.employeeNtid &&
@@ -88,6 +97,7 @@ export default function EmployeeDashboard() {
                     store={store}
                     pendingTodos={pendingTodos}
                 />
+                <DailyGoalSummary dailyGoal={dailyGoal} />
                 <ReminderSummary />
                 <section className="grid grid-cols-1 gap-6">
                     <TargetSummary

@@ -17,6 +17,21 @@ export const clockInEmployee = async (employeeNtid: string, dealerStoreId: strin
     }
 };
 
+export const getTodayGoal = async (dealerStoreId: string) => {
+    try {
+        const response = await apiClient.get(`/store/todayGoal`, {
+            params: { dealerStoreId },
+        });
+
+        // ✅ Always return parsed data (even if backend returns null)
+        return response.data || {};
+    } catch (error) {
+        console.error("❌ Error fetching today's goal:", error);
+        return { error: "Failed to fetch today's goal." };
+    }
+};
+
+
 
 export const submitEodReport = async (data: EodReport) => {
     try {

@@ -54,7 +54,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
 
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
-            console.log("❌ Validation Errors:", errors);
         }
     }, [errors]);
 
@@ -144,7 +143,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     };
 
     const onSubmit = async (data: EodReport) => {
-        console.log(data);
         if (!confirmClockOut) {
             setValidationErrors((prev) => ({
                 ...prev,
@@ -178,13 +176,6 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 individualEntries.reduce((sum, entry) => sum + (entry.systemAccessories || 0), 0).toFixed(2)
             );
             const errors: Record<string, string> = {};
-            console.log("Sum Of all employees Accessories");
-            console.log("cash/card sum - " + totalAccessoriesByEmployee);
-            console.log("system accessories sum - " + totalsystemAccessories);
-
-            console.log("\nactual total Accessories");
-            console.log("cash/card - " + accessoriesByEmployee);
-            console.log("system accessories - " + watch("systemAccessories"));
             if (totalBoxesSold !== watch("boxesSold")) { errors["boxesSold"] = "Total does not match sum of individual entries." };
             if (totalMigrations !== watch("migrations")) { errors["migrations"] = "Total does not match sum of individual entries." };
             if (totalUpgrades !== watch("upgrade")) { errors["upgrade"] = "Total does not match sum of individual entries." };

@@ -39,7 +39,6 @@ export default function ProfitsAndExpensesPage() {
                     params: { companyName, month: selectedMonth }
                 });
                 const fetchedBills = billResponse.data;
-                console.log(fetchedBills);
                 setBills(fetchedBills);
 
                 if (fetchedBills.length > 0) {

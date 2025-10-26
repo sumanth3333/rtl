@@ -2,14 +2,18 @@
 
 import EodForm from "@/components/employee/EodForm";
 import { useEmployee } from "@/hooks/useEmployee";
+import apiClient from "@/services/api/apiClient";
 import { getEodDetails } from "@/services/employee/employeeService";
 import { EodReport } from "@/types/employeeSchema";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function LogEodReportPage() {
     const [showInstructionsModal, setShowInstructionsModal] = useState(true);
     const { employee, store } = useEmployee();
-
+    const [hasInProgressImeis, setHasInProgressImeis] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
     const [eodFormValues, setEodFormValues] = useState<EodReport>({
         store: { dealerStoreId: store?.dealerStoreId ?? "" },
         employee: { employeeNtid: employee?.employeeNtid ?? "" },
@@ -30,16 +34,78 @@ export default function LogEodReportPage() {
     });
 
     useEffect(() => {
-        if (store?.dealerStoreId && employee?.employeeNtid) {
+        const checkInProgressImeis = async () => {
+            if (!store?.dealerStoreId) { return; }
+            try {
+                const res = await apiClient.get("/imei/fecthInProgressImeisStatusInStore", {
+                    params: { dealerStoreId: store.dealerStoreId },
+                });
+
+                // backend returns false when there ARE pending IMEIs
+                const apiVal = res?.data;
+                const thereArePendingImeis =
+                    apiVal === false || apiVal?.status === false;
+
+                if (thereArePendingImeis) {
+                    setHasInProgressImeis(true);
+
+                    // show warning for 3 seconds, then redirect
+                    setTimeout(() => {
+                        router.push("/dashboard/employee/record-imei");
+                    }, 3000);
+                }
+            } catch (err) {
+                console.error("❌ Failed to check in-progress IMEIs:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkInProgressImeis();
+    }, [store?.dealerStoreId, router]);
+
+
+    // ✅ Fetch EOD details only if there are no pending IMEIs
+    useEffect(() => {
+        if (!hasInProgressImeis && store?.dealerStoreId && employee?.employeeNtid) {
             getEodDetails(store.dealerStoreId, employee.employeeNtid)
-                .then((data) => {
-                    setEodFormValues((prev) => ({ ...prev, ...data }));
-                })
+                .then((data) => setEodFormValues((prev) => ({ ...prev, ...data })))
                 .catch((err) =>
                     console.error("❌ Failed to fetch EOD Report details:", err)
                 );
         }
-    }, [store?.dealerStoreId, employee?.employeeNtid]);
+    }, [store?.dealerStoreId, employee?.employeeNtid, hasInProgressImeis]);
+
+    // ✅ Loading state
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <p className="text-gray-500 text-lg animate-pulse">
+                    Checking pending IMEIs...
+                </p>
+            </div>
+        );
+    }
+
+    // ✅ Show warning before redirect
+    if (hasInProgressImeis) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-yellow-500 text-center max-w-md mx-auto">
+                    <h2 className="text-lg font-semibold text-yellow-800 dark:text-yellow-300 mb-3">
+                        ⚠️ Pending IMEIs Found
+                    </h2>
+                    <p className="text-gray-700 dark:text-gray-300">
+                        You have IMEIs in progress that must be cleared before
+                        submitting your EOD report.
+                    </p>
+                    <p className="text-sm text-gray-500 mt-3">
+                        Redirecting to the Record IMEI page in 3 seconds...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 px-4 sm:px-6 pb-20">
@@ -77,7 +143,7 @@ export default function LogEodReportPage() {
             )}
 
             <main className="max-w-5xl mx-auto mt-10">
-                <EodForm initialValues={eodFormValues} />
+                {!hasInProgressImeis && <EodForm initialValues={eodFormValues} />}
             </main>
         </div>
     );
