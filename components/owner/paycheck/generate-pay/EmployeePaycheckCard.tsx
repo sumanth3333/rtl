@@ -127,9 +127,9 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                         ["Activations", paycheck.work.boxesSold],
                         ["Upgrades", paycheck.work.upgradesSold],
                         ["Migrations", paycheck.work.migration],
-                        ["Tablets", paycheck.work.tabletsSold],
+                        ["BTS", paycheck.work.tabletsSold],
                         ["HSI", paycheck.work.hsiSold],
-                        ["Watches", paycheck.work.watchesSold],
+                        ["Free Lines", paycheck.work.watchesSold],
                         ["Preacts Activated", paycheck.preActivations.numberOfPreActivationPhonesActivated,],
                         ["Preacts Sold", paycheck.preActivations.numberOfPreActivatedPhonesSold],
                         ["Preacts Activation Cost", paycheck.preActivations.activatedValue],
@@ -303,9 +303,9 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                                             <th className="p-3 text-center">Upgrades</th>
                                             <th className="p-3 text-center">Migrations</th>
                                             <th className="p-3 text-center">Accessories ($)</th>
-                                            <th className="p-3 text-center">Tablets</th>
+                                            <th className="p-3 text-center">BTS</th>
                                             <th className="p-3 text-center">HSI</th>
-                                            <th className="p-3 text-center">Watches</th>
+                                            <th className="p-3 text-center">Free Lines</th>
                                         </tr>
                                     </thead>
                                     <tbody>

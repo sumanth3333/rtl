@@ -288,7 +288,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                             error={errors.systemCash?.message}
                         />
                         <InputField
-                            label="Cash Accessories"
+                            label="Cash Difference"
                             type="text"
                             className="text-sm font-semibold text-blue-700 dark:text-blue-300"
                             value={`$${cashDifference.toFixed(2)}`}
@@ -325,7 +325,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                             error={errors.systemCard?.message}
                         />
                         <InputField
-                            label="Card Accessories"
+                            label="Card Difference"
                             type="text"
                             className="text-sm font-semibold text-blue-700 dark:text-blue-300"
                             value={`$${cardDifference.toFixed(2)}`}
@@ -341,7 +341,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                             Accessories
                         </h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            accessories sold in system and extra cash and card totals shown here.
+                            accessories sold in system and cash and card difference totals shown here.
                         </p>
                     </div>
 
@@ -355,7 +355,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                             error={errors.systemAccessories?.message}
                         />
                         <InputField
-                            label="Cash/Card Accessories($)"
+                            label="Cash/Card Difference($)"
                             type="number"
                             step="0.01"
                             className="text-sm font-medium"
@@ -385,16 +385,16 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                             <div className="flex items-start gap-2">
                                 <span className="text-yellow-700 dark:text-yellow-200 text-xl">⚠️</span>
                                 <div className="text-sm text-yellow-900 dark:text-yellow-100 leading-snug">
-                                    <strong>Important:</strong> This count must include <strong>newly preactivated phones, not preact sold</strong>.<br />
-                                    An invoice must be created if you <strong>preactivated any phones</strong> today.<br />
-                                    <span className="underline">Do not</span> include <strong>Tablets</strong>, <strong>HSI</strong>, or <strong>Watches</strong> here.
+                                    {/* <strong>Important:</strong> This count must include <strong>newly preactivated phones, not preact sold</strong>.<br />
+                                    An invoice must be created if you <strong>preactivated any phones</strong> today.<br /> */}
+                                    <span className="underline">Do not</span> include <strong>BTS</strong>, <strong>HSI</strong>, or <strong>Free Lines</strong> here.
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {/* ⚠️ Upgrades Warning */}
-                    {isUpgradesFocused && (
+                    {/* {isUpgradesFocused && (
                         <div className="mb-4 px-4 py-3 rounded-md border-l-4 border-orange-500 bg-orange-100 dark:bg-orange-800 animate-pulse-slow">
                             <div className="flex items-start gap-2">
                                 <span className="text-orange-700 dark:text-orange-200 text-xl">⚠️</span>
@@ -403,10 +403,10 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                 </div>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     {/* ⚠️ Migrations Warning */}
-                    {isMigrationsFocused && (
+                    {/* {isMigrationsFocused && (
                         <div className="mb-4 px-4 py-3 rounded-md border-l-4 border-blue-500 bg-blue-100 dark:bg-blue-800 animate-pulse-slow">
                             <div className="flex items-start gap-2">
                                 <span className="text-blue-700 dark:text-blue-200 text-xl">⚠️</span>
@@ -415,7 +415,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                 </div>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     <div className="grid grid-cols-3 gap-3">
                         <div>
@@ -452,13 +452,13 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                             error={errors.hsiSold?.message}
                         />
                         <InputField
-                            label="Tablets"
+                            label="Tablets & Watches"
                             type="number"
                             {...register("tabletsSold", { valueAsNumber: true })}
                             error={errors.tabletsSold?.message}
                         />
                         <InputField
-                            label="Watches"
+                            label="Free/$5 Lines(2GPROMO)"
                             type="number"
                             {...register("watchesSold", { valueAsNumber: true })}
                             error={errors.watchesSold?.message}
@@ -635,7 +635,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                     />
                                     <InputField
                                         name="tabletsSold"
-                                        label="Tablets"
+                                        label="Tablets & Watches"
                                         type="number"
                                         value={individualEntries[index]?.tabletsSold}
                                         onChange={(e) => handleEmployeeDataChange(index, "tabletsSold", Number(e.target.value))}
@@ -644,7 +644,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                     />
                                     <InputField
                                         name="watchesSold"
-                                        label="Watches"
+                                        label="Free/$5 Lines(2GPROMO)"
                                         type="number"
                                         value={individualEntries[index]?.watchesSold}
                                         onChange={(e) => handleEmployeeDataChange(index, "watchesSold", Number(e.target.value))}
@@ -653,7 +653,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                                     />
                                     <InputField
                                         name="accessoriesByEmployee"
-                                        label="Total Cash/Card $$"
+                                        label="Total Cash/Card Diff"
                                         type="number"
                                         value={individualEntries[index]?.accessoriesByEmployee}
                                         onChange={(e) => handleEmployeeDataChange(index, "accessoriesByEmployee", Number(e.target.value))}

@@ -125,9 +125,9 @@ export default function LogEodReportPage() {
                             Before You Begin
                         </h2>
                         <ul className="list-disc pl-6 space-y-2 text-sm text-gray-700 dark:text-gray-200">
-                            <li><strong>Preactivated phones</strong> should be added to the <strong>Activations count</strong>.</li>
-                            <li><strong>Do not</strong> include tablets, HSI, or watches in activations.</li>
-                            <li>Invoices must be created for all preactivated phones before submission.</li>
+                            {/* <li><strong>Preactivated phones</strong> should be added to the <strong>Activations count</strong>.</li> */}
+                            <li><strong>Do not</strong> include tablets, HSI, Watches or Free/$5 lines in activations.</li>
+                            {/* <li>Invoices must be created for all preactivated phones before submission.</li> */}
                             <li>Use the actual <strong>last transaction time</strong> from your invoice or POS system.</li>
                         </ul>
                         <div className="flex justify-end mt-6">

@@ -63,9 +63,9 @@ export default function GeneratePayTable({ employeesSalesData }: GeneratePayTabl
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 text-gray-800 dark:text-gray-300 mt-3 px-4">
                             <p><strong>Total Hours:</strong> {employee.totalHours}</p>
                             <p><strong>Total Boxes:</strong> {employee.totalBoxes}</p>
-                            <p><strong>Total Tablets:</strong> {employee.totalTablets}</p>
+                            <p><strong>Total BTS:</strong> {employee.totalTablets}</p>
                             <p><strong>HSI:</strong> {employee.totalHSI}</p>
-                            <p><strong>Watches:</strong> {employee.totalWatches}</p>
+                            <p><strong>Free Lines:</strong> {employee.totalWatches}</p>
                             <p><strong>Total Accessories:</strong> ${employee.totalAccessories}</p>
                             <p><strong>Total Pay:</strong> ${employee.totalPay}</p>
                         </div>
@@ -82,9 +82,9 @@ export default function GeneratePayTable({ employeesSalesData }: GeneratePayTabl
                                             <th className="p-3">Date</th>
                                             <th className="p-3">Hours</th>
                                             <th className="p-3">Boxes</th>
-                                            <th className="p-3">Tablets</th>
+                                            <th className="p-3">BTS</th>
                                             <th className="p-3">HSI</th>
-                                            <th className="p-3">Watches</th>
+                                            <th className="p-3">Free Lines</th>
                                             <th className="p-3">Accessories ($)</th>
                                             <th className="p-3">Pay ($)</th>
                                         </tr>

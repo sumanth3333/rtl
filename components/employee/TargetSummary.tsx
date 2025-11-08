@@ -18,8 +18,8 @@ export default function TargetSummary({ title, targetData, isEmployee, cardStyle
                     { label: "Migrations", key: isEmployee ? "migrationTargetToEmployee" : "migrationTargetToStore" },
                     { label: "Accessories", key: isEmployee ? "accessoriesTargetByEmployee" : "accessoriesTargetToStore" },
                     { label: "HSI", key: isEmployee ? "hsiTarget" : "hsiTargetToStore" },
-                    { label: "Tablets", key: isEmployee ? "tabletsTargetByEmployee" : "tabletsTargetToStore" },
-                    { label: "Watches", key: isEmployee ? "smartwatchTargetByEmployee" : "smartwatchTragetToStore" }
+                    { label: "BTS", key: isEmployee ? "tabletsTargetByEmployee" : "tabletsTargetToStore" },
+                    { label: "Free Lines", key: isEmployee ? "smartwatchTargetByEmployee" : "smartwatchTragetToStore" }
                 ].map((item) => (
                     <div key={item.label} className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center w-full overflow-hidden">
                         <p className="text-sm sm:text-base font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide w-full text-center">{item.label}</p>

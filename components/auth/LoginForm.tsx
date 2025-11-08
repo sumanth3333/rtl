@@ -34,10 +34,6 @@ export default function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => vo
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="space-y-6 w-full max-w-sm mx-auto"
         >
-            {/* ✅ Viewport Info */}
-            <div className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 mb-4">
-                Viewport: {viewport.width}px × {viewport.height}px
-            </div>
 
             {/* ✅ Username / Store ID Field */}
             <motion.div

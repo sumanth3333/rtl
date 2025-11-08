@@ -140,8 +140,8 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
                     <InputField label="Upgrades" type="number" {...register("upgrade", { valueAsNumber: true })} error={errors.upgrade?.message} />
                     <InputField label="Migrations" type="number" {...register("migrations", { valueAsNumber: true })} error={errors.migrations?.message} />
                     <InputField label="HSI" type="number" {...register("hsiSold", { valueAsNumber: true })} error={errors.hsiSold?.message} />
-                    <InputField label="Tablets" type="number" {...register("tabletsSold", { valueAsNumber: true })} error={errors.tabletsSold?.message} />
-                    <InputField label="Watches" type="number" {...register("watchesSold", { valueAsNumber: true })} error={errors.watchesSold?.message} />
+                    <InputField label="BTS" type="number" {...register("tabletsSold", { valueAsNumber: true })} error={errors.tabletsSold?.message} />
+                    <InputField label="Free Lines" type="number" {...register("watchesSold", { valueAsNumber: true })} error={errors.watchesSold?.message} />
                 </div>
 
                 <div className="mt-6">

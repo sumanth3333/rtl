@@ -6,16 +6,14 @@ import { PowerIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import ThemeToggle from "./ThemeToggle";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import QuickJumpTrigger from "@/components/QuickJumpTrigger"; // <-- add
 
 export default function Header({ title, onToggleSidebar }: { title: string; onToggleSidebar: () => void }) {
     const logout = useLogout();
     const [isScrolled, setIsScrolled] = useState(false);
 
-    // Detect scroll position
     useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 10);
-        };
+        const handleScroll = () => setIsScrolled(window.scrollY > 10);
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
@@ -23,8 +21,8 @@ export default function Header({ title, onToggleSidebar }: { title: string; onTo
     return (
         <header
             className={`flex items-center justify-between px-4 md:px-10 py-4 
-                bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700
-                transition-all duration-300 ${isScrolled ? "shadow-md" : "shadow-none"}`}
+        bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700
+        transition-all duration-300 ${isScrolled ? "shadow-md" : "shadow-none"}`}
         >
             {/* Left: Brand & Sidebar Toggle */}
             <div className="flex items-center gap-4">
@@ -34,24 +32,23 @@ export default function Header({ title, onToggleSidebar }: { title: string; onTo
                     transition={{ duration: 0.3, ease: "easeOut" }}
                     onClick={onToggleSidebar}
                     className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700
-                        transition-all shadow-md hover:shadow-lg text-gray-900 dark:text-gray-100 flex items-center justify-center
-                        sm:hidden"
+            transition-all shadow-md hover:shadow-lg text-gray-900 dark:text-gray-100 flex items-center justify-center
+            sm:hidden"
                     aria-label="Toggle Sidebar"
                 >
                     <Bars3Icon className="w-6 h-6" />
                 </motion.button>
-                <Link href="/" passHref>
-                    <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.3 }}
-                        className="text-lg font-semibold tracking-widest text-gray-900 dark:text-gray-100 uppercase 
-                        px-3 py-1 border border-gray-900 dark:border-gray-100 rounded-md transition-all duration-300
-                        select-none pointer-events-none"
-                    >
-                        <span className="hidden sm:inline">OneClick</span>
-                        <span className="sm:hidden">OneClick</span>
-                    </motion.div>
-                </Link>
+
+                {/* Brand trigger with hidden shortcuts */}
+                <QuickJumpTrigger
+                    label="OneClick"
+                // Optional: you can override routes here if needed
+                // remindersPath="/dashboard/owner/..." 
+                // upgradesPath="/dashboard/owner/..." 
+                // recordImeiPath="/dashboard/owner/..."
+                // Example: enforce company restrictions (optional)
+                // canNavigate={(target) => target !== "upgrades" || companyName !== "All Connect Network LLC"}
+                />
             </div>
 
             {/* Center: Title */}
@@ -75,7 +72,7 @@ export default function Header({ title, onToggleSidebar }: { title: string; onTo
                     transition={{ duration: 0.3 }}
                     onClick={logout}
                     className="p-2 md:p-3 rounded-full bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 
-                        transition-all shadow-md hover:shadow-lg text-white flex items-center justify-center"
+            transition-all shadow-md hover:shadow-lg text-white flex items-center justify-center"
                     aria-label="Logout"
                 >
                     <PowerIcon className="w-5 h-5 md:w-6 md:h-6" />

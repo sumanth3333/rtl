@@ -75,6 +75,11 @@ export const sidebarLinks: Record<Role, {
             icon: ArchiveBoxIcon
         },
         {
+            name: "Accessories Management",
+            path: "/dashboard/employee/accessories",
+            icon: ArchiveBoxIcon
+        },
+        {
             name: "Device Upgrades",
             path: "/dashboard/employee/manage-upgrades",
             icon: DevicePhoneMobileIcon
@@ -144,6 +149,11 @@ export const sidebarLinks: Record<Role, {
             icon: ClipboardDocumentCheckIcon,
         },
         {
+            name: "Accessories Management",
+            path: "/dashboard/owner/accessories",
+            icon: ArchiveBoxIcon
+        },
+        {
             name: "Device Upgrades",
             path: "/dashboard/owner/manage-upgrades",
             icon: DevicePhoneMobileIcon
@@ -191,6 +201,7 @@ export const sidebarLinks: Record<Role, {
 
     ]
 };
+
 
 // ✅ Dashboard Cards for Each Role
 export const dashboardCards: Record<Role, { title: string; description: string; link: string }[]> = {

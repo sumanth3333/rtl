@@ -47,7 +47,7 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                         <thead className="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-300">
                             <tr>
                                 <th className="p-2 text-left">Store Name</th>
-                                {["Activations", "Upgrades", "Migrations", "Accessories ($)", "HSI", "Tablets", "Smartwatches"].map((label) => (
+                                {["Activations", "Upgrades", "Migrations", "Accessories ($)", "HSI", "BTS", "Free Lines"].map((label) => (
                                     <th key={label} className="p-2 text-center">{label}</th>
                                 ))}
                             </tr>
@@ -92,7 +92,7 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                         <thead className="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-300">
                             <tr>
                                 <th className="p-2 text-left">Employee Name</th>
-                                {["Activations", "Upgrades", "Migrations", "Accessories ($)", "HSI", "Tablets", "Smartwatches"].map((label) => (
+                                {["Activations", "Upgrades", "Migrations", "Accessories ($)", "HSI", "BTS", "Free Lines"].map((label) => (
                                     <th key={label} className="p-2 text-center">{label}</th>
                                 ))}
                             </tr>
@@ -148,8 +148,8 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                                     { label: "Migrations", key: "migrationTargetToStore" },
                                     { label: "Accessories ($)", key: "accessoriesTargetToStore" },
                                     { label: "HSI", key: "hsiTargetToStore" },
-                                    { label: "Tablets", key: "tabletsTargetToStore" },
-                                    { label: "Smartwatches", key: "smartwatchTragetToStore" },
+                                    { label: "BTS", key: "tabletsTargetToStore" },
+                                    { label: "Free Lines", key: "smartwatchTragetToStore" },
                                 ].map(({ label, key }) => (
                                     <div key={key} className="flex justify-between text-xs">
                                         <span className="text-gray-600 dark:text-gray-300">{label}</span>
@@ -184,8 +184,8 @@ export default function ElbScorecard({ companyName }: ElbScorecardProps) {
                                     { label: "Migrations", key: "migrationTargetToEmployee" },
                                     { label: "Accessories ($)", key: "accessoriesTargetByEmployee" },
                                     { label: "HSI", key: "hsiTarget" },
-                                    { label: "Tablets", key: "tabletsTargetByEmployee" },
-                                    { label: "Smartwatches", key: "smartwatchTargetByEmployee" },
+                                    { label: "BTS", key: "tabletsTargetByEmployee" },
+                                    { label: "Free Lines", key: "smartwatchTargetByEmployee" },
                                 ].map(({ label, key }) => (
                                     <div key={key} className="flex justify-between text-xs">
                                         <span className="text-gray-600 dark:text-gray-300">{label}</span>

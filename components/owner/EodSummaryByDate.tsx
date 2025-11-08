@@ -69,9 +69,9 @@ export default function EodSummaryByDate({ date, companyName }: Props) {
                                 <th className="p-2 text-left">Employee</th>
                                 <th className="p-2">Activations</th>
                                 <th className="p-2">Upgrade</th>
-                                <th className="p-2">Tablets</th>
+                                <th className="p-2">BTS</th>
                                 <th className="p-2">HSI</th>
-                                <th className="p-2">Watches</th>
+                                <th className="p-2">Free Lines</th>
                                 <th className="p-2">Migrations</th>
                                 <th className="p-2 text-right">Accessories</th>
                                 <th className="p-2 text-right">System Cash</th>

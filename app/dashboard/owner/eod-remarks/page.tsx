@@ -101,10 +101,10 @@ export default function ViewEmployeeEodRemarksPage() {
                     <div>
                         <p><strong>Boxes:</strong> {workSummary.boxesSold}</p>
                         <p><strong>Upgrades:</strong> {workSummary.upgradesSold}</p>
-                        <p><strong>Tablets:</strong> {workSummary.tabletsSold}</p>
+                        <p><strong>BTS:</strong> {workSummary.tabletsSold}</p>
                     </div>
                     <div>
-                        <p><strong>Watches:</strong> {workSummary.watchesSold}</p>
+                        <p><strong>Free Lines:</strong> {workSummary.watchesSold}</p>
                         <p><strong>HSI:</strong> {workSummary.hsiSold}</p>
                         <p><strong>Accessories:</strong> ${workSummary.totalAccessories}</p>
                     </div>

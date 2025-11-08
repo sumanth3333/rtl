@@ -32,8 +32,8 @@ export default function LatestEodList({ eodList }: LatestEodListProps) {
                             <th className="p-3 text-center">Upgrades</th>
                             <th className="p-3 text-center">Migrations</th>
                             <th className="p-3 text-center">HSI</th>
-                            <th className="p-3 text-center">Tablets</th>
-                            <th className="p-3 text-center">Watches</th>
+                            <th className="p-3 text-center">BTS</th>
+                            <th className="p-3 text-center">Free Lines</th>
                             <th className="p-3 text-center">Accessories ($)</th>
                         </tr>
                     </thead>
@@ -111,14 +111,14 @@ export default function LatestEodList({ eodList }: LatestEodListProps) {
                             </div>
 
                             <div className="flex justify-between bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
-                                <span>Tablets</span>
+                                <span>BTS</span>
                                 <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
                                     {eod.tabletsSold}
                                 </span>
                             </div>
 
                             <div className="flex justify-between bg-white dark:bg-gray-700 p-2 rounded-md shadow-sm">
-                                <span>Watches</span>
+                                <span>Free Lines</span>
                                 <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">
                                     {eod.watchesSold}
                                 </span>

@@ -38,8 +38,8 @@ export const eodReportSchema = z.object({
     migrations: z.number().nonnegative("Migrations cannot be negative"),
     hsiSold: z.number().nonnegative("HSI Sold cannot be negative"),
     upgrade: z.number().nonnegative("Upgrades Sold cannot be negative"),
-    tabletsSold: z.number().nonnegative("Tablets Sold cannot be negative"),
-    watchesSold: z.number().nonnegative("Watches Sold cannot be negative"),
+    tabletsSold: z.number().nonnegative("Tablets/Watches Sold cannot be negative"),
+    watchesSold: z.number().nonnegative("2GPROMO Sold cannot be negative"),
     expenses: z.array(
         z.object({
             id: z.number().nonnegative().default(0),

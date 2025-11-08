@@ -21,8 +21,8 @@ export default function StoreTargetTable({ targets, month, onEdit }: StoreTarget
                             <th className="p-3 text-right">Migrations</th>
                             <th className="p-3 text-right">Accessories</th>
                             <th className="p-3 text-right">HSI</th>
-                            <th className="p-3 text-right">Tablets</th>
-                            <th className="p-3 text-right">Watches</th>
+                            <th className="p-3 text-right">Tablets/Watches</th>
+                            <th className="p-3 text-right">Free Lines</th>
                             <th className="p-3 text-center">Actions</th>
                         </tr>
                     </thead>

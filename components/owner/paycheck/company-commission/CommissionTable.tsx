@@ -73,14 +73,14 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
 
                 {/* Include Tablets in Box Count */}
                 <div className="flex items-center gap-4 mb-2">
-                    <label className="text-gray-800 dark:text-gray-200">Tablets:</label>
+                    <label className="text-gray-800 dark:text-gray-200">BTS:</label>
                     <select
                         className="p-2 border rounded-md bg-white dark:bg-gray-900 dark:text-white"
                         value={includeTablet ? "yes" : "no"}
                         onChange={(e) => setIncludeTablet(e.target.value === "yes")}
                     >
                         <option value="yes">Yes</option>
-                        <option value="no">No (Set Custom $/Tablet)</option>
+                        <option value="no">No (Set Custom $/BTS)</option>
                     </select>
                 </div>
 
@@ -99,14 +99,14 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
 
                 {/* Include Watches in Box Count */}
                 <div className="flex items-center gap-4">
-                    <label className="text-gray-800 dark:text-gray-200">Watches:</label>
+                    <label className="text-gray-800 dark:text-gray-200">FreeLines:</label>
                     <select
                         className="p-2 border rounded-md bg-white dark:bg-gray-900 dark:text-white"
                         value={includeWatch ? "yes" : "no"}
                         onChange={(e) => setIncludeWatch(e.target.value === "yes")}
                     >
                         <option value="yes">Yes</option>
-                        <option value="no">No (Set Custom $/Watch)</option>
+                        <option value="no">No (Set Custom $/FreeLine)</option>
                     </select>
                 </div>
             </div>
@@ -133,10 +133,10 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
                                         onChange={(e) => handleUpdate(index, "itemType", e.target.value)}
                                     >
                                         <option value="Boxes">Boxes</option>
-                                        {!includeTablet && <option value="Tablets">Tablets</option>}
+                                        {!includeTablet && <option value="Tablets">BTS</option>}
                                         {!includeMigrations && <option value="Migrations">Migrations</option>}
                                         {!includeHSI && <option value="HSI">HSI</option>}
-                                        {!includeWatch && <option value="Watches">Watches</option>}
+                                        {!includeWatch && <option value="Watches">FreeLines</option>}
                                     </select>
                                 </td>
 
@@ -215,7 +215,7 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
                             onClick={() => handleAdd("Tablets")}
                             className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                         >
-                            ➕ Add Tablet Threshold
+                            ➕ Add BTS Threshold
                         </button>
                     )}
 
@@ -233,7 +233,7 @@ export default function CommissionTable({ thresholds, setThresholds }: Commissio
                             onClick={() => handleAdd("Watches")}
                             className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
                         >
-                            ➕ Add Watch Threshold
+                            ➕ Add FreeLines Threshold
                         </button>
                     )}
                 </div>
