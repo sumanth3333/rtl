@@ -72,3 +72,23 @@ export interface PaycheckResponse {
     totalPayCheckForCompany: number;
     paychecks: EmployeePaycheck[];
 }
+
+
+
+export interface PaySlipDetail {
+    fromDate: string;      // "2025-10-01"
+    toDate: string;        // "2025-10-31"
+    paidAmount: number;    // 2290.83
+    paidDate: string;      // "2025-11-08"
+    paySlip: string;       // base64 PDF
+};
+
+export interface EmployeeInfo {
+    employeeNtid: string;
+    employeeName: string;
+};
+
+export interface GeneratedEmployeePaychecks {
+    employee: EmployeeInfo;
+    paymentDetails: PaySlipDetail[];
+};

@@ -17,6 +17,9 @@ export default function PaycheckNavbar() {
                     { name: "Generate Pay", path: `${basePath}` },
                     { name: "Employee Pay Setup", path: `${basePath}/employee-pay-setup` },
                     { name: "Company Commission", path: `${basePath}/company-commission` },
+                    { name: "Calculate Overtime", path: `${basePath}/calculate-overtime` },
+                    { name: "View Paychecks", path: `${basePath}/view-paychecks` }
+
                 ].map((item) => (
                     <Link key={item.path} href={item.path}>
                         <div

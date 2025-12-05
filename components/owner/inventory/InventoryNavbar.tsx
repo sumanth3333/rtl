@@ -10,6 +10,7 @@ export default function InventoryNavbar() {
         { name: "Current Inventory", href: "/dashboard/owner/inventory" },
         { name: "Min. Quantity Setup", href: "/dashboard/owner/inventory/min-setup" },
         { name: "Reorder Inventory", href: "/dashboard/owner/inventory/reorder" },
+        { name: "dealer specific prices", href: "/dashboard/owner/inventory/dealer-prices" },
     ];
 
     return (

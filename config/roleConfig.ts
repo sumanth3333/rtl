@@ -80,6 +80,11 @@ export const sidebarLinks: Record<Role, {
             icon: ArchiveBoxIcon
         },
         {
+            name: "Port Help",
+            path: "/dashboard/employee/port-help",
+            icon: ArrowsRightLeftIcon // 🔄 Best for pending transfers & receives
+        },
+        {
             name: "Device Upgrades",
             path: "/dashboard/employee/manage-upgrades",
             icon: DevicePhoneMobileIcon
@@ -93,7 +98,8 @@ export const sidebarLinks: Record<Role, {
             name: "Settings",
             path: "/dashboard/employee/settings",
             icon: Settings,
-        }
+        },
+
 
     ],
     MANAGER: [
@@ -266,6 +272,7 @@ export const upgradeNavbarLinks: Record<Role, {
             path: "/dashboard/employee/manage-upgrades/receives-transfers",
             icon: ArrowsRightLeftIcon // 🔄 Best for pending transfers & receives
         },
+
     ],
     ADMIN: [
         {

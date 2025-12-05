@@ -191,3 +191,31 @@ export const fetchCompanyNameByNtid = async (employeeNtid: string) => {
         throw new Error("Failed to fetch companyName");
     }
 };
+
+export async function clockOutEmployee(
+    employeeNtid: string,
+    dealerStoreId: string
+) {
+    try {
+        const response = await apiClient.get(
+            "/employee/clockout",
+            {
+                params: {
+                    employeeNtid,
+                    dealerStoreId,
+                },
+            }
+        );
+
+        return { data: response.data, error: null };
+    } catch (error: any) {
+        console.error("Clock-out failed:", error);
+        return {
+            data: null,
+            error:
+                error?.response?.data?.message ||
+                error?.message ||
+                "Clock-out failed. Please try again.",
+        };
+    }
+}
