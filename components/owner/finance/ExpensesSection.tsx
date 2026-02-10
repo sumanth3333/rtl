@@ -1,42 +1,50 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+"use client";
 
+import React, { useMemo } from "react";
+import { Divider, Row } from "@/components/ui/finance/Row";
 
-export function ExpensesSection({ expenses }: { expenses: any }) {
-    const exp = expenses.expenses || {};
-    const regular = exp.regularExpenses || {};
-    const paycheck = exp.paycheck || {};
-    const preActivations = exp.preActivationsTotal || {};
+import { money, titleizeKey, safeNumber } from "@/lib/format";
+import type { ProfitLookupResponse } from "@/types/finance";
+import { CollapsibleCard } from "@/components/ui/finance/CollapsibleCard";
+
+export function ExpensesSection({ expenses }: { expenses: ProfitLookupResponse["expenses"] }) {
+    const e = expenses.expenses;
+
+    const regular = useMemo(() => {
+        const obj = e.regularExpenses || {};
+        return Object.entries(obj).sort((a, b) => safeNumber(b[1]) - safeNumber(a[1]));
+    }, [e.regularExpenses]);
 
     return (
-        <Card className="w-full mt-6">
-            <CardHeader>
-                <CardTitle>📉 Expense Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <ExpenseStat label="Total Expenses" value={expenses.totalExpenses} highlight />
-                    <ExpenseStat label="Total Paycheck" value={paycheck.totalPaycheck} />
-                    <ExpenseStat label="Dealer Expenses" value={exp.dealerExpenses?.amount} />
-                    <ExpenseStat label="Legal Expenses" value={exp.legalExpenses?.amount} />
-                    <ExpenseStat label="Store Expenses" value={exp.storeExpenses?.amount} />
-                    <ExpenseStat label="Other Expenses" value={exp.otherExpenses?.amount} />
-                    <ExpenseStat label="Pre-Activation Invoices" value={preActivations.totalInvoicesPrice} />
+        <CollapsibleCard
+            title="Expenses"
+            subtitle="Consolidated totals"
+            right={<span className="text-sm font-semibold tabular-nums">{money(expenses.totalExpenses)}</span>}
+            defaultOpen={false}
+        >
+            <Row label="Total Expenses" value={money(expenses.totalExpenses)} strong />
+            <Divider />
 
-                    {/* Regular Expenses as individual items */}
-                    {Object.entries(regular).map(([key, value]) => (
-                        <ExpenseStat key={key} label={key} value={value as number} />
+            <Row label="Total Paycheck" value={money(e.paycheck?.totalPaycheck)} />
+
+            {regular.length > 0 && (
+                <>
+                    <Divider />
+                    <div className="mt-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                        Regular expenses
+                    </div>
+                    {regular.map(([k, v]) => (
+                        <Row key={k} label={titleizeKey(k)} value={money(v)} />
                     ))}
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
+                </>
+            )}
 
-function ExpenseStat({ label, value, highlight = false }: { label: string; value: number; highlight?: boolean }) {
-    return (
-        <div className={`p-4 rounded-md ${highlight ? "bg-red-100 dark:bg-red-900" : "bg-gray-50 dark:bg-gray-800"}`}>
-            <p className="text-sm capitalize text-gray-600 dark:text-gray-300">{label.replace(/([a-z])([A-Z])/g, '$1 $2')}</p>
-            <p className="text-lg font-semibold text-gray-800 dark:text-white">${value?.toFixed(2) ?? "0.00"}</p>
-        </div>
+            <Divider />
+            <Row label="Dealer Expenses" value={money(e.dealerExpenses?.amount)} />
+            <Row label="Legal Expenses" value={money(e.legalExpenses?.amount)} />
+            <Row label="Other Expenses" value={money(e.otherExpenses?.amount)} />
+            <Row label="Store Expenses" value={money(e.storeExpenses?.amount)} />
+            <Row label="Pre-activations (Invoices)" value={money(e.preActivationsTotal?.totalInvoicesPrice)} />
+        </CollapsibleCard>
     );
 }

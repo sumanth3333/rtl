@@ -124,22 +124,43 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
 
     // Handle individual employee data change
     const handleEmployeeDataChange = (index: number, field: string, value: number) => {
-
-        setIndividualEntries((prevEntries) => {
-            const updatedEntries = [...prevEntries];
-            updatedEntries[index] = {
-                ...updatedEntries[index],
-                [field]: value || 0, // Ensure no empty field
-                store: { dealerStoreId: store?.dealerStoreId || "" },
-                employee: { employeeNtid: employeesWorking[index].employeeNtid },
-                systemCash: systemCash,
-                actualCash: adjustedActualCash,
-                systemCard: systemCard,
-                actualCard: adjustedActualCard,
-                lastTransactionTime: watch("lastTransactionTime"),
-            };
-            return updatedEntries;
-        });
+        console.log("individual employee data change")
+        console.log(formData?.expenses);
+        if (index == 0) {
+            setIndividualEntries((prevEntries) => {
+                const updatedEntries = [...prevEntries];
+                updatedEntries[index] = {
+                    ...updatedEntries[index],
+                    [field]: value || 0, // Ensure no empty field
+                    store: { dealerStoreId: store?.dealerStoreId || "" },
+                    employee: { employeeNtid: employeesWorking[index].employeeNtid },
+                    systemCash: systemCash,
+                    actualCash: adjustedActualCash,
+                    systemCard: systemCard,
+                    actualCard: adjustedActualCard,
+                    lastTransactionTime: watch("lastTransactionTime"),
+                    expenses: formData?.expenses
+                };
+                return updatedEntries;
+            });
+        } else {
+            setIndividualEntries((prevEntries) => {
+                const updatedEntries = [...prevEntries];
+                updatedEntries[index] = {
+                    ...updatedEntries[index],
+                    [field]: value || 0, // Ensure no empty field
+                    store: { dealerStoreId: store?.dealerStoreId || "" },
+                    employee: { employeeNtid: employeesWorking[index].employeeNtid },
+                    systemCash: systemCash,
+                    actualCash: adjustedActualCash,
+                    systemCard: systemCard,
+                    actualCard: adjustedActualCard,
+                    lastTransactionTime: watch("lastTransactionTime"),
+                };
+                return updatedEntries;
+            });
+        }
+        console.log(individualEntries);
     };
 
     const onSubmit = async (data: EodReport) => {

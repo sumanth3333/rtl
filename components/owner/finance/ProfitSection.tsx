@@ -1,26 +1,40 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+"use client";
 
+import React, { useMemo } from "react";
+import { money, safeNumber } from "@/lib/format";
+import { ProfitLookupResponse } from "@/types/finance";
+import { Card } from "@/components/ui/finance/Card";
+import { Divider, Row } from "@/components/ui/finance/Row";
+import { CollapsibleCard } from "@/components/ui/finance/CollapsibleCard";
 
-export function ProfitSection({ profit }: { profit: any }) {
+export function ProfitSection({
+    profit,
+    revenueTotal,
+    expensesTotal,
+}: {
+    profit: ProfitLookupResponse["profit"];
+    revenueTotal: number;
+    expensesTotal: number;
+}) {
+    const p = safeNumber(profit.profit);
+
+    const margin = useMemo(() => {
+        const r = safeNumber(revenueTotal);
+        return r > 0 ? (p / r) * 100 : 0;
+    }, [p, revenueTotal]);
+
     return (
-        <Card className="w-full mt-6 border-2 border-green-600 shadow-lg">
-            <CardHeader className="bg-green-100 dark:bg-green-900 rounded-t-lg">
-                <CardTitle className="text-green-800 dark:text-green-300 text-xl font-bold">
-                    💹 Net Profit
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="bg-white dark:bg-gray-900 rounded-b-lg p-6 flex items-center justify-between">
-                <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Total Profit</p>
-                    <p className="text-3xl font-bold text-green-700 dark:text-green-300">
-                        ${profit?.profit?.toFixed(2) ?? "0.00"}
-                    </p>
-                </div>
-                <div className="text-right">
-                    <p className="text-xs text-gray-400">Revenue - Expenses</p>
-                    <p className="text-xs text-gray-400">as of selected month</p>
-                </div>
-            </CardContent>
-        </Card>
+        <CollapsibleCard
+            title="Profit"
+            subtitle="Final profit + margin"
+            right={<span className="text-sm font-semibold tabular-nums">{money(p)}</span>}
+            defaultOpen={false}
+        >
+            <Row label="Profit" value={money(p)} strong />
+            <Divider />
+            <Row label="Profit Margin" value={`${margin.toFixed(2)}%`} />
+            <Row label="Revenue" value={money(revenueTotal)} />
+            <Row label="Expenses" value={money(expensesTotal)} />
+        </CollapsibleCard>
     );
 }

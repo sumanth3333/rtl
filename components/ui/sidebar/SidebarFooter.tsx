@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmployee } from "@/hooks/useEmployee";
 import { clockInEmployee, clockOutEmployee } from "@/services/employee/employeeService";
+import { useRouter } from "next/navigation";
 
 type SidebarFooterProps = {
     isCollapsed: boolean;
@@ -19,7 +20,7 @@ export default function SidebarFooter({ isCollapsed }: SidebarFooterProps) {
         store,
     } = useEmployee();
     const { role } = useAuth();
-
+    const router = useRouter();
     const [isClockedIn, setIsClockedIn] = useState<boolean>(isClockin);
     const [showEarlyClockoutModal, setShowEarlyClockoutModal] =
         useState(false);
@@ -43,12 +44,18 @@ export default function SidebarFooter({ isCollapsed }: SidebarFooterProps) {
             store.dealerStoreId
         );
 
-        if (response.error) {
+        if (response?.error) {
             console.error("Clock-in failed:", response.error);
-        } else {
-            const currentTime = new Date().toLocaleTimeString();
-            setClockIn(true, store.storeName, currentTime);
+            return;
         }
+
+        const currentTime = new Date().toLocaleTimeString();
+        setClockIn(true, store.storeName, currentTime);
+
+        // ✅ Redirect to inventory with message
+        router.push(
+            `/dashboard/employee/log-inventory?notice=clockin`
+        );
     };
 
     const handleOpenEarlyClockoutModal = () => {

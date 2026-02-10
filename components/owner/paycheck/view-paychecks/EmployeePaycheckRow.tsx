@@ -21,6 +21,7 @@ export default function EmployeePaycheckRow({ record }: EmployeeRowProps) {
         [record.paymentDetails]
     );
 
+    console.log(record.paymentDetails);
     const hasPayments =
         !!record.paymentDetails && record.paymentDetails.length > 0;
 
@@ -67,8 +68,8 @@ export default function EmployeePaycheckRow({ record }: EmployeeRowProps) {
                     )}
                     <span
                         className={`inline-flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold ${hasPayments
-                                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                                : "border-zinc-200 bg-zinc-50 text-zinc-400"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                            : "border-zinc-200 bg-zinc-50 text-zinc-400"
                             }`}
                     >
                         {hasPayments ? record.paymentDetails.length : 0}

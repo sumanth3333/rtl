@@ -21,6 +21,7 @@ export default function SaleHistoryTable({ saleHistory, dealerStoreId }: SaleHis
         { key: "actualCard", label: "Actual Card" },
         { key: "cashExpense", label: "Cash Expense" },
         { key: "expenseReason", label: "Expense Reason" },
+        { key: "envelopeMissing", label: "Is Envelope Collected" },
     ];
 
     const [sortedField, setSortedField] = useState<string | null>(null);

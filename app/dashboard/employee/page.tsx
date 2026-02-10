@@ -9,6 +9,10 @@ import TargetSummary from "@/components/employee/TargetSummary";
 import ReminderSummary from "@/components/employee/ReminderSummary";
 import { getTodayGoal } from "@/services/employee/employeeService";
 import DailyGoalSummary from "@/components/employee/DailyGoalSummary";
+import { getStoreCurrentTrends } from "@/services/employee/storeTrendsService";
+import StoreCurrentTrendsCard from "@/components/employee/StoreCurrentTrendsCard";
+import type { StoreCurrentTrends } from "@/types/storeTrends";
+
 
 export default function EmployeeDashboard() {
     const { role, isLoading } = useAuth();
@@ -18,6 +22,8 @@ export default function EmployeeDashboard() {
     const [pendingTodos, setPendingTodos] = useState(0);
     const [showClockinReminder, setShowClockinReminder] = useState(false);
     const [dailyGoal, setDailyGoal] = useState(null);
+    const [storeTrends, setStoreTrends] = useState<StoreCurrentTrends | null>(null);
+    const [loadingTrends, setLoadingTrends] = useState(false);
 
     useEffect(() => {
 
@@ -38,7 +44,13 @@ export default function EmployeeDashboard() {
             getEmployeeTargets(employee.employeeNtid).then(setEmployeeTargets);
         }
 
-
+        if (store?.dealerStoreId) {
+            setLoadingTrends(true);
+            getStoreCurrentTrends(store.dealerStoreId)
+                .then(setStoreTrends)
+                .catch((e) => console.error("Failed to fetch store trends:", e))
+                .finally(() => setLoadingTrends(false));
+        }
 
         if (
             employee?.employeeNtid &&
@@ -97,8 +109,21 @@ export default function EmployeeDashboard() {
                     store={store}
                     pendingTodos={pendingTodos}
                 />
-                <DailyGoalSummary dailyGoal={dailyGoal} />
-                <ReminderSummary />
+
+                <section className="grid grid-cols-1 gap-6 md:grid-cols-2 items-stretch">
+                    <DailyGoalSummary dailyGoal={dailyGoal} />
+                    <StoreCurrentTrendsCard
+                        storeName={store?.storeName}
+                        trends={storeTrends}
+                        loading={loadingTrends}
+                    />
+                </section>
+
+
+
+                <div className="md:col-span-1">
+                    <ReminderSummary />
+                </div>
                 <section className="grid grid-cols-1 gap-6">
                     <TargetSummary
                         title="📊 Store Target Progress"

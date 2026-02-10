@@ -197,7 +197,7 @@ export async function clockOutEmployee(
     dealerStoreId: string
 ) {
     try {
-        const response = await apiClient.get(
+        const response = await apiClient.post(
             "/employee/clockout",
             {
                 params: {

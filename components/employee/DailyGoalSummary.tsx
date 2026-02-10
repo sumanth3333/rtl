@@ -35,11 +35,11 @@ export default function DailyGoalSummary({ dailyGoal }: Props) {
 
 
     return (
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition duration-300">
+        <div className="h-full flex flex-col bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
                 📅 Today's Store Goal
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+            <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {goals.map((goal) => (
                     <div
                         key={goal.label}

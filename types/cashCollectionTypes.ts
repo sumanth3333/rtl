@@ -39,6 +39,8 @@ export interface SaleHistory {
     saleDate: string;
     lastTransactionTime?: string;
     expenses: Expense[]; // NEW: multiple expense records per sale
+    envelopeMissing: boolean,
+    saleVerified: boolean
 }
 
 export interface CashCollectionData {

@@ -1,34 +1,58 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import SkeletonTable from "@/components/ui/skeletons/SkeletonTable";
 import { useAuth } from "@/hooks/useAuth";
-import { getLatestEodDetails, getWhoIsWorking } from "@/services/owner/ownerService";
-import EmployeeList from "@/components/owner/EmployeeList";
 import { useOwner } from "@/hooks/useOwner";
+
+import { getLatestEodDetails, getWhoIsWorking } from "@/services/owner/ownerService";
+import { getGoalsTrendingCurrently } from "@/services/owner/getGoalsTrendingCurrently";
+
+import EmployeeList from "@/components/owner/EmployeeList";
 import LatestEodList from "@/components/owner/LatestEodList";
 import ElbScorecard from "@/components/owner/ElbScorecard";
+
+// ✅ correct type import (adjust path to your actual file)
+import type { GoalsTrendingCurrentlyItem } from "@/types/goalsTrending";
+import GoalsTrendingTable from "@/components/owner/GoalsTrendingBoard";
+import TodayGoalsSection from "@/components/goals/TodayGoalsSection";
 
 export default function OwnerDashboard() {
     const { role, isLoading } = useAuth();
     const { companyName } = useOwner();
-    const [workingEmployees, setWorkingEmployees] = useState([]);
+
+    // ✅ strongly type these if you have types available
+    const [workingEmployees, setWorkingEmployees] = useState<any[]>([]);
+    const [latestEod, setLatestEod] = useState<any[]>([]);
+
     const [loadingEmployees, setLoadingEmployees] = useState(true);
-    const [loadingEod, setLoadingEod] = useState(false);
-    const [latestEod, setLatestEod] = useState([]);
+    const [loadingEod, setLoadingEod] = useState(true);
+
+    const [goalsTrending, setGoalsTrending] = useState<GoalsTrendingCurrentlyItem[]>([]);
+    const [loadingGoals, setLoadingGoals] = useState(true);
 
     useEffect(() => {
-        if (companyName) {
-            getWhoIsWorking(companyName)
-                .then((data) => setWorkingEmployees(data))
-                .catch(() => { })
-                .finally(() => setLoadingEmployees(false));
+        if (!companyName) { return; }
 
-            getLatestEodDetails(companyName)
-                .then((eodDetails) => setLatestEod(eodDetails))
-                .catch(() => { })
-                .finally(() => setLoadingEod(false));
-        }
+        setLoadingEmployees(true);
+        setLoadingEod(true);
+        setLoadingGoals(true);
+
+        getWhoIsWorking(companyName)
+            .then((data) => setWorkingEmployees(data ?? []))
+            .catch(() => setWorkingEmployees([]))
+            .finally(() => setLoadingEmployees(false));
+
+        getLatestEodDetails(companyName)
+            .then((eodDetails) => setLatestEod(eodDetails ?? []))
+            .catch(() => setLatestEod([]))
+            .finally(() => setLoadingEod(false));
+
+        getGoalsTrendingCurrently(companyName)
+            .then((data) => setGoalsTrending(data ?? []))
+            .catch(() => setGoalsTrending([]))
+            .finally(() => setLoadingGoals(false));
     }, [companyName]);
 
     if (isLoading) {
@@ -49,11 +73,9 @@ export default function OwnerDashboard() {
 
     return (
         <div className="p-3 md:p-6 space-y-4">
-            {/* 🚀 Stunning Welcome Banner */}
-            {/* 🚀 Subtle & Modern Welcome Banner */}
+            {/* Welcome Banner */}
             <header className="relative w-full text-white rounded-b-xl overflow-hidden shadow-md">
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 opacity-90"></div>
-
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 opacity-90" />
                 <div className="relative p-6 flex flex-col items-center md:items-start text-center md:text-left">
                     <h1 className="text-xl md:text-3xl font-extrabold tracking-tight text-white">
                         Welcome, {companyName}
@@ -64,23 +86,41 @@ export default function OwnerDashboard() {
                 </div>
             </header>
 
-            {/* 🚀 Dashboard Sections */}
             <main className="space-y-4">
-                {/* ✅ Who is Working */}
-                <section>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">📍 Who is Working</h2>
-                    {loadingEmployees ? (
-                        <SkeletonTable rows={3} />
-                    ) : workingEmployees.length > 0 ? (
-                        <EmployeeList employees={workingEmployees} />
-                    ) : (
-                        <p className="text-gray-500 text-sm text-center">No employees currently working.</p>
-                    )}
+                {/* Who is Working + Goals Trending side by side */}
+                <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
+                    {/* LEFT: Who is Working */}
+                    <div className="h-full bg-white dark:bg-gray-900">
+
+                        {loadingEmployees ? (
+                            <SkeletonTable rows={3} />
+                        ) : workingEmployees.length > 0 ? (
+                            <EmployeeList employees={workingEmployees} />
+                        ) : (
+                            <p className="text-gray-500 text-sm text-center">No employees currently working.</p>
+                        )}
+                    </div>
+
+                    {/* RIGHT: Goals Trending */}
+                    <div className="h-full bg-white dark:bg-gray-900 p-4">
+
+                        {loadingGoals ? (
+                            <SkeletonTable rows={4} />
+                        ) : goalsTrending.length > 0 ? (
+                            <GoalsTrendingTable rows={goalsTrending} />
+                        ) : (
+                            <p className="text-gray-500 text-sm text-center">No goals data available.</p>
+                        )}
+                    </div>
                 </section>
 
-                {/* ✅ Latest EOD Summary */}
+                <div><TodayGoalsSection companyName={companyName} /></div>
+                {/* Latest EOD Summary */}
                 <section>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">📊 Latest EOD Summary</h2>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        📊 Latest EOD Summary
+                    </h2>
+
                     {loadingEod ? (
                         <SkeletonTable rows={3} />
                     ) : latestEod.length > 0 ? (
@@ -90,9 +130,11 @@ export default function OwnerDashboard() {
                     )}
                 </section>
 
-                {/* ✅ ELB Scorecard */}
+                {/* ELB Scorecard */}
                 <section>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">📈 ELB Scorecard</h2>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        📈 ELB Scorecard
+                    </h2>
                     <ElbScorecard companyName={companyName} />
                 </section>
             </main>

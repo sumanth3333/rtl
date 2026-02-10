@@ -65,7 +65,7 @@ export default function LoginPage() {
                     variants={{ hidden: { opacity: 0, y: 5 }, visible: { opacity: 1, y: 0 } }}
                     className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6"
                 >
-                    Powered by <span className="font-semibold text-blue-700 dark:text-blue-300">EasyDoers Inc.</span>
+                    Developed by <span className="font-semibold text-blue-700 dark:text-blue-300">Pro People Tech LLC.</span>
                 </motion.p>
             </motion.div>
         </div>

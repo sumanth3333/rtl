@@ -8,8 +8,13 @@ export const formatCurrency = (amount: number) =>
 
 export const formatDate = (dateStr: string) => {
     if (!dateStr) return "-";
-    const date = new Date(dateStr);
+
+    // Handle YYYY-MM-DD safely
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+
     if (Number.isNaN(date.getTime())) return dateStr;
+
     return date.toLocaleDateString("en-US", {
         month: "short",
         day: "2-digit",

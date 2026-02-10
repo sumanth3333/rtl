@@ -15,6 +15,18 @@ export default function EmployeeList({ employees }: EmployeeListProps) {
     return (
         <div className="w-full p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md">
             {/* ✅ Desktop View */}
+            <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-100">
+                <div className="flex items-center gap-2">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-900 text-white text-sm">
+                        📍
+                    </span>
+                    <div className="leading-tight">
+                        <p className="text-sm font-semibold text-zinc-900">Who is Working </p>
+
+                    </div>
+                </div>
+
+            </div>
             <div className="hidden md:block">
                 <table className="w-full text-sm border-collapse border border-gray-300 dark:border-gray-700">
                     <thead className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-300 uppercase">

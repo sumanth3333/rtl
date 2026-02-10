@@ -137,7 +137,7 @@ export default function SetupPasswordClient() {
                 </div>
 
                 <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
-                    Powered by <span className="font-semibold text-blue-700 dark:text-blue-300">EasyDoers Inc.</span>
+                    Developed By <span className="font-semibold text-blue-700 dark:text-blue-300">Pro People Tech LLC</span>
                 </p>
             </div>
         </div>

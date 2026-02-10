@@ -1,34 +1,37 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+"use client";
 
+import React from "react";
+import { money } from "@/lib/format";
+import { ProfitLookupResponse } from "@/types/finance";
+import { CollapsibleCard } from "@/components/ui/finance/CollapsibleCard";
+import { Divider, Row } from "@/components/ui/finance/Row";
 
-export function RevenueSection({ revenue }: { revenue: any }) {
-    const accessories = revenue.accessories || {};
-    const compensation = revenue.compensation || {};
+export function RevenueSection({ revenue }: { revenue: ProfitLookupResponse["revenue"] }) {
+    const a = revenue.accessories;
 
     return (
-        <Card className="w-full">
-            <CardHeader>
-                <CardTitle>💰 Revenue Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <RevenueStat label="Total Revenue" value={revenue.totalRevenue} highlight />
-                    <RevenueStat label="Cash Accessories" value={accessories.totalCashAccessories} />
-                    <RevenueStat label="Card Accessories" value={accessories.totalCardAccessories} />
-                    <RevenueStat label="System Accessories" value={accessories.totalSystemAccessories} />
-                    <RevenueStat label="Total Accessories" value={accessories.totalAccessories} />
-                    <RevenueStat label="Total Compensation" value={compensation.totalCompensation} />
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
+        <CollapsibleCard
+            title="Revenue"
+            subtitle="Accessories + compensation"
+            right={<span className="text-sm font-semibold tabular-nums">{money(revenue.totalRevenue)}</span>}
+            defaultOpen={false}
+        >
+            <Row label="Total Revenue" value={money(revenue.totalRevenue)} strong />
+            <Divider />
 
-function RevenueStat({ label, value, highlight = false }: { label: string; value: number; highlight?: boolean }) {
-    return (
-        <div className={`p-4 rounded-md ${highlight ? "bg-green-100 dark:bg-green-900" : "bg-gray-50 dark:bg-gray-800"}`}>
-            <p className="text-sm text-gray-600 dark:text-gray-300">{label}</p>
-            <p className="text-lg font-semibold text-gray-800 dark:text-white">${value?.toFixed(2) ?? "0.00"}</p>
-        </div>
+            <div className="mt-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Accessories
+            </div>
+            <Row label="Cash Accessories" value={money(a.totalCashAccessories)} />
+            <Row label="Card Accessories" value={money(a.totalCardAccessories)} />
+            <Row label="System Accessories" value={money(a.totalSystemAccessories)} />
+            <Row label="Total Accessories" value={money(a.totalAccessories)} strong />
+            <Divider />
+
+            <div className="mt-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Compensation
+            </div>
+            <Row label="Total Compensation" value={money(revenue.compensation.totalCompensation)} strong />
+        </CollapsibleCard>
     );
 }

@@ -10,7 +10,7 @@ export default function ViewPaychecksPage() {
     const { companyName } = useOwner(); // ✅ hook is now inside component
 
     // Month input expects "YYYY-MM"
-    const [selectedMonth, setSelectedMonth] = useState<string>("2025-10");
+    const [selectedMonth, setSelectedMonth] = useState<string>("");
     const [search, setSearch] = useState<string>("");
 
     const { data, loading, error } = useCompanyPaychecks(
