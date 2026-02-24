@@ -72,8 +72,8 @@ export default function OwnerDashboard() {
     }
 
     return (
-        <div className="p-3 md:p-6 space-y-4">
-            {/* Welcome Banner */}
+        <div className="p-3 md:p-6 space-y-2">
+            {/* Welcome Banner
             <header className="relative w-full text-white rounded-b-xl overflow-hidden shadow-md">
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 opacity-90" />
                 <div className="relative p-6 flex flex-col items-center md:items-start text-center md:text-left">
@@ -84,35 +84,38 @@ export default function OwnerDashboard() {
                         Effortlessly manage your stores, employees, sales data and many more.
                     </p>
                 </div>
-            </header>
+            </header> */}
 
             <main className="space-y-4">
                 {/* Who is Working + Goals Trending side by side */}
-                <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
-                    {/* LEFT: Who is Working */}
-                    <div className="h-full bg-white dark:bg-gray-900">
+                {/* <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch"> */}
 
-                        {loadingEmployees ? (
-                            <SkeletonTable rows={3} />
-                        ) : workingEmployees.length > 0 ? (
-                            <EmployeeList employees={workingEmployees} />
-                        ) : (
-                            <p className="text-gray-500 text-sm text-center">No employees currently working.</p>
-                        )}
-                    </div>
+                {/* RIGHT: Goals Trending */}
+                <div className="h-full bg-white dark:bg-gray-900 p-4">
 
-                    {/* RIGHT: Goals Trending */}
-                    <div className="h-full bg-white dark:bg-gray-900 p-4">
+                    {loadingGoals ? (
+                        <SkeletonTable rows={4} />
+                    ) : goalsTrending.length > 0 ? (
+                        <GoalsTrendingTable rows={goalsTrending} />
+                    ) : (
+                        <p className="text-gray-500 text-sm text-center">No goals data available.</p>
+                    )}
+                </div>
 
-                        {loadingGoals ? (
-                            <SkeletonTable rows={4} />
-                        ) : goalsTrending.length > 0 ? (
-                            <GoalsTrendingTable rows={goalsTrending} />
-                        ) : (
-                            <p className="text-gray-500 text-sm text-center">No goals data available.</p>
-                        )}
-                    </div>
-                </section>
+                {/* LEFT: Who is Working */}
+                <div className="h-full bg-white dark:bg-gray-900">
+
+                    {loadingEmployees ? (
+                        <SkeletonTable rows={3} />
+                    ) : workingEmployees.length > 0 ? (
+                        <EmployeeList employees={workingEmployees} />
+                    ) : (
+                        <p className="text-gray-500 text-sm text-center">No employees currently working.</p>
+                    )}
+                </div>
+
+
+                {/* </section> */}
 
                 <div><TodayGoalsSection companyName={companyName} /></div>
                 {/* Latest EOD Summary */}

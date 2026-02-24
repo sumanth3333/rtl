@@ -20,15 +20,22 @@ export default function Sidebar({
     setIsCollapsed: (value: boolean) => void;
     isMobile: boolean;
 }) {
-    const { role, refreshAuth } = useAuth() as {
+    const { role, refreshAuth, isAuthenticated } = useAuth() as {
         role?: Role | string;
         refreshAuth: () => Promise<void>;
+        isAuthenticated?: boolean;
     };
 
     const [authLoading, setAuthLoading] = useState(true);
 
     useEffect(() => {
         const fetchRole = async () => {
+            // If the user is logged out (no role and not authenticated), skip refresh attempts
+            if (!role && isAuthenticated === false) {
+                setAuthLoading(false);
+                return;
+            }
+
             if (!role) {
                 try {
                     const refreshed = await refreshToken();
@@ -42,7 +49,7 @@ export default function Sidebar({
             setAuthLoading(false);
         };
         fetchRole();
-    }, [role, refreshAuth]);
+    }, [role, refreshAuth, isAuthenticated]);
 
     const { employee, store } = useEmployee();
     // 🧭 Resolve employeeNtid & initial companyName (always called)

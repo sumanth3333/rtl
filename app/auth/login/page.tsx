@@ -57,7 +57,8 @@ export default function LoginPage() {
                     variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                     className="mt-8"
                 >
-                    <LoginForm onLoginSuccess={() => router.push("/dashboard")} />
+                    {/* Wait for role-driven redirect from the effect above to avoid redirect loops */}
+                    <LoginForm onLoginSuccess={() => { /* redirect handled by useEffect when role is set */ }} />
                 </motion.div>
 
                 {/* ✅ Subtle Footer Branding */}

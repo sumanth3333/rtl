@@ -27,11 +27,15 @@ function daysLeftInSelectedMonth(selectedMonth?: string) {
     return Math.max(remaining, 0);
 }
 
-const fmtInt = (n: number) => new Intl.NumberFormat().format(n);
+const fmtNumber = (n: number) =>
+    new Intl.NumberFormat(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
+const fmtTotals = (n: number) =>
+    new Intl.NumberFormat(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
 
+// Allow percentages to exceed 100% (backend can send >100 when surpassing goal)
 function clampPct(n: number) {
     if (!Number.isFinite(n)) { return 0; }
-    return Math.max(0, Math.min(100, n));
+    return Math.max(0, n);
 }
 
 function leftBadgeClasses(left: number, goal: number) {
@@ -91,54 +95,40 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
     }, [computed, daysLeft]);
 
     return (
-        <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden">
             {/* Header (compact) */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-100">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center gap-2">
                     <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-900 text-white text-sm">
                         🎯
                     </span>
                     <div className="leading-tight">
                         <p className="text-sm font-semibold text-zinc-900">Goals Trending</p>
-                        <p className="text-[12px] text-zinc-500">
+                        <p className="text-[11px] sm:text-[12px] text-zinc-500">
                             Trending = boxes/day for <span className="font-semibold text-zinc-800">125%</span>
                             {" "}
                             • Days left: <span className="font-semibold text-zinc-700">{daysLeft}</span>
                         </p>
                     </div>
                 </div>
-
-                <span className="hidden md:inline-flex rounded-full border border-zinc-200 bg-zinc-50 px-2 py-1 text-[11px] font-semibold text-zinc-700">
-                    Current month snapshot
-                </span>
             </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm table-fixed">
-                    {/* tighter column distribution */}
-                    <colgroup>
-                        <col className="w-[28%]" />
-                        <col className="w-[10%]" />
-                        <col className="w-[12%]" />
-                        <col className="w-[12%]" />
-                        <col className="w-[12%]" />
-                        <col className="w-[12%]" />
-                        <col className="w-[14%]" />
-                    </colgroup>
+                <table className="w-full text-left text-xs sm:text-sm table-auto">
 
-                    <thead className="sticky top-0 z-10 bg-zinc-50 text-[11px] uppercase tracking-wide text-zinc-500 border-b border-zinc-200">
+                    <thead className="sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900 text-[10px] sm:text-[11px] uppercase tracking-wide text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-zinc-700">
                         <tr>
-                            <th className="px-3 py-2">Store</th>
-                            <th className="px-3 py-2 text-right">Current</th>
-                            <th className="px-3 py-2 text-right">Goal 100</th>
-                            <th className="px-3 py-2 text-right">Left 100</th>
-                            <th className="px-3 py-2 text-right">Goal 125</th>
-                            <th className="px-3 py-2 text-right">Left 125</th>
-                            <th className="px-3 py-2 text-right">Trending</th>
+                            <th className="px-2 py-1.5 whitespace-nowrap">Store ID</th>
+                            <th className="px-2 py-1.5 text-right">Current</th>
+                            <th className="px-2 py-1.5 text-right whitespace-nowrap">Goal to 100%</th>
+                            <th className="px-2 py-1.5 text-right whitespace-nowrap">Left for 100%</th>
+                            <th className="px-2 py-1.5 text-right whitespace-nowrap">Goal to 125%</th>
+                            <th className="px-2 py-1.5 text-right whitespace-nowrap">Left for 125%</th>
+                            <th className="px-2 py-1.5 text-right whitespace-nowrap">Trending</th>
                         </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-zinc-100">
+                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
                         {computed.map((r) => {
                             const left100 = r.currentDifference ?? 0;
                             const goal100 = r.totalBoxes ?? 0;
@@ -149,69 +139,66 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
                             return (
                                 <tr
                                     key={r.store.dealerStoreId}
-                                    className="text-zinc-800 hover:bg-zinc-50/60 transition-colors"
+                                    className="text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40 transition-colors"
                                 >
-                                    <td className="px-3 py-2">
-                                        <div className="min-w-0">
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                <span className="truncate font-semibold text-zinc-900">
-                                                    {r.store.storeName}
-                                                </span>
-                                                <span
-                                                    className={`shrink-0 inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${progressChipClasses(
-                                                        r._achievedPct
-                                                    )}`}
-                                                    title="Achieved % for 100% goal"
-                                                >
-                                                    {r._achievedPct.toFixed(0)}%
-                                                </span>
-                                            </div>
-                                            <div className="text-[11px] text-zinc-500 truncate">{r.store.dealerStoreId}</div>
+                                    <td className="px-2 py-1">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
+                                            <span className="truncate font-semibold text-zinc-900 dark:text-zinc-100 text-xs sm:text-sm">
+                                                {r.store.dealerStoreId}
+                                            </span>
+                                            <span
+                                                className={`shrink-0 inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] sm:text-[11px] font-semibold whitespace-nowrap ${progressChipClasses(
+                                                    r._achievedPct
+                                                )}`}
+                                                title="Achieved % for 100% goal"
+                                            >
+                                                {r._achievedPct.toFixed(2)}%
+                                            </span>
                                         </div>
                                     </td>
 
-                                    <td className="px-3 py-2 text-right font-semibold text-zinc-900 tabular-nums">
-                                        {fmtInt(r.acheivedTillDate ?? 0)}
+                                    <td className="px-2 py-1 text-right font-semibold text-zinc-900 dark:text-zinc-100 tabular-nums">
+                                        {fmtNumber(r.acheivedTillDate ?? 0)}
                                     </td>
 
-                                    <td className="px-3 py-2 text-right text-zinc-700 tabular-nums">
-                                        {fmtInt(goal100)}
+                                    <td className="px-2 py-1 text-right text-zinc-700 dark:text-zinc-200 tabular-nums">
+                                        {fmtNumber(goal100)}
                                     </td>
 
-                                    <td className="px-3 py-2 text-right tabular-nums">
+                                    <td className="px-2 py-1 text-right tabular-nums">
                                         <span
-                                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${leftBadgeClasses(
+                                            className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] sm:text-[11px] font-semibold whitespace-nowrap ${leftBadgeClasses(
                                                 left100,
                                                 goal100
                                             )}`}
                                         >
-                                            {fmtInt(left100)}
+                                            {left100 < 0 ? `+${fmtNumber(Math.abs(left100))}` : fmtNumber(left100)}
                                         </span>
                                     </td>
 
-                                    <td className="px-3 py-2 text-right text-zinc-700 tabular-nums">
-                                        {fmtInt(goal125)}
+                                    <td className="px-2 py-1 text-right text-zinc-700 dark:text-zinc-200 tabular-nums">
+                                        {fmtNumber(goal125)}
                                     </td>
 
-                                    <td className="px-3 py-2 text-right tabular-nums">
+                                    <td className="px-2 py-1 text-right tabular-nums">
                                         <span
-                                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${leftBadgeClasses(
+                                            className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] sm:text-[11px] font-semibold whitespace-nowrap ${leftBadgeClasses(
                                                 left125,
                                                 goal125
                                             )}`}
                                         >
-                                            {fmtInt(left125)}
+                                            {left125 < 0 ? `+${fmtNumber(Math.abs(left125))}` : fmtNumber(left125)}
                                         </span>
                                     </td>
 
-                                    <td className="px-3 py-2 text-right tabular-nums">
+                                    <td className="px-2 py-1 text-right tabular-nums">
                                         <span
-                                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-extrabold ${trendBadgeClasses(
+                                            className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold whitespace-nowrap ${trendBadgeClasses(
                                                 r._perDayFor125
                                             )}`}
                                             title="Boxes per day needed to hit 125%"
                                         >
-                                            {fmtInt(r._perDayFor125)} /day
+                                            {fmtNumber(r._perDayFor125)} /day
                                         </span>
                                     </td>
                                 </tr>
@@ -220,7 +207,7 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
 
                         {computed.length === 0 && (
                             <tr>
-                                <td className="px-3 py-6 text-center text-sm text-zinc-500" colSpan={7}>
+                                <td className="px-2 py-3 text-center text-sm text-zinc-500" colSpan={7}>
                                     No goals data available.
                                 </td>
                             </tr>
@@ -231,36 +218,36 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
                     {computed.length > 0 && (
                         <tfoot className="border-t border-zinc-200 bg-zinc-50/70">
                             <tr className="text-[12px] font-bold text-zinc-900">
-                                <td className="px-3 py-2">TOTAL</td>
+                                <td className="px-2 py-1.5">TOTAL</td>
 
-                                <td className="px-3 py-2 text-right tabular-nums">
-                                    {fmtInt(totals.current)}
+                                <td className="px-2 py-1.5 text-right tabular-nums">
+                                    {fmtTotals(totals.current)}
                                 </td>
 
-                                <td className="px-3 py-2 text-right tabular-nums">
-                                    {fmtInt(totals.goal100)}
+                                <td className="px-2 py-1.5 text-right tabular-nums">
+                                    {fmtTotals(totals.goal100)}
                                 </td>
 
-                                <td className="px-3 py-2 text-right tabular-nums">
-                                    {fmtInt(totals.left100)}
+                                <td className="px-2 py-1.5 text-right tabular-nums">
+                                    {totals.left100 < 0 ? `+${fmtTotals(Math.abs(totals.left100))}` : fmtTotals(totals.left100)}
                                 </td>
 
-                                <td className="px-3 py-2 text-right tabular-nums">
-                                    {fmtInt(totals.goal125)}
+                                <td className="px-2 py-1.5 text-right tabular-nums">
+                                    {fmtTotals(totals.goal125)}
                                 </td>
 
-                                <td className="px-3 py-2 text-right tabular-nums">
-                                    {fmtInt(totals.left125)}
+                                <td className="px-2 py-1.5 text-right tabular-nums">
+                                    {totals.left125 < 0 ? `+${fmtTotals(Math.abs(totals.left125))}` : fmtTotals(totals.left125)}
                                 </td>
 
-                                <td className="px-3 py-2 text-right tabular-nums">
+                                <td className="px-2 py-1.5 text-right tabular-nums">
                                     <span
-                                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-extrabold ${trendBadgeClasses(
+                                        className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold whitespace-nowrap ${trendBadgeClasses(
                                             totals.trendTotal
                                         )}`}
                                         title="Total boxes/day needed for 125%"
                                     >
-                                        {fmtInt(totals.trendTotal)} /day
+                                        {fmtTotals(totals.trendTotal)} /day
                                     </span>
                                 </td>
                             </tr>

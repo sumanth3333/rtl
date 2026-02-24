@@ -22,18 +22,21 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
     }, []);
 
     return (
-        <div className="flex h-screen bg-gray-100 dark:bg-gray-900 transition-all duration-300">
-            {/* ✅ Sidebar with `isMobile` Prop */}
-            <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} isMobile={isMobile} />
+        <div className="flex min-h-screen bg-white dark:bg-slate-900 transition-all duration-200">
+            {/* ✅ Sidebar with `isMobile` Prop (sticky so it never scrolls away) */}
+            <div className="sticky top-0 h-screen z-50">
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} isMobile={isMobile} />
+            </div>
 
             {/* ✅ Main Content */}
-            <div className="relative flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out">
+            <div className="relative flex flex-1 flex-col min-w-0 transition-all duration-300 ease-in-out">
                 <Header title="Dashboard" onToggleSidebar={() => setIsCollapsed(!isCollapsed)} />
 
-                {/* ✅ High-End Content Section */}
-                <main className="relative flex-1 overflow-auto p-4 md:p-6">
-                    <div className="relative bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-300 p-4 md:p-6">
-                        {children}
+                <main className="relative flex-1 overflow-auto px-2 py-2 sm:px-2 sm:py-2 lg:px-2 lg:py-2">
+                    <div className="max-w-screen-xl mx-auto w-full">
+                        <div className="bg-white dark:bg-slate-900 p-1 sm:p-2 lg:p-2">
+                            {children}
+                        </div>
                     </div>
                 </main>
 
