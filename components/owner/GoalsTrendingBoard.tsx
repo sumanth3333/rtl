@@ -40,22 +40,36 @@ function clampPct(n: number) {
 
 function leftBadgeClasses(left: number, goal: number) {
     const ratio = goal > 0 ? left / goal : left > 0 ? 1 : 0;
-    if (left <= 0) { return "bg-emerald-50 text-emerald-700 border-emerald-200"; }
-    if (ratio <= 0.25) { return "bg-amber-50 text-amber-800 border-amber-200"; }
-    return "bg-rose-50 text-rose-700 border-rose-200";
+    if (left <= 0) {
+        return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-100 dark:border-emerald-800";
+    }
+    if (ratio <= 0.25) {
+        return "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-100 dark:border-amber-800";
+    }
+    return "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-100 dark:border-rose-800";
 }
 
 function trendBadgeClasses(perDay: number) {
-    if (perDay <= 0) { return "bg-emerald-50 text-emerald-700 border-emerald-200" };
-    if (perDay <= 3) { return "bg-amber-50 text-amber-800 border-amber-200" };
-    return "bg-rose-50 text-rose-700 border-rose-200";
+    if (perDay <= 0) {
+        return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-100 dark:border-emerald-800";
+    }
+    if (perDay <= 3) {
+        return "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-100 dark:border-amber-800";
+    }
+    return "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-100 dark:border-rose-800";
 }
 
 function progressChipClasses(pct: number) {
-    if (pct >= 85) { return "bg-emerald-50 text-emerald-700 border-emerald-200"; }
-    if (pct >= 50) { return "bg-blue-50 text-blue-700 border-blue-200"; }
-    if (pct >= 25) { return "bg-amber-50 text-amber-800 border-amber-200"; }
-    return "bg-rose-50 text-rose-700 border-rose-200";
+    if (pct >= 85) {
+        return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-100 dark:border-emerald-800";
+    }
+    if (pct >= 50) {
+        return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-100 dark:border-blue-800";
+    }
+    if (pct >= 25) {
+        return "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-100 dark:border-amber-800";
+    }
+    return "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-100 dark:border-rose-800";
 }
 
 export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
@@ -95,7 +109,7 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
     }, [computed, daysLeft]);
 
     return (
-        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0b1220] shadow-sm overflow-hidden">
             {/* Header (compact) */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center gap-2">
@@ -103,11 +117,13 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
                         🎯
                     </span>
                     <div className="leading-tight">
-                        <p className="text-sm font-semibold text-zinc-900">Goals Trending</p>
-                        <p className="text-[11px] sm:text-[12px] text-zinc-500">
-                            Trending = boxes/day for <span className="font-semibold text-zinc-800">125%</span>
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Goals Trending</p>
+                        <p className="text-[11px] sm:text-[12px] text-zinc-500 dark:text-zinc-300">
+                            Trending = boxes/day for{" "}
+                            <span className="font-semibold text-indigo-700 dark:text-indigo-300">125%</span>
                             {" "}
-                            • Days left: <span className="font-semibold text-zinc-700">{daysLeft}</span>
+                            • Days left:{" "}
+                            <span className="font-semibold text-emerald-700 dark:text-emerald-300">{daysLeft}</span>
                         </p>
                     </div>
                 </div>
@@ -216,8 +232,8 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
 
                     {/* ✅ TOTALS FOOTER ROW */}
                     {computed.length > 0 && (
-                        <tfoot className="border-t border-zinc-200 bg-zinc-50/70">
-                            <tr className="text-[12px] font-bold text-zinc-900">
+                        <tfoot className="border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/90 dark:bg-zinc-900">
+                            <tr className="text-[12px] font-bold text-zinc-900 dark:text-zinc-100">
                                 <td className="px-2 py-1.5">TOTAL</td>
 
                                 <td className="px-2 py-1.5 text-right tabular-nums">

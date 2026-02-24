@@ -6,7 +6,7 @@ import SkeletonTable from "@/components/ui/skeletons/SkeletonTable";
 import { useAuth } from "@/hooks/useAuth";
 import { useOwner } from "@/hooks/useOwner";
 
-import { getLatestEodDetails, getWhoIsWorking } from "@/services/owner/ownerService";
+import { getLatestEodByDate, getWhoIsWorking } from "@/services/owner/ownerService";
 import { getGoalsTrendingCurrently } from "@/services/owner/getGoalsTrendingCurrently";
 
 import EmployeeList from "@/components/owner/EmployeeList";
@@ -17,6 +17,8 @@ import ElbScorecard from "@/components/owner/ElbScorecard";
 import type { GoalsTrendingCurrentlyItem } from "@/types/goalsTrending";
 import GoalsTrendingTable from "@/components/owner/GoalsTrendingBoard";
 import TodayGoalsSection from "@/components/goals/TodayGoalsSection";
+import MtdMetricsCards from "@/components/owner/MtdMetricsCards";
+import { getMtdMetricsOverall, MtdMetrics } from "@/services/owner/ownerService";
 
 export default function OwnerDashboard() {
     const { role, isLoading } = useAuth();
@@ -25,12 +27,20 @@ export default function OwnerDashboard() {
     // ✅ strongly type these if you have types available
     const [workingEmployees, setWorkingEmployees] = useState<any[]>([]);
     const [latestEod, setLatestEod] = useState<any[]>([]);
+    const [latestTotals, setLatestTotals] = useState<any | null>(null);
+    const [selectedDate, setSelectedDate] = useState<string>(() => {
+        const now = new Date();
+        return now.toISOString().slice(0, 10);
+    });
+    const [attemptedYesterday, setAttemptedYesterday] = useState(false);
 
     const [loadingEmployees, setLoadingEmployees] = useState(true);
     const [loadingEod, setLoadingEod] = useState(true);
 
     const [goalsTrending, setGoalsTrending] = useState<GoalsTrendingCurrentlyItem[]>([]);
     const [loadingGoals, setLoadingGoals] = useState(true);
+    const [mtdMetrics, setMtdMetrics] = useState<MtdMetrics | null>(null);
+    const [loadingMetrics, setLoadingMetrics] = useState(true);
 
     useEffect(() => {
         if (!companyName) { return; }
@@ -38,22 +48,45 @@ export default function OwnerDashboard() {
         setLoadingEmployees(true);
         setLoadingEod(true);
         setLoadingGoals(true);
+        setLoadingMetrics(true);
 
         getWhoIsWorking(companyName)
             .then((data) => setWorkingEmployees(data ?? []))
             .catch(() => setWorkingEmployees([]))
             .finally(() => setLoadingEmployees(false));
 
-        getLatestEodDetails(companyName)
-            .then((eodDetails) => setLatestEod(eodDetails ?? []))
-            .catch(() => setLatestEod([]))
+        getLatestEodByDate(companyName, selectedDate)
+            .then((eodDetails) => {
+                setLatestEod(eodDetails?.salesByStore ?? []);
+                setLatestTotals(eodDetails ?? null);
+            })
+            .catch(() => {
+                setLatestEod([]);
+                setLatestTotals(null);
+            })
             .finally(() => setLoadingEod(false));
 
         getGoalsTrendingCurrently(companyName)
             .then((data) => setGoalsTrending(data ?? []))
             .catch(() => setGoalsTrending([]))
             .finally(() => setLoadingGoals(false));
-    }, [companyName]);
+
+        getMtdMetricsOverall(companyName)
+            .then((data) => setMtdMetrics(data))
+            .catch(() => setMtdMetrics(null))
+            .finally(() => setLoadingMetrics(false));
+    }, [companyName, selectedDate]);
+
+    // If today's data is empty, fall back to yesterday automatically (one-time)
+    useEffect(() => {
+        const todayIso = new Date().toISOString().slice(0, 10);
+        if (!loadingEod && latestEod.length === 0 && !attemptedYesterday && selectedDate === todayIso) {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            setSelectedDate(yesterday.toISOString().slice(0, 10));
+            setAttemptedYesterday(true);
+        }
+    }, [loadingEod, latestEod.length, selectedDate, attemptedYesterday]);
 
     if (isLoading) {
         return (
@@ -72,27 +105,23 @@ export default function OwnerDashboard() {
     }
 
     return (
-        <div className="p-3 md:p-6 space-y-2">
-            {/* Welcome Banner
-            <header className="relative w-full text-white rounded-b-xl overflow-hidden shadow-md">
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 opacity-90" />
-                <div className="relative p-6 flex flex-col items-center md:items-start text-center md:text-left">
-                    <h1 className="text-xl md:text-3xl font-extrabold tracking-tight text-white">
-                        Welcome, {companyName}
+        <div className="p-3 md:p-6 space-y-3">
+            <header className="flex items-center justify-between rounded-xl border border-gray-300 dark:border-gray-700 bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 dark:from-[#0a0f1c] dark:via-[#0c1320] dark:to-[#0a0f1c] px-4 py-4 shadow-sm">
+                <div className="space-y-0.5">
+                    <p className="text-xs uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">Welcome</p>
+                    <h1 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
+                        {companyName || "Owner Dashboard"}
                     </h1>
-                    <p className="text-sm md:text-base text-white/80 mt-1">
-                        Effortlessly manage your stores, employees, sales data and many more.
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Overview of your stores, teams, and daily performance.
                     </p>
                 </div>
-            </header> */}
+            </header>
 
             <main className="space-y-4">
-                {/* Who is Working + Goals Trending side by side */}
-                {/* <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch"> */}
-
-                {/* RIGHT: Goals Trending */}
-                <div className="h-full bg-white dark:bg-gray-900 p-4">
-
+                <MtdMetricsCards metrics={mtdMetrics} loading={loadingMetrics} />
+                {/* Goals Trending */}
+                <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-4 space-y-3 overflow-x-auto">
                     {loadingGoals ? (
                         <SkeletonTable rows={4} />
                     ) : goalsTrending.length > 0 ? (
@@ -102,9 +131,8 @@ export default function OwnerDashboard() {
                     )}
                 </div>
 
-                {/* LEFT: Who is Working */}
-                <div className="h-full bg-white dark:bg-gray-900">
-
+                {/* Who is Working */}
+                <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-4 space-y-3">
                     {loadingEmployees ? (
                         <SkeletonTable rows={3} />
                     ) : workingEmployees.length > 0 ? (
@@ -113,25 +141,35 @@ export default function OwnerDashboard() {
                         <p className="text-gray-500 text-sm text-center">No employees currently working.</p>
                     )}
                 </div>
-
-
-                {/* </section> */}
-
-                <div><TodayGoalsSection companyName={companyName} /></div>
-                {/* Latest EOD Summary */}
-                <section>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        📊 Latest EOD Summary
-                    </h2>
+                {/* Latest EOD Summary (moved above Today Goals) */}
+                <section className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-4 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                            📊 EOD Summary
+                        </h2>
+                        <div className="flex items-center gap-2 text-xs sm:text-sm">
+                            <label htmlFor="eod-date" className="text-gray-600 dark:text-gray-300">Date:</label>
+                            <input
+                                id="eod-date"
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1 text-gray-900 dark:text-gray-100 text-xs sm:text-sm"
+                            />
+                        </div>
+                    </div>
 
                     {loadingEod ? (
                         <SkeletonTable rows={3} />
                     ) : latestEod.length > 0 ? (
-                        <LatestEodList eodList={latestEod} />
+                        <LatestEodList eodList={latestEod} totals={latestTotals ?? undefined} />
                     ) : (
                         <p className="text-gray-500 text-sm text-center">No EOD reports available.</p>
                     )}
                 </section>
+
+
+                <div><TodayGoalsSection companyName={companyName} /></div>
 
                 {/* ELB Scorecard */}
                 <section>

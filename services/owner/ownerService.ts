@@ -137,6 +137,28 @@ export const getLatestEodDetails = async (companyName: string) => {
     }
 };
 
+export type MtdMetrics = {
+    totalActivations: number;
+    totalHsi: number;
+    totalBts: number;
+    totalAccessories: number;
+    totalUpgrades: number;
+    totalMigrations: number;
+    totalFreeLines: number;
+};
+
+export const getMtdMetricsOverall = async (companyName: string): Promise<MtdMetrics | null> => {
+    try {
+        const response = await apiClient.get("/company/MTDMetricsOverall", {
+            params: { companyName }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("❌ Error fetching MTD metrics:", error);
+        return null;
+    }
+};
+
 export const getAssignedTodosForStore = async (dealerStoreId: string): Promise<{ todos: AssignedTodo[] }> => {
     try {
         const response = await apiClient.get("/todos/getAssinedTodos", { params: { dealerStoreId } });
@@ -169,6 +191,28 @@ export const getEodDetails = async (dealerStoreId: string, employeeNtid: string,
         });
         console.log(response.data);
         return response.data; // Return the API response if needed
+    } catch (error: unknown) {
+        let errorMessage = "An unknown error occurred";
+
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        } else if (typeof error === "string") {
+            errorMessage = error;
+        } else if (error && typeof error === "object" && "response" in error) {
+            errorMessage =
+                (error as any).response?.data?.message || "API request failed";
+        }
+        console.error("❌ Failed to fetch EOD Report details:", errorMessage);
+        throw new Error(errorMessage); // Re-throw error for UI handling
+    }
+};
+
+export const getLatestEodByDate = async (companyName: string, date: string) => {
+    try {
+        const response = await apiClient.get("/sale/fetchSubmittedSalesByDate", {
+            params: { companyName, date }
+        });
+        return response.data;
     } catch (error: unknown) {
         let errorMessage = "An unknown error occurred";
 

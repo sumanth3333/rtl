@@ -22,7 +22,9 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
     }, []);
 
     return (
-        <div className="flex min-h-screen bg-white dark:bg-slate-900 transition-all duration-200">
+        <div className="relative flex min-h-screen bg-white dark:bg-slate-900 transition-all duration-300">
+            {/* subtle dotted overlay for texture */}
+            <div className="pointer-events-none absolute inset-0 opacity-0" />
             {/* ✅ Sidebar with `isMobile` Prop (sticky so it never scrolls away) */}
             <div className="sticky top-0 h-screen z-50">
                 <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} isMobile={isMobile} />

@@ -21,7 +21,8 @@ export default function Header({ title, onToggleSidebar }: { title: string; onTo
     return (
         <header
             className={`flex items-center justify-between px-4 md:px-10 py-4 
-        bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700
+        bg-gradient-to-r from-white via-white to-slate-50 dark:from-[#0c1220] dark:via-[#0e1628] dark:to-[#0c1220]
+        backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700
         transition-all duration-300 ${isScrolled ? "shadow-md" : "shadow-none"}`}
         >
             {/* Left: Brand & Sidebar Toggle */}
@@ -57,7 +58,7 @@ export default function Header({ title, onToggleSidebar }: { title: string; onTo
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="hidden sm:block text-lg md:text-2xl lg:text-3xl font-bold tracking-wide text-gray-900 dark:text-gray-100 transition-all duration-300"
+                    className="hidden sm:block text-lg md:text-2xl lg:text-3xl font-bold tracking-wide text-gray-900 dark:text-gray-50 transition-all duration-300"
                 >
                     {title}
                 </motion.h1>

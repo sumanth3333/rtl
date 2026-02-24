@@ -15,44 +15,68 @@ interface EodSummary {
 
 interface LatestEodListProps {
     eodList: EodSummary[];
+    totals?: {
+        totalActivations: number;
+        totalUpgrades: number;
+        totalMigrations: number;
+        totalHsi: number;
+        totalBts: number;
+        totalFreeLines: number;
+        totalAccessories: number;
+    };
 }
 
-export default function LatestEodList({ eodList }: LatestEodListProps) {
+export default function LatestEodList({ eodList, totals }: LatestEodListProps) {
     return (
         <div className="w-full p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md">
             {/* ✅ Desktop View */}
-            <div className="hidden md:block">
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm border-collapse border border-gray-300 dark:border-gray-700">
                     <thead className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-300 uppercase">
                         <tr>
-                            <th className="p-3 text-left">Date</th>
-                            <th className="p-3 text-left">Store</th>
-                            <th className="p-3 text-left">Employee</th>
-                            <th className="p-3 text-center">Activations</th>
-                            <th className="p-3 text-center">Upgrades</th>
-                            <th className="p-3 text-center">Migrations</th>
-                            <th className="p-3 text-center">HSI</th>
-                            <th className="p-3 text-center">BTS</th>
-                            <th className="p-3 text-center">Free Lines</th>
-                            <th className="p-3 text-center">Accessories ($)</th>
+                            <th className="p-2 text-left">Store</th>
+                            <th className="p-2 text-left">Employee</th>
+                            <th className="p-2 text-center">Activations</th>
+                            <th className="p-2 text-center">Upgrades</th>
+                            <th className="p-2 text-center">Migrations</th>
+                            <th className="p-2 text-center">HSI</th>
+                            <th className="p-2 text-center">BTS</th>
+                            <th className="p-2 text-center">Free Lines</th>
+                            <th className="p-2 text-center">Accessories ($)</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                         {eodList.map((eod, index) => (
                             <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                                <td className="p-3 font-semibold text-gray-900 dark:text-white">{eod.saleDate}</td>
-                                <td className="p-3 text-gray-700 dark:text-gray-300">{eod.dealerStoreId}</td>
-                                <td className="p-3 text-gray-700 dark:text-gray-300">{eod.employeeName}</td>
-                                <td className="p-3 text-center font-semibold text-blue-600 dark:text-blue-400">{eod.boxesSold}</td>
-                                <td className="p-3 text-center font-semibold text-blue-600 dark:text-blue-400">{eod.upgrade}</td>
-                                <td className="p-3 text-center font-semibold text-blue-600 dark:text-blue-400">{eod.migrations}</td>
-                                <td className="p-3 text-center font-semibold text-green-600 dark:text-green-400">{eod.hsiSold}</td>
-                                <td className="p-3 text-center font-semibold text-indigo-600 dark:text-indigo-400">{eod.tabletsSold}</td>
-                                <td className="p-3 text-center font-semibold text-purple-600 dark:text-purple-400">{eod.watchesSold}</td>
-                                <td className="p-3 text-center font-semibold text-yellow-600 dark:text-yellow-400">${eod.accessories}</td>
+                                <td className="p-2 text-gray-700 dark:text-gray-300">{eod.dealerStoreId}</td>
+                                <td className="p-2 text-gray-700 dark:text-gray-300">{eod.employeeName}</td>
+                                <td className="p-2 text-center font-semibold text-blue-600 dark:text-blue-400">{eod.boxesSold}</td>
+                                <td className="p-2 text-center font-semibold text-blue-600 dark:text-blue-400">{eod.upgrade}</td>
+                                <td className="p-2 text-center font-semibold text-blue-600 dark:text-blue-400">{eod.migrations}</td>
+                                <td className="p-2 text-center font-semibold text-green-600 dark:text-green-400">{eod.hsiSold}</td>
+                                <td className="p-2 text-center font-semibold text-indigo-600 dark:text-indigo-400">{eod.tabletsSold}</td>
+                                <td className="p-2 text-center font-semibold text-purple-600 dark:text-purple-400">{eod.watchesSold}</td>
+                                <td className="p-2 text-center font-semibold text-yellow-600 dark:text-yellow-400">${eod.accessories}</td>
                             </tr>
                         ))}
                     </tbody>
+
+                    {totals && (
+                        <tfoot className="bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200 font-semibold">
+                            <tr>
+                                <td className="p-2" colSpan={2}>Totals</td>
+                                <td className="p-2 text-center text-blue-600 dark:text-blue-300">{totals.totalActivations}</td>
+                                <td className="p-2 text-center text-blue-600 dark:text-blue-300">{totals.totalUpgrades}</td>
+                                <td className="p-2 text-center text-blue-600 dark:text-blue-300">{totals.totalMigrations}</td>
+                                <td className="p-2 text-center text-green-600 dark:text-green-300">{totals.totalHsi}</td>
+                                <td className="p-2 text-center text-indigo-600 dark:text-indigo-300">{totals.totalBts}</td>
+                                <td className="p-2 text-center text-purple-600 dark:text-purple-300">{totals.totalFreeLines}</td>
+                                <td className="p-2 text-center text-yellow-600 dark:text-yellow-300">
+                                    ${totals.totalAccessories?.toFixed(2)}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    )}
                 </table>
             </div>
 
@@ -133,6 +157,43 @@ export default function LatestEodList({ eodList }: LatestEodListProps) {
                         </div>
                     </div>
                 ))}
+
+                {totals && (
+                    <div className="p-3 bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div className="grid grid-cols-2 gap-3 text-xs text-gray-600 dark:text-gray-400">
+                            <div className="flex justify-between">
+                                <span>Activations</span>
+                                <span className="font-semibold text-blue-600 dark:text-blue-300">{totals.totalActivations}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Upgrades</span>
+                                <span className="font-semibold text-blue-600 dark:text-blue-300">{totals.totalUpgrades}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Migrations</span>
+                                <span className="font-semibold text-blue-600 dark:text-blue-300">{totals.totalMigrations}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>HSI</span>
+                                <span className="font-semibold text-green-600 dark:text-green-300">{totals.totalHsi}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>BTS</span>
+                                <span className="font-semibold text-indigo-600 dark:text-indigo-300">{totals.totalBts}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Free Lines</span>
+                                <span className="font-semibold text-purple-600 dark:text-purple-300">{totals.totalFreeLines}</span>
+                            </div>
+                            <div className="col-span-2 flex justify-between">
+                                <span>Accessories ($)</span>
+                                <span className="font-semibold text-yellow-600 dark:text-yellow-300">
+                                    ${totals.totalAccessories?.toFixed(2)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
