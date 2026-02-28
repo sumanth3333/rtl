@@ -68,7 +68,7 @@ export default function LatestEodList({ eodList, totals }: LatestEodListProps) {
     };
 
     const indicator = (key: SortKey) => {
-        if (sortConfig.key !== key) return "";
+        if (sortConfig.key !== key) { return ""; }
         return sortConfig.direction === "asc" ? "▲" : "▼";
     };
     return (

@@ -63,7 +63,7 @@ export default function OwnerAvailableDevicesPage() {
     });
 
     const renderSortIndicator = (key: "productName" | "daysOld") => {
-        if (sortConfig.key !== key) return "";
+        if (sortConfig.key !== key) { return "" };
         return sortConfig.direction === "asc" ? "▲" : "▼";
     };
 

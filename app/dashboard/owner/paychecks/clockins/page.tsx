@@ -23,7 +23,7 @@ export default function ClockinsPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!companyName) return;
+    if (!companyName) { return; }
     setLoading(true);
     getStoreClockins(companyName, start, end)
       .then((res) => setData(res))

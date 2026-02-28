@@ -19,7 +19,7 @@ interface EmployeeListProps {
 function parseClockTime(value: string) {
     // Attempt to parse times like "09:15", "09:15:30" or "09:15 AM"; fall back to lexical compare weight
     const normalized = value?.trim();
-    if (!normalized) return null;
+    if (!normalized) { return null; }
 
     // Handle AM/PM
     const ampmMatch = normalized.match(/^(\d{1,2}:\d{2})(?::\d{2})?\s?(AM|PM)$/i);
@@ -76,7 +76,7 @@ export default function EmployeeList({ employees }: EmployeeListProps) {
     };
 
     const indicator = (key: SortKey) => {
-        if (sortConfig.key !== key) return "";
+        if (sortConfig.key !== key) { return ""; }
         return sortConfig.direction === "asc" ? "▲" : "▼";
     };
     return (

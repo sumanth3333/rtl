@@ -141,7 +141,7 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
     };
 
     const indicator = (key: SortKey) => {
-        if (sortConfig.key !== key) return "";
+        if (sortConfig.key !== key) { return ""; }
         return sortConfig.direction === "asc" ? "▲" : "▼";
     };
 
@@ -296,7 +296,7 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
                                 <td className="px-2 py-1.5">TOTAL</td>
 
                                 <td className="px-2 py-1.5 text-right tabular-nums text-zinc-400 dark:text-zinc-500">
-                                    — 
+                                    —
                                 </td>
 
                                 <td className="px-2 py-1.5 text-right tabular-nums">
