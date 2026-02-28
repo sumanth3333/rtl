@@ -7,6 +7,12 @@ import { useOwner } from "@/hooks/useOwner";
 
 export default function OwnerAvailableDevicesPage() {
     const [devices, setDevices] = useState<(Device & { storeName: string })[]>([]);
+    const [sortConfig, setSortConfig] = useState<{ key: "productName" | "daysOld"; direction: "asc" | "desc" }>(
+        {
+            key: "productName",
+            direction: "asc",
+        }
+    );
     const { companyName } = useOwner();
 
     useEffect(() => {
@@ -37,6 +43,30 @@ export default function OwnerAvailableDevicesPage() {
         fetchDevices();
     }, [companyName]);
 
+    const handleSort = (key: "productName" | "daysOld") => {
+        setSortConfig((prev) => {
+            if (prev.key === key) {
+                return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+            }
+            return { key, direction: "asc" };
+        });
+    };
+
+    const sortedDevices = [...devices].sort((a, b) => {
+        const { key, direction } = sortConfig;
+        if (key === "productName") {
+            const result = a.productName.localeCompare(b.productName);
+            return direction === "asc" ? result : -result;
+        }
+        const result = (a.daysOld ?? 0) - (b.daysOld ?? 0);
+        return direction === "asc" ? result : -result;
+    });
+
+    const renderSortIndicator = (key: "productName" | "daysOld") => {
+        if (sortConfig.key !== key) return "";
+        return sortConfig.direction === "asc" ? "▲" : "▼";
+    };
+
     return (
         <main className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-4 py-8 sm:px-8">
             <h1 className="text-3xl font-bold text-center mb-6">📱 Available Upgrade Devices</h1>
@@ -46,16 +76,28 @@ export default function OwnerAvailableDevicesPage() {
                     <thead className="bg-gray-200 dark:bg-gray-800 text-left">
                         <tr>
                             <th className="p-3">Store</th>
-                            <th className="p-3">Device Name</th>
+                            <th
+                                className="p-3 cursor-pointer select-none"
+                                onClick={() => handleSort("productName")}
+                                title="Sort by device name"
+                            >
+                                Device Name {renderSortIndicator("productName")}
+                            </th>
                             <th className="p-3">IMEI</th>
                             <th className="p-3">Phone #</th>
                             <th className="p-3">Activation Date</th>
-                            <th className="p-3">Days Old</th>
+                            <th
+                                className="p-3 cursor-pointer select-none"
+                                onClick={() => handleSort("daysOld")}
+                                title="Sort by days old"
+                            >
+                                Days Old {renderSortIndicator("daysOld")}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {devices.length > 0 ? (
-                            devices.map((device) => (
+                        {sortedDevices.length > 0 ? (
+                            sortedDevices.map((device) => (
                                 <tr
                                     key={device.imei}
                                     className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"

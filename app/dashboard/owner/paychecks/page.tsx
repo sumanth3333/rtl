@@ -10,6 +10,7 @@ import { EmployeePaycheck } from "@/types/paycheckTypes";
 export default function GeneratePayPage() {
     const { companyName } = useOwner();
     const [paychecks, setPaychecks] = useState<EmployeePaycheck[]>([]); // ✅ Correctly typed
+    const [totalPaycheck, setTotalPaycheck] = useState<number | null>(null);
 
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
@@ -22,8 +23,11 @@ export default function GeneratePayPage() {
         const response = await fetchEmployeePaychecks(companyName, startDate, endDate, includeBoxes, includeAccessories, includeTaxes);
 
         if (response.success && response.data) {
-            setPaychecks(response.data); // ✅ Only set if data is present
+            setPaychecks(response.data.paychecks); // ✅ Only set if data is present
+            setTotalPaycheck(response.data.totalPayCheckForCompany ?? null);
         } else {
+            setPaychecks([]);
+            setTotalPaycheck(null);
             console.error(response.error || "Unknown error fetching paychecks");
         }
     };
@@ -46,6 +50,13 @@ export default function GeneratePayPage() {
                 setIncludeAccessories={setIncludeAccessories}
                 fetchPaychecks={fetchPaychecks}
             />
+
+            {totalPaycheck !== null && (
+                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    <span className="font-semibold text-emerald-900">Total payout:</span>{" "}
+                    {totalPaycheck.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                </div>
+            )}
 
             {/* ✅ Corrected paycheck mapping */}
             {paychecks.length > 0 ? (

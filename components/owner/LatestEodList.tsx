@@ -26,7 +26,51 @@ interface LatestEodListProps {
     };
 }
 
+import { useMemo, useState } from "react";
+
+type SortKey = "store" | "employee" | "accessories";
+type SortDir = "asc" | "desc";
+
 export default function LatestEodList({ eodList, totals }: LatestEodListProps) {
+    const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDir }>({ key: "store", direction: "asc" });
+
+    const parseAccessories = (value: string) => {
+        const num = Number.parseFloat(String(value).replace(/[^0-9.-]/g, ""));
+        return Number.isFinite(num) ? num : 0;
+    };
+
+    const sortedEod = useMemo(() => {
+        const list = [...eodList];
+        const { key, direction } = sortConfig;
+
+        return list.sort((a, b) => {
+            if (key === "store") {
+                const result = a.dealerStoreId.localeCompare(b.dealerStoreId);
+                return direction === "asc" ? result : -result;
+            }
+
+            if (key === "employee") {
+                const result = a.employeeName.localeCompare(b.employeeName);
+                return direction === "asc" ? result : -result;
+            }
+
+            const result = parseAccessories(a.accessories) - parseAccessories(b.accessories);
+            return direction === "asc" ? result : -result;
+        });
+    }, [eodList, sortConfig]);
+
+    const toggleSort = (key: SortKey) => {
+        setSortConfig((prev) =>
+            prev.key === key
+                ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
+                : { key, direction: "asc" }
+        );
+    };
+
+    const indicator = (key: SortKey) => {
+        if (sortConfig.key !== key) return "";
+        return sortConfig.direction === "asc" ? "▲" : "▼";
+    };
     return (
         <div className="w-full p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md">
             {/* ✅ Desktop View */}
@@ -34,19 +78,37 @@ export default function LatestEodList({ eodList, totals }: LatestEodListProps) {
                 <table className="w-full text-sm border-collapse border border-gray-300 dark:border-gray-700">
                     <thead className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-300 uppercase">
                         <tr>
-                            <th className="p-2 text-left">Store</th>
-                            <th className="p-2 text-left">Employee</th>
+                            <th
+                                className="p-2 text-left cursor-pointer select-none"
+                                onClick={() => toggleSort("store")}
+                                title="Sort by store"
+                            >
+                                Store {indicator("store")}
+                            </th>
+                            <th
+                                className="p-2 text-left cursor-pointer select-none"
+                                onClick={() => toggleSort("employee")}
+                                title="Sort by employee"
+                            >
+                                Employee {indicator("employee")}
+                            </th>
                             <th className="p-2 text-center">Activations</th>
                             <th className="p-2 text-center">Upgrades</th>
                             <th className="p-2 text-center">Migrations</th>
                             <th className="p-2 text-center">HSI</th>
                             <th className="p-2 text-center">BTS</th>
                             <th className="p-2 text-center">Free Lines</th>
-                            <th className="p-2 text-center">Accessories ($)</th>
+                            <th
+                                className="p-2 text-center cursor-pointer select-none"
+                                onClick={() => toggleSort("accessories")}
+                                title="Sort by accessories"
+                            >
+                                Accessories ($) {indicator("accessories")}
+                            </th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {eodList.map((eod, index) => (
+                        {sortedEod.map((eod, index) => (
                             <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition">
                                 <td className="p-2 text-gray-700 dark:text-gray-300">{eod.dealerStoreId}</td>
                                 <td className="p-2 text-gray-700 dark:text-gray-300">{eod.employeeName}</td>
@@ -82,7 +144,7 @@ export default function LatestEodList({ eodList, totals }: LatestEodListProps) {
 
             {/* ✅ Mobile View */}
             <div className="md:hidden flex flex-col gap-2">
-                {eodList.map((eod, index) => (
+                {sortedEod.map((eod, index) => (
                     <div
                         key={index}
                         className="p-3 bg-gray-50 dark:bg-gray-800 border-l-4 border-blue-500 dark:border-blue-400 rounded-md shadow-sm flex flex-col"

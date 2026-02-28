@@ -159,6 +159,37 @@ export const getMtdMetricsOverall = async (companyName: string): Promise<MtdMetr
     }
 };
 
+export type ClockinStatus = "ONTIME" | "LATE" | "GRACE" | string;
+
+export interface StoreClockin {
+    storeOpeningTime: string;
+    employeeOpeningTime: string;
+    employeeName: string;
+    status: ClockinStatus;
+    lateDuration: string;
+    date: string;
+}
+
+export interface StoreClockinReport {
+    store: { dealerStoreId: string; storeName: string };
+    storeOpeningReport: {
+        overallDuration: string;
+        storeClockins: StoreClockin[];
+    };
+}
+
+export const getStoreClockins = async (companyName: string, startDate: string, endDate: string): Promise<StoreClockinReport[]> => {
+    try {
+        const response = await apiClient.get("/company/viewClockins", {
+            params: { companyName, startDate, endDate }
+        });
+        return response.data || [];
+    } catch (error) {
+        console.error("❌ Error fetching store clockins:", error);
+        return [];
+    }
+};
+
 export const getAssignedTodosForStore = async (dealerStoreId: string): Promise<{ todos: AssignedTodo[] }> => {
     try {
         const response = await apiClient.get("/todos/getAssinedTodos", { params: { dealerStoreId } });

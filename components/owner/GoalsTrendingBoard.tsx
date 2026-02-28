@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { GoalsTrendingCurrentlyItem } from "@/types/goalsTrending";
 
 type Props = {
     rows: GoalsTrendingCurrentlyItem[];
     selectedMonth?: string;
 };
+
+type SortKey = "store" | "trending" | "achievedPct";
+type SortDir = "asc" | "desc";
 
 function daysLeftInSelectedMonth(selectedMonth?: string) {
     const now = new Date();
@@ -73,6 +76,7 @@ function progressChipClasses(pct: number) {
 }
 
 export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
+    const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDir }>({ key: "store", direction: "asc" });
     const daysLeft = useMemo(() => daysLeftInSelectedMonth(selectedMonth), [selectedMonth]);
 
     const computed = useMemo(() => {
@@ -89,6 +93,26 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
             };
         });
     }, [rows, daysLeft]);
+
+    const sorted = useMemo(() => {
+        const list = [...computed];
+        const { key, direction } = sortConfig;
+
+        return list.sort((a, b) => {
+            if (key === "store") {
+                const result = a.store.dealerStoreId.localeCompare(b.store.dealerStoreId);
+                return direction === "asc" ? result : -result;
+            }
+
+            if (key === "trending") {
+                const result = a._perDayFor125 - b._perDayFor125;
+                return direction === "asc" ? result : -result;
+            }
+
+            const result = (a._achievedPct ?? 0) - (b._achievedPct ?? 0);
+            return direction === "asc" ? result : -result;
+        });
+    }, [computed, sortConfig]);
 
     const totals = useMemo(() => {
         const t = computed.reduce(
@@ -107,6 +131,19 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
 
         return { ...t, trendTotal };
     }, [computed, daysLeft]);
+
+    const toggleSort = (key: SortKey) => {
+        setSortConfig((prev) =>
+            prev.key === key
+                ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
+                : { key, direction: "asc" }
+        );
+    };
+
+    const indicator = (key: SortKey) => {
+        if (sortConfig.key !== key) return "";
+        return sortConfig.direction === "asc" ? "▲" : "▼";
+    };
 
     return (
         <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0b1220] shadow-sm overflow-hidden">
@@ -134,18 +171,37 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
 
                     <thead className="sticky top-0 z-10 bg-zinc-50 dark:bg-zinc-900 text-[10px] sm:text-[11px] uppercase tracking-wide text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-zinc-700">
                         <tr>
-                            <th className="px-2 py-1.5 whitespace-nowrap">Store ID</th>
+                            <th
+                                className="px-2 py-1.5 whitespace-nowrap cursor-pointer select-none"
+                                onClick={() => toggleSort("store")}
+                                title="Sort by store"
+                            >
+                                Store ID {indicator("store")}
+                            </th>
+                            <th
+                                className="px-2 py-1.5 text-right whitespace-nowrap cursor-pointer select-none"
+                                onClick={() => toggleSort("achievedPct")}
+                                title="Sort by achieved percent"
+                            >
+                                Achieved % {indicator("achievedPct")}
+                            </th>
                             <th className="px-2 py-1.5 text-right">Current</th>
                             <th className="px-2 py-1.5 text-right whitespace-nowrap">Goal to 100%</th>
                             <th className="px-2 py-1.5 text-right whitespace-nowrap">Left for 100%</th>
                             <th className="px-2 py-1.5 text-right whitespace-nowrap">Goal to 125%</th>
                             <th className="px-2 py-1.5 text-right whitespace-nowrap">Left for 125%</th>
-                            <th className="px-2 py-1.5 text-right whitespace-nowrap">Trending</th>
+                            <th
+                                className="px-2 py-1.5 text-right whitespace-nowrap cursor-pointer select-none"
+                                onClick={() => toggleSort("trending")}
+                                title="Sort by trending per day"
+                            >
+                                Trending {indicator("trending")}
+                            </th>
                         </tr>
                     </thead>
 
                     <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                        {computed.map((r) => {
+                        {sorted.map((r) => {
                             const left100 = r.currentDifference ?? 0;
                             const goal100 = r.totalBoxes ?? 0;
 
@@ -162,15 +218,18 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
                                             <span className="truncate font-semibold text-zinc-900 dark:text-zinc-100 text-xs sm:text-sm">
                                                 {r.store.dealerStoreId}
                                             </span>
-                                            <span
-                                                className={`shrink-0 inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] sm:text-[11px] font-semibold whitespace-nowrap ${progressChipClasses(
-                                                    r._achievedPct
-                                                )}`}
-                                                title="Achieved % for 100% goal"
-                                            >
-                                                {r._achievedPct.toFixed(2)}%
-                                            </span>
                                         </div>
+                                    </td>
+
+                                    <td className="px-2 py-1 text-right">
+                                        <span
+                                            className={`shrink-0 inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] sm:text-[11px] font-semibold whitespace-nowrap ${progressChipClasses(
+                                                r._achievedPct
+                                            )}`}
+                                            title="Achieved % for 100% goal"
+                                        >
+                                            {r._achievedPct.toFixed(2)}%
+                                        </span>
                                     </td>
 
                                     <td className="px-2 py-1 text-right font-semibold text-zinc-900 dark:text-zinc-100 tabular-nums">
@@ -221,9 +280,9 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
                             );
                         })}
 
-                        {computed.length === 0 && (
+                        {sorted.length === 0 && (
                             <tr>
-                                <td className="px-2 py-3 text-center text-sm text-zinc-500" colSpan={7}>
+                                <td className="px-2 py-3 text-center text-sm text-zinc-500" colSpan={8}>
                                     No goals data available.
                                 </td>
                             </tr>
@@ -235,6 +294,10 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
                         <tfoot className="border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/90 dark:bg-zinc-900">
                             <tr className="text-[12px] font-bold text-zinc-900 dark:text-zinc-100">
                                 <td className="px-2 py-1.5">TOTAL</td>
+
+                                <td className="px-2 py-1.5 text-right tabular-nums text-zinc-400 dark:text-zinc-500">
+                                    — 
+                                </td>
 
                                 <td className="px-2 py-1.5 text-right tabular-nums">
                                     {fmtTotals(totals.current)}
