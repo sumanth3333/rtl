@@ -200,10 +200,9 @@ export async function clockOutEmployee(
         const response = await apiClient.post(
             "/employee/clockout",
             {
-                params: {
-                    employeeNtid,
-                    dealerStoreId,
-                },
+                employeeNtid,
+                dealerStoreId,
+
             }
         );
 
