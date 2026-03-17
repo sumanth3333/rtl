@@ -124,7 +124,7 @@ export default function FileExportsPage() {
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file) return;
+        if (!file) { return; }
         const extensionAllowed = [".csv", ".xlsx", ".xls"].some((ext) => file.name.toLowerCase().endsWith(ext));
         const allowedMimeTypes = [
             "text/csv",
@@ -141,9 +141,9 @@ export default function FileExportsPage() {
     };
 
     const validateForm = () => {
-        if (!form.companyName) return "Please select a company.";
-        if (form.startDate && form.endDate && form.startDate > form.endDate) return "Start date cannot be after end date.";
-        if (!form.file) return "Please attach a CSV or Excel file.";
+        if (!form.companyName) { return "Please select a company."; }
+        if (form.startDate && form.endDate && form.startDate > form.endDate) { return "Start date cannot be after end date."; }
+        if (!form.file) { return "Please attach a CSV or Excel file."; }
         return "";
     };
 
@@ -177,7 +177,7 @@ export default function FileExportsPage() {
                     file: form.file as File,
                 },
                 (evt) => {
-                    if (!evt.total) return;
+                    if (!evt.total) { return; }
                     const percent = Math.round((evt.loaded / evt.total) * 100);
                     setProgress((prev) => Math.max(prev, percent));
                 }
