@@ -40,6 +40,11 @@ export const sidebarLinks: Record<Role, {
             name: "Setup Payments",
             path: "/dashboard/admin/payments",
             icon: CreditCardIcon
+        },
+        {
+            name: "File Exports",
+            path: "/dashboard/admin/file-exports",
+            icon: DocumentMagnifyingGlassIcon
         }
     ],
 
@@ -64,11 +69,11 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/employee/eod-report",
             icon: DocumentTextIcon
         },
-        {
-            name: "Record IMEI",
-            path: "/dashboard/employee/record-imei",
-            icon: ClipboardDocumentCheckIcon
-        },
+        // {
+        //     name: "Record IMEI",
+        //     path: "/dashboard/employee/record-imei",
+        //     icon: ClipboardDocumentCheckIcon
+        // },
         {
             name: "Inventory Management",
             path: "/dashboard/employee/log-inventory",
@@ -84,11 +89,11 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/employee/port-help",
             icon: ArrowsRightLeftIcon // 🔄 Best for pending transfers & receives
         },
-        {
-            name: "Device Upgrades",
-            path: "/dashboard/employee/manage-upgrades",
-            icon: DevicePhoneMobileIcon
-        },
+        // {
+        //     name: "Device Upgrades",
+        //     path: "/dashboard/employee/manage-upgrades",
+        //     icon: DevicePhoneMobileIcon
+        // },
         {
             name: "Raise A Request",
             path: "/dashboard/employee/raise-request",
@@ -125,6 +130,11 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/owner",
             icon: HomeIcon
         },
+        {
+            name: "Analytics",
+            path: "/dashboard/owner/analytics",
+            icon: ChartBarSquareIcon,
+        },
         // {
         //     name: "Manage Managers",
         //     path: "/dashboard/owner/manage-managers",
@@ -159,11 +169,11 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/owner/accessories",
             icon: ArchiveBoxIcon
         },
-        {
-            name: "Device Upgrades",
-            path: "/dashboard/owner/manage-upgrades",
-            icon: DevicePhoneMobileIcon
-        },
+        // {
+        //     name: "Device Upgrades",
+        //     path: "/dashboard/owner/manage-upgrades",
+        //     icon: DevicePhoneMobileIcon
+        // },
         {
             name: "Assign ToDos",
             path: "/dashboard/owner/assign-todos",
@@ -216,6 +226,7 @@ export const dashboardCards: Record<Role, { title: string; description: string; 
         { title: "Manage Stores", description: "View & update stores by company", link: "/dashboard/admin/stores" },
         { title: "Generate Invoices", description: "Create invoices for companies", link: "/dashboard/admin/invoices" },
         { title: "Setup Payments", description: "Configure payment methods", link: "/dashboard/admin/payments" },
+        { title: "File Exports", description: "Upload activation or sales reports", link: "/dashboard/admin/file-exports" },
     ],
     EMPLOYEE: [
 
