@@ -69,11 +69,11 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/employee/eod-report",
             icon: DocumentTextIcon
         },
-        // {
-        //     name: "Record IMEI",
-        //     path: "/dashboard/employee/record-imei",
-        //     icon: ClipboardDocumentCheckIcon
-        // },
+        {
+            name: "Record IMEI",
+            path: "/dashboard/employee/record-imei",
+            icon: ClipboardDocumentCheckIcon
+        },
         {
             name: "Inventory Management",
             path: "/dashboard/employee/log-inventory",
@@ -89,11 +89,11 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/employee/port-help",
             icon: ArrowsRightLeftIcon // 🔄 Best for pending transfers & receives
         },
-        // {
-        //     name: "Device Upgrades",
-        //     path: "/dashboard/employee/manage-upgrades",
-        //     icon: DevicePhoneMobileIcon
-        // },
+        {
+            name: "Device Upgrades",
+            path: "/dashboard/employee/manage-upgrades",
+            icon: DevicePhoneMobileIcon
+        },
         {
             name: "Raise A Request",
             path: "/dashboard/employee/raise-request",
@@ -169,11 +169,11 @@ export const sidebarLinks: Record<Role, {
             path: "/dashboard/owner/accessories",
             icon: ArchiveBoxIcon
         },
-        // {
-        //     name: "Device Upgrades",
-        //     path: "/dashboard/owner/manage-upgrades",
-        //     icon: DevicePhoneMobileIcon
-        // },
+        {
+            name: "Device Upgrades",
+            path: "/dashboard/owner/manage-upgrades",
+            icon: DevicePhoneMobileIcon
+        },
         {
             name: "Assign ToDos",
             path: "/dashboard/owner/assign-todos",
