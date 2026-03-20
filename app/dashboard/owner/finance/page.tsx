@@ -38,7 +38,14 @@ export default function ProfitsAndExpensesPage() {
                 const billResponse = await apiClient.get("/expense/fetchRegularExpenses", {
                     params: { companyName, month: selectedMonth }
                 });
-                const fetchedBills = billResponse.data;
+                const fetchedBills = [...billResponse.data].sort((a: any, b: any) => {
+                    const aId = a.dealerStoreId ?? "";
+                    const bId = b.dealerStoreId ?? "";
+                    const aNum = parseFloat(aId);
+                    const bNum = parseFloat(bId);
+                    if (!isNaN(aNum) && !isNaN(bNum)) { return aNum - bNum; }
+                    return String(aId).localeCompare(String(bId));
+                });
                 setBills(fetchedBills);
 
                 if (fetchedBills.length > 0) {
@@ -178,6 +185,7 @@ export default function ProfitsAndExpensesPage() {
                     data={bills}
                     onUpdate={setBills}
                     onSave={handleSaveBills}
+                    resetKey={selectedMonth}
                 />
 
                 <StoreExpensesDisplay

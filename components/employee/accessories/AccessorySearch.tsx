@@ -9,7 +9,6 @@ interface InventorySearchProps {
 }
 
 export default function AccessorySearch({ data }: InventorySearchProps) {
-    console.log("data " + data)
     const [query, setQuery] = useState("");
 
     const groupedResults = useMemo(() => {

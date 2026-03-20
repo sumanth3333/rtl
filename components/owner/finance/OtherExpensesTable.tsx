@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 interface OtherExpense {
     expenseId?: number; // null/undefined for new
@@ -9,8 +9,8 @@ interface OtherExpense {
     paidFor: string;
     amount: number;
     month: string;
-    paidDate: string;
-    expenseRecordedDate: string;
+    paidDate?: string;
+    expenseRecordedDate?: string;
     isNew?: boolean;
     isEdited?: boolean;
 }
@@ -43,7 +43,9 @@ export default function OtherExpensesTable({
     const [tableData, setTableData] = useState<OtherExpense[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<string | null>(null);
-    const [editableRowIds, setEditableRowIds] = useState<Set<number>>(new Set());
+    const [editableRowIds, setEditableRowIds] = useState<Set<number | string>>(new Set());
+    const paidToRefs = useRef<Array<HTMLInputElement | null>>([]);
+    const [pendingFocusRow, setPendingFocusRow] = useState<number | null>(null);
 
     useEffect(() => {
         setTableData(data); // ← Remove setting isEdited/isNew here
@@ -70,7 +72,7 @@ export default function OtherExpensesTable({
 
     const handleAddRow = () => {
         const newRow: OtherExpense = {
-            paymentMode: "",
+            paymentMode: "Card",
             paidTo: "",
             paidFor: "",
             amount: 0,
@@ -107,7 +109,17 @@ export default function OtherExpensesTable({
                 return;
             }
 
-            await onSave(changedRows);
+            // persist only what changed to keep payload small, but ensure required fields exist
+            const today = new Date().toISOString().slice(0, 10);
+            const payload = changedRows.map(row => ({
+                ...row,
+                month: row.month || month,
+                paymentMode: row.paymentMode || "Card",
+                paidDate: row.paidDate || today,
+                expenseRecordedDate: row.expenseRecordedDate || today,
+            }));
+
+            await onSave(payload);
 
             const cleaned = tableData.map(row => ({
                 ...row,
@@ -126,158 +138,154 @@ export default function OtherExpensesTable({
         }
     };
 
+    // Handle Enter key across input/select fields to move to next row or add one
+    const handleEnter = (e: KeyboardEvent<HTMLElement>, rowIndex: number) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const targetIndex = rowIndex + 1;
+            if (rowIndex === tableData.length - 1) {
+                handleAddRow();
+            }
+            setPendingFocusRow(targetIndex);
+        }
+    };
+
+    // After new row is created or data changes, move focus to Paid To of pending row
+    useEffect(() => {
+        if (pendingFocusRow === null) { return; }
+        const input = paidToRefs.current[pendingFocusRow];
+        if (input) {
+            input.focus();
+            input.select();
+            setPendingFocusRow(null);
+        }
+    }, [tableData.length, pendingFocusRow]);
+
+    const isRowEditable = (item: OtherExpense) => {
+        if (item.isNew) { return true; }
+        const id = item.expenseId ?? `idx-${tableData.indexOf(item)}`;
+        return editableRowIds.has(id);
+    };
+
+    const toggleEdit = (item: OtherExpense) => {
+        const id = item.expenseId ?? `idx-${tableData.indexOf(item)}`;
+        const next = new Set(editableRowIds);
+        if (next.has(id)) { next.delete(id); } else { next.add(id); }
+        setEditableRowIds(next);
+    };
+
     return (
-        <div className="mt-10">
+        <div className="mt-8 bg-gray-50 dark:bg-gray-900/40 p-3 rounded-lg border border-gray-200 dark:border-gray-800">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-200">💸 Other Expenses</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-200">💸 Other Expenses</h3>
                 <div className="flex gap-2">
-                    <button onClick={handleAddRow} className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 text-sm">
-                        Add New Expense
+                    <button onClick={handleAddRow} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-xs sm:text-sm">
+                        Add Row
                     </button>
-                    <button onClick={handleSave} disabled={isSaving} className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 text-sm">
+                    <button onClick={handleSave} disabled={isSaving} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-xs sm:text-sm disabled:opacity-60">
                         {isSaving ? "Saving..." : "Save"}
                     </button>
                 </div>
             </div>
 
-            {saveStatus && <p className="text-sm mb-2 text-center text-green-500 dark:text-green-400">{saveStatus}</p>}
+            {saveStatus && <p className="text-xs sm:text-sm mb-2 text-center text-green-600 dark:text-green-400">{saveStatus}</p>}
 
             <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse border border-gray-300 dark:border-gray-700">
+                <table className="w-full text-xs sm:text-sm border-collapse">
                     <thead>
-                        <tr className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300">
-                            <th className="p-3">Payment Mode</th>
-                            <th className="p-3">Paid To</th>
-                            <th className="p-3">Paid For</th>
-                            <th className="p-3 text-center">Amount</th>
-                            <th className="p-3 text-center">Paid Date</th>
-                            <th className="p-3 text-center">Recorded Date</th>
-                            <th className="p-3 text-center">Actions</th>
+                        <tr className="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-200">
+                            <th className="px-2 py-2 text-left">Payment Mode</th>
+                            <th className="px-2 py-2 text-left">Paid To</th>
+                            <th className="px-2 py-2 text-left">Paid For</th>
+                            <th className="px-2 py-2 text-center">Amount</th>
+                            <th className="px-2 py-2 text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {tableData.map((item, index) => {
-                            const isEditable = item.isNew || (item.expenseId && editableRowIds.has(item.expenseId));
-
+                            const editable = isRowEditable(item);
                             return (
-                                <tr key={index} className="border-b border-gray-300 dark:border-gray-700">
-                                    <td className="p-2">
-                                        {isEditable ? (
-                                            <input
-                                                list={`payment-mode-${index}`}
-                                                value={item.paymentMode}
-                                                onChange={(e) => handleChange(index, "paymentMode", e.target.value)}
-                                                className="w-full p-1 rounded bg-white dark:bg-gray-900 text-center"
-                                            />
-                                        ) : (
-                                            item.paymentMode
-                                        )}
-                                        <datalist id={`payment-mode-${index}`}>
-                                            {paymentModes.map((mode) => (
-                                                <option key={mode} value={mode} />
+                                <tr key={index} className="border-b border-gray-200 dark:border-gray-800">
+                                    <td className="px-2 py-1">
+                                        <select
+                                            value={item.paymentMode}
+                                            onChange={(e) => handleChange(index, "paymentMode", e.target.value)}
+                                            onKeyDown={(e) => handleEnter(e, index)}
+                                            disabled={!editable}
+                                            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 disabled:bg-gray-100 disabled:dark:bg-gray-800"
+                                        >
+                                            {paymentModes.map(mode => (
+                                                <option key={mode} value={mode}>{mode}</option>
                                             ))}
-                                        </datalist>
+                                        </select>
                                     </td>
-                                    <td className="p-2 text-center">
-                                        {isEditable ? (
-                                            <input
-                                                type="text"
-                                                value={item.paidTo}
-                                                onChange={(e) => handleChange(index, "paidTo", e.target.value)}
-                                                className="w-full p-1 rounded bg-white dark:bg-gray-900 text-center"
-                                            />
-                                        ) : (
-                                            item.paidTo
-                                        )}
+                                    <td className="px-2 py-1">
+                                        <input
+                                            type="text"
+                                            value={item.paidTo}
+                                            onChange={(e) => handleChange(index, "paidTo", e.target.value)}
+                                            onKeyDown={(e) => handleEnter(e, index)}
+                                            disabled={!editable}
+                                            ref={(el) => {
+                                                paidToRefs.current[index] = el;
+                                            }}
+                                            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 disabled:bg-gray-100 disabled:dark:bg-gray-800"
+                                            placeholder="Vendor / Person"
+                                        />
                                     </td>
-                                    <td className="p-2 text-center">
-                                        {isEditable ? (
-                                            <input
-                                                list={`paid-for-${index}`}
-                                                value={item.paidFor}
-                                                onChange={(e) => handleChange(index, "paidFor", e.target.value)}
-                                                className="w-full p-1 rounded bg-white dark:bg-gray-900 text-center"
-                                            />
-                                        ) : (
-                                            item.paidFor
-                                        )}
+                                    <td className="px-2 py-1">
+                                        <input
+                                            list={`paid-for-${index}`}
+                                            value={item.paidFor}
+                                            onChange={(e) => handleChange(index, "paidFor", e.target.value)}
+                                            onKeyDown={(e) => handleEnter(e, index)}
+                                            disabled={!editable}
+                                            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 disabled:bg-gray-100 disabled:dark:bg-gray-800"
+                                            placeholder="Purpose"
+                                        />
                                         <datalist id={`paid-for-${index}`}>
                                             {paidForOptions.map((option) => (
                                                 <option key={option} value={option} />
                                             ))}
                                         </datalist>
                                     </td>
-                                    <td className="p-2 text-center">
-                                        {isEditable ? (
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                value={item.amount}
-                                                onChange={(e) => handleChange(index, "amount", e.target.value)}
-                                                className="w-full p-1 rounded bg-white dark:bg-gray-900 text-center"
-                                            />
-                                        ) : (
-                                            `$${item.amount.toFixed(2)}`
-                                        )}
+                                    <td className="px-2 py-1 text-center">
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            value={item.amount}
+                                            onChange={(e) => handleChange(index, "amount", e.target.value)}
+                                            onKeyDown={(e) => handleEnter(e, index)}
+                                            disabled={!editable}
+                                            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-center disabled:bg-gray-100 disabled:dark:bg-gray-800"
+                                            placeholder="0.00"
+                                        />
                                     </td>
-                                    <td className="p-2 text-center">
-                                        {isEditable ? (
-                                            <input
-                                                type="date"
-                                                value={item.paidDate}
-                                                onChange={(e) => handleChange(index, "paidDate", e.target.value)}
-                                                className="w-full p-1 rounded bg-white dark:bg-gray-900 text-center"
-                                            />
-                                        ) : (
-                                            item.paidDate
-                                        )}
-                                    </td>
-                                    <td className="p-2 text-center">
-                                        {isEditable ? (
-                                            <input
-                                                type="date"
-                                                value={item.expenseRecordedDate}
-                                                onChange={(e) => handleChange(index, "expenseRecordedDate", e.target.value)}
-                                                className="w-full p-1 rounded bg-white dark:bg-gray-900 text-center"
-                                            />
-                                        ) : (
-                                            item.expenseRecordedDate
-                                        )}
-                                    </td>
-                                    <td className="p-2 text-center">
+                                    <td className="px-2 py-1 text-center">
                                         {item.isNew ? (
                                             <button
                                                 onClick={() => handleDeleteRow(index)}
-                                                className="text-red-500 text-sm font-medium hover:underline"
+                                                className="text-red-500 text-xs sm:text-sm font-medium hover:underline"
                                             >
                                                 Delete
                                             </button>
                                         ) : (
                                             <button
-                                                onClick={() => {
-                                                    const newSet = new Set(editableRowIds);
-                                                    if (newSet.has(item.expenseId!)) {
-                                                        newSet.delete(item.expenseId!);
-                                                    } else {
-                                                        newSet.add(item.expenseId!);
-                                                    }
-                                                    setEditableRowIds(newSet);
-                                                }}
-                                                className="text-blue-500 text-sm font-medium hover:underline"
+                                                onClick={() => toggleEdit(item)}
+                                                className="text-blue-600 text-xs sm:text-sm font-medium hover:underline"
                                             >
-                                                {editableRowIds.has(item.expenseId!) ? "Cancel" : "Edit"}
+                                                {isRowEditable(item) ? "Cancel" : "Edit"}
                                             </button>
-
                                         )}
                                     </td>
                                 </tr>
                             );
                         })}
 
-                        <tr className="bg-gray-300 dark:bg-gray-700 font-bold text-gray-800 dark:text-white">
-                            <td className="p-3 text-right" colSpan={3}>TOTAL</td>
-                            <td className="p-3 text-center">${getTotalAmount()}</td>
-                            <td colSpan={3} />
+                        <tr className="bg-gray-100 dark:bg-gray-800 font-semibold text-gray-800 dark:text-gray-100">
+                            <td className="px-2 py-2 text-right" colSpan={3}>TOTAL</td>
+                            <td className="px-2 py-2 text-center">${getTotalAmount()}</td>
+                            <td />
                         </tr>
                     </tbody>
                 </table>

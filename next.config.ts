@@ -3,7 +3,8 @@ const withPWA = require("next-pwa")({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development", // Enable only in production
-  buildExcludes: [/middleware-manifest.json$/], // ✅ Prevents build issues
+  // Some Next.js internal manifests are not served at runtime; exclude them to avoid workbox install errors
+  buildExcludes: [/middleware-manifest\.json$/, /app-build-manifest\.json$/],
 });
 
 module.exports = withPWA({

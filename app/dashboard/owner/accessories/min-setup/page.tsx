@@ -19,8 +19,6 @@ export default function MinQuantitySetupPage() {
     const [storeQuantities, setStoreQuantities] = useState<StoreQuantities>({});
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-    console.log(stores);
-
     useEffect(() => {
         if (!stores || stores.length === 0) { return; }
 

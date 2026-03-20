@@ -6,16 +6,31 @@
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#000000",
+    "scope": "/",
     "icons": [
         {
-            "src": "/icons/1c-192x192.png",
+            "src": "/brand/favicons/icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/brand/favicons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "/icons/1c-512x512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/brand/favicons/favicon.ico",
+            "sizes": "48x48",
+            "type": "image/x-icon",
+            "purpose": "any"
         }
     ]
 }

@@ -21,7 +21,6 @@ export default function EmployeePaycheckRow({ record }: EmployeeRowProps) {
         [record.paymentDetails]
     );
 
-    console.log(record.paymentDetails);
     const hasPayments =
         !!record.paymentDetails && record.paymentDetails.length > 0;
 

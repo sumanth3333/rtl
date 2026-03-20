@@ -32,7 +32,6 @@ export default function TargetSummary({
     const achieved = targetData[1] || {};
     const remaining = targetData[2] || {};
 
-    console.log(companyName?.toLocaleLowerCase());
     // Define all KPI items
     const items = [
         { label: "Activations", key: isEmployee ? "phonesTargetToEmployee" : "activationTargetToStore" },

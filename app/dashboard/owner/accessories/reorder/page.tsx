@@ -13,8 +13,6 @@ export default function ReorderInventoryPage() {
     const [selectedStores, setSelectedStores] = useState<string[]>([]);
     const [showOverall, setShowOverall] = useState<boolean>(false);
 
-    console.log(data);
-
     const filteredStores = data && selectedStores.length
         ? data.filter((store) => selectedStores.includes(store.store.dealerStoreId))
         : [];
