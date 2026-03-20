@@ -45,7 +45,6 @@ export default function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => vo
                     label="Username or Store ID"
                     type="text"
                     autoComplete="username"
-                    name="username"
                     placeholder="Enter Username or Store ID"
                     {...register("userName")}
                     error={errors.userName?.message}
@@ -63,7 +62,6 @@ export default function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => vo
                         label="Password or Employee NTID"
                         type={showPassword ? "text" : "password"}
                         autoComplete="current-password"
-                        name="password"
                         placeholder="Enter Password or NTID"
                         {...register("password")}
                         error={errors.password?.message}
