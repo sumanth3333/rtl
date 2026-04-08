@@ -39,7 +39,7 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     // Keep watched values stable and memo-friendly
     const watchedValues = useWatch({
         control,
-        name: ["actualCash", "actualCard", "systemCash", "systemCard", "expenses", "lastTransactionTime", "boxesSold", "migrations", "upgrade", "hsiSold", "tabletsSold", "watchesSold", "systemAccessories"],
+        name: ["actualCash", "actualCard", "systemCash", "systemCard", "expenses", "lastTransactionTime", "boxesSold", "migrations", "upgrade", "hsiSold", "tabletsSold", "watchesSold", "systemAccessories", "creditCard", "debitCard"],
     });
     const [
         watchActualCash,
@@ -55,6 +55,8 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         watchTabletsSold,
         watchWatchesSold,
         watchSystemAccessories,
+        watchCreditCard,
+        watchDebitCard,
     ] = watchedValues;
 
     // Fetch employees working in the store
@@ -94,6 +96,8 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 actualCash: 0,
                 systemCard: 0,
                 actualCard: 0,
+                creditCard: prev[index]?.creditCard ?? 0,
+                debitCard: prev[index]?.debitCard ?? 0,
                 lastTransactionTime: lastTransactionTime,
                 expenses: watchedExpenses,
                 boxesSold: prev[index]?.boxesSold ?? 0,
@@ -116,6 +120,8 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 actualCash: initialValues.actualCash ?? 0,
                 systemCash: initialValues.systemCash ?? 0,
                 actualCard: initialValues.actualCard ?? 0,
+                creditCard: initialValues.creditCard ?? 0,
+                debitCard: initialValues.debitCard ?? 0,
                 systemCard: initialValues.systemCard ?? 0,
                 systemAccessories: initialValues.systemAccessories ?? 0,
                 accessoriesByEmployee: initialValues.accessoriesByEmployee ?? 0,
@@ -183,6 +189,8 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                 actualCash: adjustedActualCash,
                 systemCard,
                 actualCard: adjustedActualCard,
+                creditCard: watchCreditCard ?? 0,
+                debitCard: watchDebitCard ?? 0,
                 lastTransactionTime: watchLastTxn,
                 expenses: currentExpenses,
             };

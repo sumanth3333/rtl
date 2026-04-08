@@ -4,8 +4,11 @@ import { useEffect } from "react";
 
 export default function ServiceWorkerRegister() {
   useEffect(() => {
-    // Only register in production; next-pwa outputs /sw.js at the project root
+    // If not production, proactively unregister any SWs (avoids dev 404s for build manifests)
     if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) {
+      navigator.serviceWorker?.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => registration.unregister());
+      });
       return;
     }
 

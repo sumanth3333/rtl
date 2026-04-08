@@ -4,8 +4,9 @@ import { z } from "zod";
 export const employeeSchema = z.object({
     employeeNtid: z.string().min(3, "Employee NTID must be at least 3 characters.").toUpperCase(),
     employeeName: z.string().min(6, "Employee name must have firstname and lastname."),
-    phoneNumber: z.string().regex(/^\d{10,15}$/, "Invalid phone number - no special characters like -,(,),space."),
+    phoneNumber: z.coerce.string().trim().regex(/^\d{10,15}$/, "Invalid phone number - digits only, 10-15 length."),
     email: z.string().email("please enter a valid email"),
+    isHavingAssurantAccess: z.boolean().optional(),
     address: z.object({
         streetName: z.string().min(5, "Street name is required."),
         city: z.string().min(2, "City is required."),
@@ -31,6 +32,8 @@ export const eodReportSchema = z.object({
     actualCash: z.number().nonnegative("Actual Cash cannot be negative"),
     systemCash: z.number().nonnegative("System Cash cannot be negative"),
     actualCard: z.number().nonnegative("Actual Card cannot be negative"),
+    creditCard: z.number().nonnegative("Credit Card total cannot be negative"),
+    debitCard: z.number().nonnegative("Debit Card total cannot be negative"),
     systemCard: z.number().nonnegative("System Card cannot be negative"),
     systemAccessories: z.number().nonnegative("System Accessories cannot be negative"),
     accessoriesByEmployee: z.number().nonnegative("accessoriesByEmployee is auto-populated"),
@@ -54,4 +57,3 @@ export const eodReportSchema = z.object({
 });
 
 export type EodReport = z.infer<typeof eodReportSchema>;
-

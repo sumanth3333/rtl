@@ -41,6 +41,25 @@ export default function CardSummarySection({ cardDifference }: { cardDifference:
                     readOnly
                 />
             </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+                <InputField
+                    label="Credit Card"
+                    type="number"
+                    step="0.01"
+                    className="text-sm"
+                    {...register("creditCard", { valueAsNumber: true })}
+                    error={errors.creditCard?.message}
+                />
+                <InputField
+                    label="Debit Card"
+                    type="number"
+                    step="0.01"
+                    className="text-sm"
+                    {...register("debitCard", { valueAsNumber: true })}
+                    error={errors.debitCard?.message}
+                />
+            </div>
         </section>
     );
 }

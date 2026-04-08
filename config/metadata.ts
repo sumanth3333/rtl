@@ -4,7 +4,6 @@ export const metadata: Metadata = {
     title: "OneClick By Pro People Tech",
     description: "Business Management App Developed By Pro People Tech LLC",
     manifest: "/manifest.json",
-    themeColor: "#000000",
     icons: {
         icon: [
             { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },

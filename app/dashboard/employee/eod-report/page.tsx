@@ -20,6 +20,8 @@ export default function LogEodReportPage() {
         actualCash: 0,
         systemCash: 0,
         actualCard: 0,
+        creditCard: 0,
+        debitCard: 0,
         systemCard: 0,
         systemAccessories: 0,
         accessoriesByEmployee: 0,

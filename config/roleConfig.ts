@@ -80,6 +80,11 @@ export const sidebarLinks: Record<Role, {
             icon: ArchiveBoxIcon
         },
         {
+            name: "Retention",
+            path: "/dashboard/employee/retention",
+            icon: DocumentMagnifyingGlassIcon
+        },
+        {
             name: "Accessories Management",
             path: "/dashboard/employee/accessories",
             icon: ArchiveBoxIcon
@@ -98,6 +103,11 @@ export const sidebarLinks: Record<Role, {
             name: "Raise A Request",
             path: "/dashboard/employee/raise-request",
             icon: PencilSquareIcon
+        },
+        {
+            name: "Claims & Returns",
+            path: "/dashboard/employee/claims-returns",
+            icon: DocumentMagnifyingGlassIcon
         },
         {
             name: "Settings",
@@ -185,6 +195,11 @@ export const sidebarLinks: Record<Role, {
             icon: DocumentTextIcon
         },
         {
+            name: "RTPOS Report",
+            path: "/dashboard/owner/rtpos-report",
+            icon: ChartBarIcon
+        },
+        {
             name: "EOD Remarks",
             path: "/dashboard/owner/eod-remarks",
             icon: ClipboardDocumentCheckIcon
@@ -198,6 +213,16 @@ export const sidebarLinks: Record<Role, {
             name: "Expenses & Profits",
             path: "/dashboard/owner/finance",
             icon: PresentationChartLineIcon,
+        },
+        {
+            name: "Retention",
+            path: "/dashboard/owner/retention",
+            icon: DocumentMagnifyingGlassIcon,
+        },
+        {
+            name: "Rebates",
+            path: "/dashboard/owner/rebates",
+            icon: DocumentMagnifyingGlassIcon,
         },
         {
             name: "Pending Requests",
@@ -236,6 +261,7 @@ export const dashboardCards: Record<Role, { title: string; description: string; 
         { title: "Reports", description: "Generate team reports", link: "/dashboard/manager/reports" },
     ],
     OWNER: [
+        { title: "RTPOS Sales", description: "Verified store sales metrics", link: "/dashboard/owner/rtpos-report" },
         // {
         //     title: "Manage Managers",
         //     description: "Oversee and assign managerial roles within the company.",

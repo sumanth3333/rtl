@@ -45,6 +45,8 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
                 employee: { employeeNtid: employee.employeeNtid },
                 saleDate,
                 expenses: initialValues.expenses ?? [],
+                creditCard: initialValues.creditCard ?? 0,
+                debitCard: initialValues.debitCard ?? 0,
             });
         }
     }, [store, employee, reset, initialValues]);
@@ -80,6 +82,8 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
             actualCash: parseFloat((data.actualCash ?? 0).toFixed(2)),
             systemCash: parseFloat((data.systemCash ?? 0).toFixed(2)),
             actualCard: parseFloat((data.actualCard ?? 0).toFixed(2)),
+            creditCard: parseFloat((data.creditCard ?? 0).toFixed(2)),
+            debitCard: parseFloat((data.debitCard ?? 0).toFixed(2)),
             systemCard: parseFloat((data.systemCard ?? 0).toFixed(2)),
             systemAccessories: parseFloat((data.systemAccessories ?? 0).toFixed(2)),
             accessories: parseFloat((data.accessories ?? 0).toFixed(2)),
@@ -126,6 +130,10 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
                         <InputField label="Actual" type="number" step="0.01" {...register("actualCard", { valueAsNumber: true })} error={errors.actualCard?.message} />
                         <InputField label="System" type="number" step="0.01" {...register("systemCard", { valueAsNumber: true })} error={errors.systemCard?.message} />
                         <InputField label="Difference" type="text" value={`$${cardDifference.toFixed(2)}`} readOnly />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                        <InputField label="Credit Card" type="number" step="0.01" {...register("creditCard", { valueAsNumber: true })} error={errors.creditCard?.message} />
+                        <InputField label="Debit Card" type="number" step="0.01" {...register("debitCard", { valueAsNumber: true })} error={errors.debitCard?.message} />
                     </div>
                 </div>
 

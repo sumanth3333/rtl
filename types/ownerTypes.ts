@@ -14,6 +14,8 @@ export const eodReportSchema = z.object({
     actualCash: z.number().nonnegative("Actual Cash cannot be negative"),
     systemCash: z.number().nonnegative("System Cash cannot be negative"),
     actualCard: z.number().nonnegative("Actual Card cannot be negative"),
+    creditCard: z.number().nonnegative("Credit Card total cannot be negative"),
+    debitCard: z.number().nonnegative("Debit Card total cannot be negative"),
     systemCard: z.number().nonnegative("System Card cannot be negative"),
     systemAccessories: z.number().nonnegative("System Accessories cannot be negative"),
     accessories: z.number().optional(), // ✅ Updated

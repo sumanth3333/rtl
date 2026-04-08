@@ -3,11 +3,14 @@ export interface SimpleCompany {
     companyName: string;
 }
 
+export type FileExportType = "activation" | "saleDetail" | "callidus" | "retentionReport";
+
 export interface FileExportPayload {
     companyName: string;
     startDate?: string; // YYYY-MM-DD
     endDate?: string; // YYYY-MM-DD
     file: File;
+    reportType: FileExportType;
 }
 
 export interface FileExportResult {

@@ -92,7 +92,20 @@ export const deleteEmployee = async (employeeNtid: string): Promise<string> => {
 
 export const updateEmployee = async (companyName: string, employee: Employee): Promise<Employee[]> => {
     try {
-        const response = await apiClient.put(`/company/updateEmployee`, { employee });
+        // baseURL already includes /v1, so avoid double prefix
+        await apiClient.put(`/company/updateEmployee`, {
+            employeeNtid: employee.employeeNtid,
+            employeeName: employee.employeeName,
+            phoneNumber: employee.phoneNumber,
+            email: employee.email,
+            employeePayRatePerHour: employee.employeePayRatePerHour,
+            commissionPercentage: employee.commissionPercentage,
+            perBoxCommission: employee.perBoxCommission,
+            isActive: (employee as any).isActive ?? true,
+            isHavingAssurantAccess: (employee as any).isHavingAssurantAccess ?? false,
+        }, {
+            headers: { "Content-Type": "application/json" },
+        });
         return await getEmployees(companyName);
     }
     catch (error) {
