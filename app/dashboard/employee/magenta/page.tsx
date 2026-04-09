@@ -24,6 +24,15 @@ const EMPTY_VIEW: MagentaInStoreViewResponse = {
 
 const asDisplayDate = (value?: string) => {
     if (!value) { return "—"; }
+
+    // Prevent timezone drift for date-only strings like "2026-04-09".
+    const dateOnlyMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dateOnlyMatch) {
+        const [, year, month, day] = dateOnlyMatch;
+        const localDate = new Date(Number(year), Number(month) - 1, Number(day));
+        return localDate.toLocaleDateString();
+    }
+
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) { return value; }
     return dt.toLocaleDateString();
@@ -381,27 +390,37 @@ export default function EmployeeMagentaPage() {
                                         </span>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 gap-3">
                                         <div className="rounded-lg border border-violet-200 bg-violet-50/60 dark:border-violet-900/40 dark:bg-violet-950/20 p-2.5">
                                             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-violet-800 dark:text-violet-300 mb-2">Metro Info</p>
-                                            <div className="grid grid-cols-1 gap-1.5 text-sm text-gray-800 dark:text-gray-200">
-                                                <p><span className="font-semibold">Phone Number:</span> {order.phoneNumber || "—"}</p>
-                                                <p><span className="font-semibold">Account Number:</span> {order.accountNumber || "—"}</p>
-                                                <p><span className="font-semibold">Account Pin:</span> {order.accountPin || "—"}</p>
-                                                <p><span className="font-semibold">Transfer Pin:</span> {order.transferPin || "—"}</p>
-                                                <p><span className="font-semibold">Transfer Pin Validity:</span> {asDisplayDate(order.transferPinValidity)}</p>
-                                            </div>
+                                            <dl className="grid grid-cols-[minmax(145px,auto)_1fr] gap-x-4 gap-y-1.5 text-sm text-gray-800 dark:text-gray-200">
+                                                <dt className="font-semibold">Phone Number</dt>
+                                                <dd>{order.phoneNumber || "—"}</dd>
+                                                <dt className="font-semibold">Account Number</dt>
+                                                <dd>{order.accountNumber || "—"}</dd>
+                                                <dt className="font-semibold">Account Pin</dt>
+                                                <dd>{order.accountPin || "—"}</dd>
+                                                <dt className="font-semibold">Transfer Pin</dt>
+                                                <dd>{order.transferPin || "—"}</dd>
+                                                <dt className="font-semibold">Transfer Pin Validity</dt>
+                                                <dd>{asDisplayDate(order.transferPinValidity)}</dd>
+                                            </dl>
                                         </div>
 
                                         <div className="rounded-lg border border-fuchsia-200 bg-fuchsia-50/60 dark:border-fuchsia-900/40 dark:bg-fuchsia-950/20 p-2.5">
                                             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-fuchsia-800 dark:text-fuchsia-300 mb-2">T-Mobile Info</p>
-                                            <div className="grid grid-cols-1 gap-1.5 text-sm text-gray-800 dark:text-gray-200">
-                                                <p><span className="font-semibold">Number of Lines:</span> {order.numberOfLines ?? "—"}</p>
-                                                <p><span className="font-semibold">Order Date:</span> {asDisplayDate(order.orderDate)}</p>
-                                                <p><span className="font-semibold">New Account Number:</span> {order.newAccountNumber || "—"}</p>
-                                                <p><span className="font-semibold">New Account Pin:</span> {order.newAccountPin || "—"}</p>
-                                                <p><span className="font-semibold">Instructions:</span> {order.instructions || "—"}</p>
-                                            </div>
+                                            <dl className="grid grid-cols-[minmax(145px,auto)_1fr] gap-x-4 gap-y-1.5 text-sm text-gray-800 dark:text-gray-200">
+                                                <dt className="font-semibold">Number of Lines</dt>
+                                                <dd>{order.numberOfLines ?? "—"}</dd>
+                                                <dt className="font-semibold">Order Date</dt>
+                                                <dd>{asDisplayDate(order.orderDate)}</dd>
+                                                <dt className="font-semibold">New Account Number</dt>
+                                                <dd>{order.newAccountNumber || "—"}</dd>
+                                                <dt className="font-semibold">New Account Pin</dt>
+                                                <dd>{order.newAccountPin || "—"}</dd>
+                                                <dt className="font-semibold">Instructions</dt>
+                                                <dd>{order.instructions || "—"}</dd>
+                                            </dl>
                                         </div>
                                     </div>
 

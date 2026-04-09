@@ -7,6 +7,15 @@ import { MagentaStoreSummary } from "@/types/magenta";
 
 const asDisplayDate = (value?: string) => {
     if (!value) { return "—"; }
+
+    // Prevent timezone drift for date-only strings like "2026-04-09".
+    const dateOnlyMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dateOnlyMatch) {
+        const [, year, month, day] = dateOnlyMatch;
+        const localDate = new Date(Number(year), Number(month) - 1, Number(day));
+        return localDate.toLocaleDateString();
+    }
+
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) { return value; }
     return dt.toLocaleDateString();
