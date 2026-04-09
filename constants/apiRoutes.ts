@@ -23,4 +23,17 @@ export const API_ROUTES = {
         RETURN: "/assurant/return",
         STATUS: "/store/viewAssurantDevicesStatus",
     },
+    COMPANY_ASSURANT_STATUS: "/company/viewAssurantDevicesStatus",
+    COMPANY_RETURN_DEVICES: "/company/viewReturnDevices",
+    CUSTOMER_RETURN: {
+        SAVE: "/returnPhone/save",
+        VIEW: "/returnPhone/inStoreView",
+    },
+    MAGENTA: {
+        SAVE: "/magenta/save",
+        ORDER_COMPLETED: "/magenta/orderCompleted",
+        ORDER_CANCELLATION: "/magenta/orderCancellation",
+        IN_STORE_VIEW: "/magenta/inStoreView",
+        COMPANY_VIEW: "/company/viewMagentaOrders",
+    },
 };

@@ -52,7 +52,13 @@ export default function ManageEmployees() {
     };
 
     const handleEdit = (employee: Employee) => {
-        setEditingEmployee(employee); // ✅ Store the employee to edit
+        setEditingEmployee({
+            ...employee,
+            isHavingAssurantAccess:
+                (employee as any).isHavingAssurantAccess ??
+                (employee as any).havingAssurantAccess ??
+                false,
+        } as Employee); // ✅ Store normalized employee data for edit form
     };
 
     const editSchema = employeeSchema.extend({
@@ -79,14 +85,12 @@ export default function ManageEmployees() {
     }, [editingEmployee, reset]);
 
     const onUpdateSubmit = async (data: Employee) => {
-        console.log("Submitting employee update", data);
         if (!companyName) { return; }
         setSavingEdit(true);
         try {
             const updatedList = await updateEmployee(companyName, data);
             setEmployees(updatedList);
             setEditingEmployee(null);
-            console.log("Update success");
         } catch (err) {
             console.error("Failed to update employee", err);
         } finally {
@@ -134,7 +138,16 @@ export default function ManageEmployees() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <InputField label="Employee NTID" disabled {...register("employeeNtid")} error={errors.employeeNtid?.message} />
                                 <InputField label="Employee Name" {...register("employeeName")} error={errors.employeeName?.message} />
-                                <InputField label="Phone Number" {...register("phoneNumber")} error={errors.phoneNumber?.message} />
+                                <InputField
+                                    label="Phone Number"
+                                    type="tel"
+                                    {...register("phoneNumber")}
+                                    error={errors.phoneNumber?.message}
+                                    onInput={(e) => {
+                                        const input = e.currentTarget;
+                                        input.value = input.value.replace(/\D/g, "").slice(0, 15);
+                                    }}
+                                />
                                 <InputField label="Email" type="email" {...register("email")} error={errors.email?.message} />
                                 <InputField label="$/hour" type="number" step="0.01" {...register("employeePayRatePerHour", { valueAsNumber: true })} error={errors.employeePayRatePerHour?.message} />
                                 <InputField label="Commission %" type="number" step="0.01" {...register("commissionPercentage", { valueAsNumber: true })} error={errors.commissionPercentage?.message} />

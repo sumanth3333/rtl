@@ -110,6 +110,11 @@ export const sidebarLinks: Record<Role, {
             icon: DocumentMagnifyingGlassIcon
         },
         {
+            name: "Magenta Orders",
+            path: "/dashboard/employee/magenta",
+            icon: DocumentMagnifyingGlassIcon
+        },
+        {
             name: "Settings",
             path: "/dashboard/employee/settings",
             icon: Settings,
@@ -217,6 +222,16 @@ export const sidebarLinks: Record<Role, {
         {
             name: "Retention",
             path: "/dashboard/owner/retention",
+            icon: DocumentMagnifyingGlassIcon,
+        },
+        {
+            name: "Claims & Returns",
+            path: "/dashboard/owner/claims-returns",
+            icon: DocumentMagnifyingGlassIcon,
+        },
+        {
+            name: "Magenta Orders",
+            path: "/dashboard/owner/magenta",
             icon: DocumentMagnifyingGlassIcon,
         },
         {
