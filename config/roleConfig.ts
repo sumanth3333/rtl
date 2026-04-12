@@ -6,15 +6,41 @@ import {
     CheckCircleIcon,
     BellAlertIcon
 } from "@heroicons/react/24/outline";
-import { Clock, MapPin, Settings } from "lucide-react";
+import {
+    BadgePercent,
+    Banknote,
+    BarChart3,
+    Boxes,
+    Clock3,
+    FileText,
+    ListChecks,
+    MapPin,
+    MessageSquareText,
+    Package,
+    RefreshCcw,
+    Settings,
+    ShoppingCart,
+    Smartphone,
+    Store,
+    Target,
+    TrendingUp,
+    FileSpreadsheet,
+    UserCheck,
+    Users,
+    WalletCards
+} from "lucide-react";
 import React from "react";
 // roleConfig.ts - Centralized role-based configuration
 export type Role = "ADMIN" | "EMPLOYEE" | "MANAGER" | "OWNER";
+export type SidebarLink = {
+    name: string;
+    path: string;
+    icon: React.ElementType;
+    section?: string;
+};
 
 // ✅ Sidebar Links for Each Role
-export const sidebarLinks: Record<Role, {
-    name: string; path: string, icon: React.ElementType
-}[]> = {
+export const sidebarLinks: Record<Role, SidebarLink[]> = {
     ADMIN: [
         {
             name: "Home",
@@ -29,22 +55,22 @@ export const sidebarLinks: Record<Role, {
         {
             name: "Manage Stores",
             path: "/dashboard/admin/stores",
-            icon: BuildingStorefrontIcon
+            icon: Store
         },
         {
             name: "Generate Invoices",
             path: "/dashboard/admin/invoices",
-            icon: DocumentTextIcon
+            icon: FileText
         },
         {
             name: "Setup Payments",
             path: "/dashboard/admin/payments",
-            icon: CreditCardIcon
+            icon: WalletCards
         },
         {
             name: "File Exports",
             path: "/dashboard/admin/file-exports",
-            icon: DocumentMagnifyingGlassIcon
+            icon: FileSpreadsheet
         }
     ],
 
@@ -62,12 +88,12 @@ export const sidebarLinks: Record<Role, {
         {
             name: "Tasks",
             path: "/dashboard/employee/todos",
-            icon: ClipboardDocumentListIcon
+            icon: ListChecks
         },
         {
             name: "End of Day Report",
             path: "/dashboard/employee/eod-report",
-            icon: DocumentTextIcon
+            icon: FileText
         },
         {
             name: "Record IMEI",
@@ -77,17 +103,17 @@ export const sidebarLinks: Record<Role, {
         {
             name: "Inventory Management",
             path: "/dashboard/employee/log-inventory",
-            icon: ArchiveBoxIcon
+            icon: Boxes
         },
         {
             name: "Retention",
             path: "/dashboard/employee/retention",
-            icon: DocumentMagnifyingGlassIcon
+            icon: UserCheck
         },
         {
             name: "Accessories Management",
             path: "/dashboard/employee/accessories",
-            icon: ArchiveBoxIcon
+            icon: Package
         },
         {
             name: "Port Help",
@@ -97,22 +123,22 @@ export const sidebarLinks: Record<Role, {
         {
             name: "Device Upgrades",
             path: "/dashboard/employee/manage-upgrades",
-            icon: DevicePhoneMobileIcon
+            icon: Smartphone
         },
         {
             name: "Raise A Request",
             path: "/dashboard/employee/raise-request",
-            icon: PencilSquareIcon
+            icon: MessageSquareText
         },
         {
             name: "Claims & Returns",
             path: "/dashboard/employee/claims-returns",
-            icon: DocumentMagnifyingGlassIcon
+            icon: RefreshCcw
         },
         {
             name: "Magenta Orders",
             path: "/dashboard/employee/magenta",
-            icon: DocumentMagnifyingGlassIcon
+            icon: ShoppingCart
         },
         {
             name: "Settings",
@@ -143,12 +169,14 @@ export const sidebarLinks: Record<Role, {
         {
             name: "Home",
             path: "/dashboard/owner",
-            icon: HomeIcon
+            icon: HomeIcon,
+            section: "Overview"
         },
         {
             name: "Analytics",
             path: "/dashboard/owner/analytics",
-            icon: ChartBarSquareIcon,
+            icon: BarChart3,
+            section: "Overview"
         },
         // {
         //     name: "Manage Managers",
@@ -158,101 +186,121 @@ export const sidebarLinks: Record<Role, {
         {
             name: "Manage Employees",
             path: "/dashboard/owner/manage-employees",
-            icon: UsersIcon
+            icon: Users,
+            section: "People"
         },
         {
             name: "Manage Stores",
             path: "/dashboard/owner/manage-stores",
-            icon: BuildingStorefrontIcon
+            icon: Store,
+            section: "People"
         },
         {
             name: "Paychecks",
             path: "/dashboard/owner/paychecks",
-            icon: CurrencyDollarIcon
+            icon: WalletCards,
+            section: "Finance"
         },
         {
             name: "Cash Collection",
             path: "/dashboard/owner/cash-collection",
-            icon: BanknotesIcon,
+            icon: Banknote,
+            section: "Finance"
         }, {
             name: "Inventory Management",
             path: "/dashboard/owner/inventory",
-            icon: ClipboardDocumentCheckIcon,
+            icon: Boxes,
+            section: "Operations"
         },
         {
             name: "Accessories Management",
             path: "/dashboard/owner/accessories",
-            icon: ArchiveBoxIcon
+            icon: Package,
+            section: "Operations"
         },
         {
             name: "Device Upgrades",
             path: "/dashboard/owner/manage-upgrades",
-            icon: DevicePhoneMobileIcon
+            icon: Smartphone,
+            section: "Operations"
         },
         {
             name: "Assign ToDos",
             path: "/dashboard/owner/assign-todos",
-            icon: CheckCircleIcon,
+            icon: ListChecks,
+            section: "Operations"
         },
         {
             name: "End of Day Report",
             path: "/dashboard/owner/eod-report",
-            icon: DocumentTextIcon
+            icon: FileText,
+            section: "Reports"
         },
         {
             name: "RTPOS Report",
             path: "/dashboard/owner/rtpos-report",
-            icon: ChartBarIcon
+            icon: ChartBarIcon,
+            section: "Reports"
         },
         {
             name: "EOD Remarks",
             path: "/dashboard/owner/eod-remarks",
-            icon: ClipboardDocumentCheckIcon
+            icon: MessageSquareText,
+            section: "Reports"
         },
         {
             name: "Monthly Targets",
             path: "/dashboard/owner/targets",
-            icon: ChartBarIcon,
+            icon: Target,
+            section: "Operations"
         },
         {
             name: "Expenses & Profits",
             path: "/dashboard/owner/finance",
-            icon: PresentationChartLineIcon,
+            icon: TrendingUp,
+            section: "Finance"
         },
         {
             name: "Retention",
             path: "/dashboard/owner/retention",
-            icon: DocumentMagnifyingGlassIcon,
+            icon: UserCheck,
+            section: "Finance"
         },
         {
             name: "Claims & Returns",
             path: "/dashboard/owner/claims-returns",
-            icon: DocumentMagnifyingGlassIcon,
+            icon: RefreshCcw,
+            section: "Operations"
         },
         {
             name: "Magenta Orders",
             path: "/dashboard/owner/magenta",
-            icon: DocumentMagnifyingGlassIcon,
+            icon: ShoppingCart,
+            section: "Operations"
         },
         {
             name: "Rebates",
             path: "/dashboard/owner/rebates",
-            icon: DocumentMagnifyingGlassIcon,
+            icon: BadgePercent,
+            section: "Finance"
         },
         {
             name: "Pending Requests",
             path: "/dashboard/owner/pending-requests",
-            icon: Clock, // or Hourglass
+            icon: Clock3,
+            section: "Operations"
         },
         {
             name: "Store Visit",
             path: "/dashboard/owner/store-visit",
             icon: MapPin,
+            section: "Operations"
         },
         {
             name: "Settings",
             path: "/dashboard/owner/settings",
             icon: Settings,
+            section: "System"
         }
 
     ]

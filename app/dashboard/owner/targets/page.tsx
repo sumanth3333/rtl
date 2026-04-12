@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { StoreTarget, EmployeeTarget, StoreTargetResponse, EmployeeTargetResponse, StoreTargetRequest, EmployeeTargetRequest } from "@/types/targetTypes";
-import { getEmployeeTargets, getStoreTargets } from "@/services/owner/targetService";
+import { getEmployeeTargets, getStoreTargets, updateEmployeeTarget, updateStoreTarget } from "@/services/owner/targetService";
 import StoreTargetTable from "@/components/owner/targets/StoreTargetTable";
 import EmployeeTargetTable from "@/components/owner/targets/EmployeeTargetTable";
-import TargetUpdateModal from "@/components/owner/targets/TargetUpdateModal";
 import { useOwner } from "@/hooks/useOwner";
 import { format, subMonths } from "date-fns";
 
@@ -16,8 +15,6 @@ export default function MonthlyTargets() {
     const [employeeTargets, setEmployeeTargets] = useState<EmployeeTargetResponse[]>([]);
 
     const [loading, setLoading] = useState<boolean>(true);
-    const [selectedTarget, setSelectedTarget] = useState<StoreTargetRequest | EmployeeTargetRequest | null>(null);
-    const [isModalOpen, setModalOpen] = useState<boolean>(false);
 
     // Default to current month
     const [targetMonth, setTargetMonth] = useState<string>(format(new Date(), "yyyy-MM"));
@@ -47,54 +44,16 @@ export default function MonthlyTargets() {
         fetchData();
     }, [companyName, targetMonth]);
 
-    const openEditModal = (target: StoreTarget | EmployeeTarget | null, id: string, type: "store" | "employee") => {
-        const initialTarget = type === "store"
-            ? {
-                activationTargetToStore: 0,
-                upgradeTargetToStore: 0,
-                accessoriesTargetToStore: 0.0,
-                hsiTargetToStore: 0,
-                tabletsTargetToStore: 0,
-                migrationTargetToStore: 0,
-                smartwatchTragetToStore: 0,
-                targetMonth,
-            } as StoreTarget
-            : {
-                phonesTargetToEmployee: 0,
-                upgradeTargetToEmployee: 0,
-                accessoriesTargetByEmployee: 0.0,
-                hsiTarget: 0,
-                tabletsTargetByEmployee: 0,
-                smartwatchTargetByEmployee: 0,
-                migrationTargetToEmployee: 0,
-                targetMonth,
+    const saveStoreTarget = async (dealerStoreId: string, target: StoreTarget) => {
+        const payload: StoreTargetRequest = { store: { dealerStoreId }, target };
+        await updateStoreTarget(payload);
+        setStoreTargets((prev) => prev.map((row) => (row.store.dealerStoreId === dealerStoreId ? { ...row, target } : row)));
+    };
 
-            } as EmployeeTarget;
-
-        const actualTarget = type === "store"
-            ? {
-                store: { dealerStoreId: id },
-                target: target
-            } as StoreTargetRequest
-            : {
-                employee: { employeeNtid: id },
-                target: target
-
-            } as EmployeeTargetRequest;
-
-        const defaultTarget = type === "store"
-            ? {
-                store: { dealerStoreId: id },
-                target: initialTarget
-            } as StoreTargetRequest
-            : {
-                employee: { employeeNtid: id },
-                target: initialTarget
-
-            } as EmployeeTargetRequest;
-
-        setSelectedTarget(actualTarget || defaultTarget);
-        setModalOpen(true);
+    const saveEmployeeTarget = async (employeeNtid: string, target: EmployeeTarget) => {
+        const payload: EmployeeTargetRequest = { employee: { employeeNtid }, target };
+        await updateEmployeeTarget(payload);
+        setEmployeeTargets((prev) => prev.map((row) => (row.employeeDTO.employeeNtid === employeeNtid ? { ...row, target } : row)));
     };
 
     return (
@@ -124,13 +83,9 @@ export default function MonthlyTargets() {
                 <p className="text-gray-500">Loading targets...</p>
             ) : (
                 <>
-                    <StoreTargetTable targets={storeTargets} month={targetMonth} onEdit={(target, id) => openEditModal(target, id, "store")} />
-                    <EmployeeTargetTable targets={employeeTargets} month={targetMonth} onEdit={(target, id) => openEditModal(target, id, "employee")} />
+                    <StoreTargetTable targets={storeTargets} month={targetMonth} onSave={saveStoreTarget} />
+                    <EmployeeTargetTable targets={employeeTargets} month={targetMonth} onSave={saveEmployeeTarget} />
                 </>
-            )}
-
-            {selectedTarget && (
-                <TargetUpdateModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} target={selectedTarget} month={targetMonth} />
             )}
         </div>
     );

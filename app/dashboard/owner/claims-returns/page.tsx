@@ -7,6 +7,7 @@ import { fetchCompanyAssurantStatus, fetchCompanyReturnDevices, StoreAssurantSum
 type Tab = "assurant" | "customer";
 
 const formatDateTime = (val?: string) => val || "—";
+const formatCurrency = (val?: number | null) => (typeof val === "number" ? `$${val.toFixed(2)}` : "—");
 
 export default function OwnerClaimsReturnsPage() {
     const { companyName } = useOwner();
@@ -34,10 +35,10 @@ export default function OwnerClaimsReturnsPage() {
                 setReturns(Array.isArray(returnData) ? returnData : []);
 
                 const collapsedA: Record<string, boolean> = {};
-                (assurantData || []).forEach((s: any) => { collapsedA[s.store?.dealerStoreId] = false; });
+                (assurantData || []).forEach((s: any) => { collapsedA[s.store?.dealerStoreId] = true; });
                 setExpandedAssurant(collapsedA);
                 const collapsedR: Record<string, boolean> = {};
-                (returnData || []).forEach((s: any) => { collapsedR[s.store?.dealerStoreId] = false; });
+                (returnData || []).forEach((s: any) => { collapsedR[s.store?.dealerStoreId] = true; });
                 setExpandedReturns(collapsedR);
             } catch (err: any) {
                 setError(err?.message || "Failed to load data.");
@@ -121,7 +122,12 @@ export default function OwnerClaimsReturnsPage() {
                                                         <tr>
                                                             <th className="px-3 py-2 text-left">Bucket</th>
                                                             <th className="px-3 py-2 text-left">IMEI</th>
-                                                            <th className="px-3 py-2 text-left">Claimed</th>
+                                                            <th className="px-3 py-2 text-left">Customer</th>
+                                                            <th className="px-3 py-2 text-left">Phone</th>
+                                                            <th className="px-3 py-2 text-left">Claim Info</th>
+                                                            <th className="px-3 py-2 text-left">Received By</th>
+                                                            <th className="px-3 py-2 text-left">Label By</th>
+                                                            <th className="px-3 py-2 text-left">Return By</th>
                                                             <th className="px-3 py-2 text-left">Received</th>
                                                             <th className="px-3 py-2 text-left">Label</th>
                                                             <th className="px-3 py-2 text-left">Returned</th>
@@ -131,11 +137,30 @@ export default function OwnerClaimsReturnsPage() {
                                                         {["claims", "pendings", "returns", "success"].flatMap((bucket) => {
                                                             const items = (store.statusResponse as any)[bucket] || [];
                                                             if (!items.length) {
-                                                                return [{ bucket, imei: "—", claimedDate: "—", receivedDate: "—", labelCreatedDate: "—", returnedDate: "—" }];
+                                                                return [{
+                                                                    bucket,
+                                                                    imei: "—",
+                                                                    customerName: "—",
+                                                                    customerNumber: "—",
+                                                                    claimedBy: "—",
+                                                                    receivedBy: "—",
+                                                                    labelBy: "—",
+                                                                    returnBy: "—",
+                                                                    claimedDate: "—",
+                                                                    receivedDate: "—",
+                                                                    labelCreatedDate: "—",
+                                                                    returnedDate: "—",
+                                                                }];
                                                             }
                                                             return items.map((item: any) => ({
                                                                 bucket,
                                                                 imei: item.imei,
+                                                                customerName: item.customerName || "—",
+                                                                customerNumber: item.customerNumber || item.customerPhoneNumber || "—",
+                                                                claimedBy: item.claimedBy || "—",
+                                                                receivedBy: item.receivedBy || "—",
+                                                                labelBy: item.labelBy || "—",
+                                                                returnBy: item.returnBy || "—",
                                                                 claimedDate: item.claimedDate,
                                                                 receivedDate: item.receivedDate || "—",
                                                                 labelCreatedDate: item.labelCreatedDate || "—",
@@ -145,7 +170,14 @@ export default function OwnerClaimsReturnsPage() {
                                                             <tr key={`${storeId}-${row.bucket}-${row.imei}-${idx}`} className="hover:bg-gray-50/70 dark:hover:bg-gray-900/40">
                                                                 <td className="px-3 py-2 capitalize text-gray-700 dark:text-gray-200">{row.bucket}</td>
                                                                 <td className="px-3 py-2 font-mono text-xs text-gray-900 dark:text-gray-100">{row.imei}</td>
-                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatDateTime(row.claimedDate)}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{row.customerName}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{row.customerNumber}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">
+                                                                    {`${row.claimedBy} | ${formatDateTime(row.claimedDate)}`}
+                                                                </td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{row.receivedBy}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{row.labelBy}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{row.returnBy}</td>
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatDateTime(row.receivedDate)}</td>
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatDateTime(row.labelCreatedDate)}</td>
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatDateTime(row.returnedDate)}</td>
@@ -192,26 +224,32 @@ export default function OwnerClaimsReturnsPage() {
                                                 <thead className="bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200">
                                                     <tr>
                                                         <th className="px-3 py-2 text-left">IMEI</th>
+                                                        <th className="px-3 py-2 text-left">Device</th>
                                                         <th className="px-3 py-2 text-left">Phone</th>
                                                         <th className="px-3 py-2 text-left">PIN</th>
                                                         <th className="px-3 py-2 text-left">Activated</th>
                                                         <th className="px-3 py-2 text-left">Returned</th>
+                                                        <th className="px-3 py-2 text-left">Refunded</th>
+                                                        <th className="px-3 py-2 text-left">Payment</th>
                                                         <th className="px-3 py-2 text-left">Employee</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                                     {store.returnDevices.length === 0 ? (
                                                         <tr>
-                                                            <td colSpan={6} className="px-3 py-3 text-center text-gray-500 dark:text-gray-400">No devices.</td>
+                                                            <td colSpan={9} className="px-3 py-3 text-center text-gray-500 dark:text-gray-400">No devices.</td>
                                                         </tr>
                                                     ) : (
                                                         store.returnDevices.map((item) => (
                                                             <tr key={`${storeId}-${item.imei}`} className="hover:bg-gray-50/70 dark:hover:bg-gray-900/40">
                                                                 <td className="px-3 py-2 font-mono text-xs text-gray-900 dark:text-gray-100">{item.imei}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{item.deviceName || "—"}</td>
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{item.phoneNumber}</td>
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{item.accountPin}</td>
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatDateTime(item.activatedDate)}</td>
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatDateTime(item.returnedDate)}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatCurrency(item.refundedAmount)}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{item.refundPaymentType || "—"}</td>
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{item.employeeNtid}</td>
                                                             </tr>
                                                         ))

@@ -1,5 +1,6 @@
 export type MagentaSaveOrderPayload = {
     dealerStoreId: string;
+    customerName: string;
     numberOfLines: number;
     employeeNtid: string;
     phoneNumber: string;
@@ -15,6 +16,7 @@ export type MagentaSaveOrderPayload = {
 export type MagentaOrderCompletedPayload = {
     employeeNtid: string;
     accountNumber: string;
+    temporaryNumberReceived: string;
 };
 
 export type MagentaOrderCancellationPayload = {
@@ -24,6 +26,7 @@ export type MagentaOrderCancellationPayload = {
 };
 
 export type MagentaOrder = {
+    customerName?: string;
     numberOfLines: number;
     phoneNumber: string;
     accountPin: string;
@@ -40,6 +43,7 @@ export type MagentaOrder = {
 };
 
 export type MagentaCancellation = {
+    customerName?: string;
     numberOfLines: number;
     phoneNumber: string;
     cancelledEmployeeName: string;
@@ -49,8 +53,10 @@ export type MagentaCancellation = {
 };
 
 export type MagentaSuccessOrder = {
+    customerName?: string;
     numberOfLines: number;
     phoneNumber: string;
+    temporaryNumber?: string;
     completedDate: string;
     completedEmployeeName: string;
     cancelled: boolean;
@@ -60,6 +66,7 @@ export type MagentaInStoreCounts = {
     totalOrdersCount: number;
     cancelledCount: number;
     sucessOrdersCount: number;
+    successOrdersCount?: number;
 };
 
 export type MagentaInStoreViewResponse = {

@@ -51,7 +51,6 @@ export default function EmployeeRetentionCard({ account, onSave }: Props) {
                         <tr>
                             <th className="px-3 py-2 text-left font-semibold">Phone Number</th>
                             <th className="px-3 py-2 text-left font-semibold">Status</th>
-                            <th className="px-3 py-2 text-left font-semibold">Paid</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -77,27 +76,32 @@ export default function EmployeeRetentionCard({ account, onSave }: Props) {
                                         ))}
                                     </select>
                                 </td>
-                                <td className="px-3 py-2">
-                                    {showAmount ? (
-                                        <input
-                                            type="number"
-                                            min={0}
-                                            step="0.01"
-                                            value={amountPaid}
-                                            onChange={(e) => {
-                                                const val = Number(e.target.value);
-                                                setAmountPaid(Number.isNaN(val) ? 0 : val);
-                                            }}
-                                            className="w-24 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1 text-sm"
-                                        />
-                                    ) : (
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">—</span>
-                                    )}
-                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 dark:border-gray-800 px-3 py-2">
+                <p className="text-xs uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">Retention Amount (Per Account)</p>
+                {showAmount ? (
+                    <div className="mt-2 flex items-center gap-2">
+                        <span className="text-sm text-gray-600 dark:text-gray-300">$</span>
+                        <input
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            value={amountPaid}
+                            onChange={(e) => {
+                                const val = Number(e.target.value);
+                                setAmountPaid(Number.isNaN(val) ? 0 : val);
+                            }}
+                            className="w-40 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-1 text-sm"
+                        />
+                    </div>
+                ) : (
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Set at least one phone status to `RETAINED` to enter account-level amount.</p>
+                )}
             </div>
 
             <div className="flex items-center justify-between">

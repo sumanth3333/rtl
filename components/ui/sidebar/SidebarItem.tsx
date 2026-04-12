@@ -25,24 +25,26 @@ export default function SidebarItem({
                 href={path}
                 onClick={onClick}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-300 relative
-          hover:bg-gray-200 dark:hover:bg-gray-800
-          ${isCollapsed ? "justify-center" : "pl-4 pr-6"}
-          ${isActive ? "bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white font-semibold" : "text-gray-600 dark:text-gray-400"}`}
+                className={`flex items-center gap-2.5 rounded-md transition-all duration-200 relative border border-transparent
+          hover:bg-gray-200/80 hover:border-gray-300/80 dark:hover:bg-gray-800/80 dark:hover:border-gray-700/80
+          ${isCollapsed ? "justify-center h-10 w-10 mx-auto p-0" : "px-3 py-2.5"}
+          ${isActive
+                        ? "bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-500/15 dark:border-blue-500/30 dark:text-blue-100 font-semibold"
+                        : "text-gray-700 dark:text-gray-300"}`}
             >
                 {/* Icon - Always Visible */}
                 <div
                     className={`transition-all duration-200 ${isActive
-                            ? "text-gray-900 dark:text-white"
-                            : "text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                            ? "text-blue-700 dark:text-blue-200"
+                            : "text-gray-500 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200"
                         }`}
                 >
-                    {Icon && <Icon className="w-6 h-6" />}
+                    {Icon && <Icon className="w-5 h-5" />}
                 </div>
 
                 {/* Name - Hidden when collapsed */}
                 <span
-                    className={`text-sm font-medium transition-opacity duration-300 ease-in-out ${isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"
+                    className={`text-[13px] leading-5 font-medium transition-opacity duration-300 ease-in-out ${isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"
                         }`}
                 >
                     {name}
@@ -50,14 +52,14 @@ export default function SidebarItem({
 
                 {/* Tooltip for collapsed mode */}
                 {isCollapsed && (
-                    <span className="absolute left-16 bg-gray-900 text-white text-xs font-medium rounded-md px-3 py-1 shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 whitespace-nowrap">
+                    <span className="absolute left-14 z-10 bg-gray-900 text-white text-xs font-medium rounded-md px-2.5 py-1 shadow-lg opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 whitespace-nowrap pointer-events-none">
                         {name}
                     </span>
                 )}
 
                 {/* Left Active Indicator */}
-                {isActive && (
-                    <span className="absolute left-0 top-0 h-full w-1 bg-blue-500 dark:bg-blue-400 rounded-r-lg"></span>
+                {isActive && !isCollapsed && (
+                    <span className="absolute left-0 top-1/2 h-6 -translate-y-1/2 w-1 bg-blue-500 dark:bg-blue-400 rounded-r-md"></span>
                 )}
             </Link>
         </div>

@@ -115,49 +115,117 @@ export default function OwnerMagentaPage() {
                             <section className="rounded-xl border border-gray-200 dark:border-gray-800 p-3">
                                 <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Active Orders</h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{details.orders.length} item(s)</p>
-                                <div className="space-y-2 max-h-[280px] overflow-auto pr-1">
-                                    {details.orders.length === 0 && <p className="text-xs text-gray-500 dark:text-gray-400">No active orders.</p>}
-                                    {details.orders.map((order) => (
-                                        <div key={`${order.orderId}-${order.accountNumber}`} className="rounded-lg border border-gray-200 dark:border-gray-800 p-2.5">
-                                            <p className="text-xs text-gray-700 dark:text-gray-300"><span className="font-semibold">Order ID:</span> {order.orderId}</p>
-                                            <p className="text-xs text-gray-700 dark:text-gray-300"><span className="font-semibold">Account:</span> {order.accountNumber}</p>
-                                            <p className="text-xs text-gray-700 dark:text-gray-300"><span className="font-semibold">Phone:</span> {order.phoneNumber}</p>
-                                            <p className="text-xs text-gray-700 dark:text-gray-300"><span className="font-semibold">Lines:</span> {order.numberOfLines}</p>
-                                            <p className="text-xs text-gray-700 dark:text-gray-300"><span className="font-semibold">Date:</span> {asDisplayDate(order.orderDate)}</p>
-                                        </div>
-                                    ))}
+                                <div className="max-h-[280px] overflow-auto pr-1">
+                                    {details.orders.length === 0 ? (
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">No active orders.</p>
+                                    ) : (
+                                        <table className="min-w-full text-xs">
+                                            <thead className="bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-200">
+                                                <tr>
+                                                    <th className="px-2 py-1 text-left">Customer</th>
+                                                    <th className="px-2 py-1 text-left">Phone</th>
+                                                    <th className="px-2 py-1 text-left">Account #</th>
+                                                    <th className="px-2 py-1 text-left">Account PIN</th>
+                                                    <th className="px-2 py-1 text-left">Transfer PIN</th>
+                                                    <th className="px-2 py-1 text-left">Transfer PIN Validity</th>
+                                                    <th className="px-2 py-1 text-left">Order ID</th>
+                                                    <th className="px-2 py-1 text-left">Order Date</th>
+                                                    <th className="px-2 py-1 text-left">New Account #</th>
+                                                    <th className="px-2 py-1 text-left">New Account PIN</th>
+                                                    <th className="px-2 py-1 text-left">Lines</th>
+                                                    <th className="px-2 py-1 text-left">Instructions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                                {details.orders.map((order) => (
+                                                    <tr key={`${order.orderId}-${order.accountNumber}`} className="hover:bg-gray-50/70 dark:hover:bg-gray-900/40">
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.customerName || "—"}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.phoneNumber || "—"}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.accountNumber || "—"}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.accountPin || "—"}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.transferPin || "—"}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{asDisplayDate(order.transferPinValidity)}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.orderId || "—"}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{asDisplayDate(order.orderDate)}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.newAccountNumber || "—"}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.newAccountPin || "—"}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.numberOfLines ?? "—"}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.instructions || "—"}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
                                 </div>
                             </section>
 
                             <section className="rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/10 p-3">
                                 <h3 className="text-sm font-semibold text-rose-800 dark:text-rose-300">Cancellations</h3>
                                 <p className="text-xs text-rose-700/80 dark:text-rose-300/80 mb-2">{details.cancellations.length} item(s)</p>
-                                <div className="space-y-2 max-h-[280px] overflow-auto pr-1">
-                                    {details.cancellations.length === 0 && <p className="text-xs text-rose-700/80 dark:text-rose-300/80">No cancellations.</p>}
-                                    {details.cancellations.map((item, index) => (
-                                        <div key={`${item.phoneNumber}-${item.cancelledDate}-${index}`} className="rounded-lg border border-rose-200 dark:border-rose-900/40 p-2.5 bg-white/80 dark:bg-black/10">
-                                            <p className="text-xs text-rose-900 dark:text-rose-200"><span className="font-semibold">Phone:</span> {item.phoneNumber}</p>
-                                            <p className="text-xs text-rose-900 dark:text-rose-200"><span className="font-semibold">By:</span> {item.cancelledEmployeeName || "—"}</p>
-                                            <p className="text-xs text-rose-900 dark:text-rose-200"><span className="font-semibold">Date:</span> {asDisplayDate(item.cancelledDate)}</p>
-                                            <p className="text-xs text-rose-900 dark:text-rose-200"><span className="font-semibold">Reason:</span> {item.cancelledReason || "—"}</p>
-                                        </div>
-                                    ))}
+                                <div className="max-h-[280px] overflow-auto pr-1">
+                                    {details.cancellations.length === 0 ? (
+                                        <p className="text-xs text-rose-700/80 dark:text-rose-300/80">No cancellations.</p>
+                                    ) : (
+                                        <table className="min-w-full text-xs">
+                                            <thead className="bg-rose-100 dark:bg-rose-900/20 text-rose-900 dark:text-rose-200">
+                                                <tr>
+                                                    <th className="px-2 py-1 text-left">Customer</th>
+                                                    <th className="px-2 py-1 text-left">Phone</th>
+                                                    <th className="px-2 py-1 text-left">Lines</th>
+                                                    <th className="px-2 py-1 text-left">Cancelled By</th>
+                                                    <th className="px-2 py-1 text-left">Cancelled Date</th>
+                                                    <th className="px-2 py-1 text-left">Reason</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-rose-100 dark:divide-rose-900/30">
+                                                {details.cancellations.map((item, index) => (
+                                                    <tr key={`${item.phoneNumber}-${item.cancelledDate}-${index}`} className="hover:bg-rose-50/60 dark:hover:bg-rose-900/10">
+                                                        <td className="px-2 py-1">{item.customerName || "—"}</td>
+                                                        <td className="px-2 py-1">{item.phoneNumber || "—"}</td>
+                                                        <td className="px-2 py-1">{item.numberOfLines ?? "—"}</td>
+                                                        <td className="px-2 py-1">{item.cancelledEmployeeName || "—"}</td>
+                                                        <td className="px-2 py-1">{asDisplayDate(item.cancelledDate)}</td>
+                                                        <td className="px-2 py-1">{item.cancelledReason || "—"}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
                                 </div>
                             </section>
 
                             <section className="rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/10 p-3">
                                 <h3 className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Completed</h3>
                                 <p className="text-xs text-emerald-700/80 dark:text-emerald-300/80 mb-2">{details.successOrders.length} item(s)</p>
-                                <div className="space-y-2 max-h-[280px] overflow-auto pr-1">
-                                    {details.successOrders.length === 0 && <p className="text-xs text-emerald-700/80 dark:text-emerald-300/80">No completed orders.</p>}
-                                    {details.successOrders.map((item, index) => (
-                                        <div key={`${item.phoneNumber}-${item.completedDate}-${index}`} className="rounded-lg border border-emerald-200 dark:border-emerald-900/40 p-2.5 bg-white/80 dark:bg-black/10">
-                                            <p className="text-xs text-emerald-900 dark:text-emerald-200"><span className="font-semibold">Phone:</span> {item.phoneNumber}</p>
-                                            <p className="text-xs text-emerald-900 dark:text-emerald-200"><span className="font-semibold">By:</span> {item.completedEmployeeName || "—"}</p>
-                                            <p className="text-xs text-emerald-900 dark:text-emerald-200"><span className="font-semibold">Date:</span> {asDisplayDate(item.completedDate)}</p>
-                                            <p className="text-xs text-emerald-900 dark:text-emerald-200"><span className="font-semibold">Lines:</span> {item.numberOfLines}</p>
-                                        </div>
-                                    ))}
+                                <div className="max-h-[280px] overflow-auto pr-1">
+                                    {details.successOrders.length === 0 ? (
+                                        <p className="text-xs text-emerald-700/80 dark:text-emerald-300/80">No completed orders.</p>
+                                    ) : (
+                                        <table className="min-w-full text-xs">
+                                            <thead className="bg-emerald-100 dark:bg-emerald-900/20 text-emerald-900 dark:text-emerald-200">
+                                                <tr>
+                                                    <th className="px-2 py-1 text-left">Customer</th>
+                                                    <th className="px-2 py-1 text-left">Phone</th>
+                                                    <th className="px-2 py-1 text-left">T-Mobile Temp #</th>
+                                                    <th className="px-2 py-1 text-left">Lines</th>
+                                                    <th className="px-2 py-1 text-left">Completed By</th>
+                                                    <th className="px-2 py-1 text-left">Completed Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-emerald-100 dark:divide-emerald-900/30">
+                                                {details.successOrders.map((item, index) => (
+                                                    <tr key={`${item.phoneNumber}-${item.completedDate}-${index}`} className="hover:bg-emerald-50/60 dark:hover:bg-emerald-900/10">
+                                                        <td className="px-2 py-1">{item.customerName || "—"}</td>
+                                                        <td className="px-2 py-1">{item.phoneNumber || "—"}</td>
+                                                        <td className="px-2 py-1">{item.temporaryNumber || "—"}</td>
+                                                        <td className="px-2 py-1">{item.numberOfLines ?? "—"}</td>
+                                                        <td className="px-2 py-1">{item.completedEmployeeName || "—"}</td>
+                                                        <td className="px-2 py-1">{asDisplayDate(item.completedDate)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
                                 </div>
                             </section>
                         </div>

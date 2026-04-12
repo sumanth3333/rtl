@@ -95,19 +95,22 @@ export default function SidebarFooter({ isCollapsed }: SidebarFooterProps) {
 
     return (
         <>
-            <div className="border-t border-gray-300 bg-gray-200 p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="border-t border-slate-200/90 bg-white/60 px-3 py-3 backdrop-blur-md dark:border-slate-800/90 dark:bg-slate-900/55">
                 {!isCollapsed && (
                     <>
+                        <p className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">
+                            Shift Actions
+                        </p>
                         {!isClockedIn ? (
                             <button
-                                className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-blue-700"
+                                className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-blue-700 hover:to-indigo-700"
                                 onClick={handleClockIn}
                             >
                                 Click Here to Clock In
                             </button>
                         ) : (
                             <button
-                                className="w-full rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-amber-700"
+                                className="w-full rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-amber-600 hover:to-orange-700"
                                 onClick={handleOpenEarlyClockoutModal}
                             >
                                 Early Clock-out

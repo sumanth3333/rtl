@@ -11,5 +11,16 @@ export const fetchCustomerReturns = async (dealerStoreId: string): Promise<Custo
     const response = await apiClient.get(API_ROUTES.CUSTOMER_RETURN.VIEW, {
         params: { dealerStoreId },
     });
-    return response.data ?? [];
+    const data = Array.isArray(response.data) ? response.data : [];
+    return data.map((item: any) => ({
+        employeeNtid: item?.employeeNtid ?? "",
+        imei: item?.imei ?? "",
+        deviceName: item?.deviceName ?? "",
+        phoneNumber: item?.phoneNumber ?? "",
+        accountPin: item?.accountPin ?? "",
+        activatedDate: item?.activatedDate ?? "",
+        returnedDate: item?.returnedDate,
+        refundedAmount: item?.refundedAmount ?? item?.amountRefunded ?? null,
+        refundPaymentType: item?.refundPaymentType ?? null,
+    }));
 };

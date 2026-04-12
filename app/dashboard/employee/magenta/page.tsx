@@ -51,9 +51,12 @@ export default function EmployeeMagentaPage() {
     const [message, setMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [cancelPromptFor, setCancelPromptFor] = useState<string | null>(null);
+    const [completePromptFor, setCompletePromptFor] = useState<string | null>(null);
     const [cancelReasonsByAccount, setCancelReasonsByAccount] = useState<Record<string, string>>({});
+    const [temporaryNumbersByAccount, setTemporaryNumbersByAccount] = useState<Record<string, string>>({});
 
     const [saveForm, setSaveForm] = useState({
+        customerName: "",
         numberOfLines: "",
         phoneNumber: "",
         accountPin: "",
@@ -110,6 +113,7 @@ export default function EmployeeMagentaPage() {
             await saveMagentaOrder({
                 dealerStoreId,
                 employeeNtid,
+                customerName: saveForm.customerName.trim(),
                 numberOfLines: linesCount,
                 phoneNumber: saveForm.phoneNumber.trim(),
                 accountPin: saveForm.accountPin.trim(),
@@ -122,6 +126,7 @@ export default function EmployeeMagentaPage() {
             });
             setMessage("Order placed successfully.");
             setSaveForm({
+                customerName: "",
                 numberOfLines: "",
                 phoneNumber: "",
                 accountPin: "",
@@ -145,6 +150,11 @@ export default function EmployeeMagentaPage() {
             setError("Employee context is missing.");
             return;
         }
+        const temporaryNumberReceived = (temporaryNumbersByAccount[accountNumber] || "").trim();
+        if (!temporaryNumberReceived) {
+            setError("T-Mobile temporary number is required.");
+            return;
+        }
 
         setActionLoading("complete");
         setOrderActionAccount(accountNumber);
@@ -154,8 +164,11 @@ export default function EmployeeMagentaPage() {
             await completeMagentaOrder({
                 employeeNtid,
                 accountNumber: accountNumber.trim(),
+                temporaryNumberReceived,
             });
             setMessage(`Order ${accountNumber} marked as completed.`);
+            setCompletePromptFor(null);
+            setTemporaryNumbersByAccount((prev) => ({ ...prev, [accountNumber]: "" }));
             await loadView(true);
         } catch (err: any) {
             setError(err?.message || "Failed to complete order.");
@@ -196,6 +209,18 @@ export default function EmployeeMagentaPage() {
             setActionLoading(null);
             setOrderActionAccount(null);
         }
+    };
+
+    const openCompletePrompt = (accountNumber: string) => {
+        setCancelPromptFor(null);
+        setCancelReasonsByAccount((prev) => ({ ...prev, [accountNumber]: "" }));
+        setCompletePromptFor(accountNumber);
+    };
+
+    const openCancelPrompt = (accountNumber: string) => {
+        setCompletePromptFor(null);
+        setTemporaryNumbersByAccount((prev) => ({ ...prev, [accountNumber]: "" }));
+        setCancelPromptFor(accountNumber);
     };
 
     if (!hasStore) {
@@ -245,6 +270,16 @@ export default function EmployeeMagentaPage() {
                         <div className="rounded-xl border border-violet-200 bg-violet-50/60 dark:border-violet-900/50 dark:bg-violet-950/20 p-3">
                             <h3 className="text-sm font-semibold text-violet-900 dark:text-violet-300 mb-3">Metro Info</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <label className="text-sm text-gray-700 dark:text-gray-200">
+                                    Customer Name
+                                    <input
+                                        type="text"
+                                        value={saveForm.customerName}
+                                        onChange={(e) => setSaveForm((prev) => ({ ...prev, customerName: e.target.value }))}
+                                        className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                        required
+                                    />
+                                </label>
                                 <label className="text-sm text-gray-700 dark:text-gray-200">
                                     Phone Number
                                     <input
@@ -394,6 +429,8 @@ export default function EmployeeMagentaPage() {
                                         <div className="rounded-lg border border-violet-200 bg-violet-50/60 dark:border-violet-900/40 dark:bg-violet-950/20 p-2.5">
                                             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-violet-800 dark:text-violet-300 mb-2">Metro Info</p>
                                             <dl className="grid grid-cols-[minmax(145px,auto)_1fr] gap-x-4 gap-y-1.5 text-sm text-gray-800 dark:text-gray-200">
+                                                <dt className="font-semibold">Customer Name</dt>
+                                                <dd>{order.customerName || "—"}</dd>
                                                 <dt className="font-semibold">Phone Number</dt>
                                                 <dd>{order.phoneNumber || "—"}</dd>
                                                 <dt className="font-semibold">Account Number</dt>
@@ -426,25 +463,47 @@ export default function EmployeeMagentaPage() {
 
                                     {!order.cancelled && !order.completed && (
                                         <div className="mt-3 space-y-2">
-                                            <div className="flex flex-wrap gap-2">
-                                                <Button
-                                                    variant="success"
-                                                    className="!px-2.5 !py-1.5 !text-xs"
-                                                    onClick={() => handleCompleteOrder(order.accountNumber)}
-                                                    isLoading={actionLoading === "complete" && orderActionAccount === order.accountNumber}
-                                                    disabled={actionLoading !== null}
-                                                >
-                                                    Complete Order
-                                                </Button>
-                                                <Button
-                                                    variant="danger"
-                                                    className="!px-2.5 !py-1.5 !text-xs"
-                                                    onClick={() => setCancelPromptFor(order.accountNumber)}
-                                                    disabled={actionLoading !== null}
-                                                >
-                                                    Cancel Order
-                                                </Button>
-                                            </div>
+                                            {completePromptFor === order.accountNumber && (
+                                                <div className="space-y-2 rounded-md border border-emerald-200 dark:border-emerald-900/50 p-2">
+                                                    <input
+                                                        type="text"
+                                                        value={temporaryNumbersByAccount[order.accountNumber] || ""}
+                                                        onChange={(e) =>
+                                                            setTemporaryNumbersByAccount((prev) => ({
+                                                                ...prev,
+                                                                [order.accountNumber]: e.target.value,
+                                                            }))
+                                                        }
+                                                        placeholder="Enter T-Mobile temporary number"
+                                                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            variant="success"
+                                                            className="!px-2.5 !py-1.5 !text-xs"
+                                                            onClick={() => handleCompleteOrder(order.accountNumber)}
+                                                            isLoading={actionLoading === "complete" && orderActionAccount === order.accountNumber}
+                                                            disabled={actionLoading !== null}
+                                                        >
+                                                            Confirm Complete
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            className="!px-2.5 !py-1.5 !text-xs"
+                                                            onClick={() => {
+                                                                setCompletePromptFor(null);
+                                                                setTemporaryNumbersByAccount((prev) => ({
+                                                                    ...prev,
+                                                                    [order.accountNumber]: "",
+                                                                }));
+                                                            }}
+                                                            disabled={actionLoading !== null}
+                                                        >
+                                                            Close
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            )}
                                             {cancelPromptFor === order.accountNumber && (
                                                 <div className="space-y-2 rounded-md border border-rose-200 dark:border-rose-900/50 p-2">
                                                     <textarea
@@ -486,6 +545,25 @@ export default function EmployeeMagentaPage() {
                                                     </div>
                                                 </div>
                                             )}
+                                            <div className="flex flex-wrap gap-2">
+                                                <Button
+                                                    variant="success"
+                                                    className="!px-2.5 !py-1.5 !text-xs"
+                                                    onClick={() => openCompletePrompt(order.accountNumber)}
+                                                    isLoading={actionLoading === "complete" && orderActionAccount === order.accountNumber}
+                                                    disabled={actionLoading !== null}
+                                                >
+                                                    Complete Order
+                                                </Button>
+                                                <Button
+                                                    variant="danger"
+                                                    className="!px-2.5 !py-1.5 !text-xs"
+                                                    onClick={() => openCancelPrompt(order.accountNumber)}
+                                                    disabled={actionLoading !== null}
+                                                >
+                                                    Cancel Order
+                                                </Button>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -500,6 +578,7 @@ export default function EmployeeMagentaPage() {
                             {viewData.cancellations.length === 0 && <p className="text-sm text-rose-700/80 dark:text-rose-300/80">No cancelled orders.</p>}
                             {viewData.cancellations.map((item, index) => (
                                 <div key={`${item.phoneNumber}-${item.cancelledDate}-${index}`} className="rounded-lg border border-rose-200 dark:border-rose-900/40 p-3 bg-white/70 dark:bg-black/10">
+                                    <p className="text-sm font-semibold text-rose-900 dark:text-rose-200">Customer: {item.customerName || "—"}</p>
                                     <p className="text-sm font-semibold text-rose-900 dark:text-rose-200">Phone: {item.phoneNumber}</p>
                                     <p className="text-xs text-rose-800/80 dark:text-rose-200/80">Lines: {item.numberOfLines}</p>
                                     <p className="text-xs text-rose-800/80 dark:text-rose-200/80">Cancelled By: {item.cancelledEmployeeName || "—"}</p>
@@ -517,7 +596,9 @@ export default function EmployeeMagentaPage() {
                             {viewData.successOrders.length === 0 && <p className="text-sm text-emerald-700/80 dark:text-emerald-300/80">No completed orders.</p>}
                             {viewData.successOrders.map((item, index) => (
                                 <div key={`${item.phoneNumber}-${item.completedDate}-${index}`} className="rounded-lg border border-emerald-200 dark:border-emerald-900/40 p-3 bg-white/70 dark:bg-black/10">
+                                    <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">Customer: {item.customerName || "—"}</p>
                                     <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">Phone: {item.phoneNumber}</p>
+                                    <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">T-Mobile Temp #: {item.temporaryNumber || "—"}</p>
                                     <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">Lines: {item.numberOfLines}</p>
                                     <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">Completed By: {item.completedEmployeeName || "—"}</p>
                                     <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">Date: {asDisplayDate(item.completedDate)}</p>
