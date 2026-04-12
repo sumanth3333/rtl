@@ -8,6 +8,14 @@ type Tab = "assurant" | "customer";
 
 const formatDateTime = (val?: string) => val || "—";
 const formatCurrency = (val?: number | null) => (typeof val === "number" ? `$${val.toFixed(2)}` : "—");
+const formatInfoField = (actor?: string, date?: string) => {
+    const actorText = actor && actor.trim() ? actor : "—";
+    const dateText = date && date.trim() ? date : "—";
+    if (actorText === "—" && dateText === "—") {
+        return "—";
+    }
+    return `${actorText} | ${dateText}`;
+};
 
 export default function OwnerClaimsReturnsPage() {
     const { companyName } = useOwner();
@@ -125,12 +133,9 @@ export default function OwnerClaimsReturnsPage() {
                                                             <th className="px-3 py-2 text-left">Customer</th>
                                                             <th className="px-3 py-2 text-left">Phone</th>
                                                             <th className="px-3 py-2 text-left">Claim Info</th>
-                                                            <th className="px-3 py-2 text-left">Received By</th>
-                                                            <th className="px-3 py-2 text-left">Label By</th>
-                                                            <th className="px-3 py-2 text-left">Return By</th>
-                                                            <th className="px-3 py-2 text-left">Received</th>
-                                                            <th className="px-3 py-2 text-left">Label</th>
-                                                            <th className="px-3 py-2 text-left">Returned</th>
+                                                            <th className="px-3 py-2 text-left">Received Info</th>
+                                                            <th className="px-3 py-2 text-left">Label Info</th>
+                                                            <th className="px-3 py-2 text-left">Return Info</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -173,14 +178,11 @@ export default function OwnerClaimsReturnsPage() {
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{row.customerName}</td>
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{row.customerNumber}</td>
                                                                 <td className="px-3 py-2 text-gray-700 dark:text-gray-200">
-                                                                    {`${row.claimedBy} | ${formatDateTime(row.claimedDate)}`}
+                                                                    {formatInfoField(row.claimedBy, row.claimedDate)}
                                                                 </td>
-                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{row.receivedBy}</td>
-                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{row.labelBy}</td>
-                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{row.returnBy}</td>
-                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatDateTime(row.receivedDate)}</td>
-                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatDateTime(row.labelCreatedDate)}</td>
-                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatDateTime(row.returnedDate)}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatInfoField(row.receivedBy, row.receivedDate)}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatInfoField(row.labelBy, row.labelCreatedDate)}</td>
+                                                                <td className="px-3 py-2 text-gray-700 dark:text-gray-200">{formatInfoField(row.returnBy, row.returnedDate)}</td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
