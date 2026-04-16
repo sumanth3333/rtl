@@ -1,11 +1,13 @@
 "use client";
 
 import ChangePasswordForm from "@/components/owner/settings/ChangePasswordForm";
+import DealerInventoryCommissionForm from "@/components/owner/settings/DealerInventoryCommissionForm";
 import NotificationPreferences from "@/components/owner/settings/NotificationPreferences";
 import { useState } from "react";
 
 const tabs = [
     { key: "changePassword", label: "Change Password" },
+    { key: "inventoryCommission", label: "Dealer Per Box Commission" },
     { key: "notifications", label: "Notification Preferences" },
 ];
 
@@ -33,6 +35,7 @@ export default function SettingsPage() {
                 </div>
 
                 {activeTab === "changePassword" && <ChangePasswordForm />}
+                {activeTab === "inventoryCommission" && <DealerInventoryCommissionForm />}
                 {activeTab === "notifications" && <NotificationPreferences />}
             </div>
         </div>

@@ -2,16 +2,28 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useOwner } from "@/hooks/useOwner";
-import { fetchRebates } from "@/services/owner/rebatesService";
-import { StoreRebateReport } from "@/types/rebates";
+import { fetchRebates, fetchWeeklyRebatesSummary } from "@/services/owner/rebatesService";
+import { StoreRebateReport, WeeklyRebateStoreSummary } from "@/types/rebates";
 import SummaryStatCard from "@/components/owner/rebates/SummaryStatCard";
 import StoreRebateCard from "@/components/owner/rebates/StoreRebateCard";
+import WeeklySummaryTable from "@/components/owner/rebates/WeeklySummaryTable";
 
-const currency = (value: number) =>
-    value.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
+const toSafeNumber = (value: unknown): number => {
+    if (typeof value === "number") {
+        return Number.isFinite(value) ? value : 0;
+    }
+    if (typeof value === "string") {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : 0;
+    }
+    return 0;
+};
+
+const currency = (value: unknown) =>
+    toSafeNumber(value).toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
 
 const sumReducer = (items: StoreRebateReport[], field: keyof StoreRebateReport["detailedReportSummary"]) =>
-    items.reduce((acc, item) => acc + (item.detailedReportSummary[field] as number), 0);
+    items.reduce((acc, item) => acc + toSafeNumber(item.detailedReportSummary[field]), 0);
 
 export default function RebatesPage() {
     const { companyName } = useOwner();
@@ -33,17 +45,23 @@ export default function RebatesPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [reports, setReports] = useState<StoreRebateReport[]>([]);
+    const [weeklySummary, setWeeklySummary] = useState<WeeklyRebateStoreSummary[]>([]);
 
     const loadData = useCallback(async () => {
         if (!companyName || !startDate || !endDate) { return; }
         setLoading(true);
         setError(null);
         try {
-            const data = await fetchRebates(companyName, startDate, endDate);
-            setReports(Array.isArray(data) ? data : []);
+            const [rebatesData, weeklyData] = await Promise.all([
+                fetchRebates(companyName, startDate, endDate),
+                fetchWeeklyRebatesSummary(companyName),
+            ]);
+            setReports(Array.isArray(rebatesData) ? rebatesData : []);
+            setWeeklySummary(Array.isArray(weeklyData) ? weeklyData : []);
         } catch (err: any) {
             setError(err?.message || "Failed to load rebates.");
             setReports([]);
+            setWeeklySummary([]);
         } finally {
             setLoading(false);
         }
@@ -112,6 +130,8 @@ export default function RebatesPage() {
                     {error}
                 </div>
             )}
+
+            <WeeklySummaryTable summaries={weeklySummary} currency={currency} />
 
             {overall && (
                 <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

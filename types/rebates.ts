@@ -29,3 +29,20 @@ export interface StoreRebateReport {
     store: RebateStoreInfo;
     detailedReportSummary: RebateSummary;
 }
+
+export interface WeeklyRebateDaySummary {
+    postDate: string;
+    batchStartDate: string;
+    batchEndDate: string;
+    totalCost: number;
+    dealerDeduction: number;
+    expectedRebates: number;
+}
+
+export interface WeeklyRebateStoreSummary {
+    store: RebateStoreInfo;
+    weekStartDate: string;
+    weekEndDate: string;
+    tuesdaySummary: WeeklyRebateDaySummary;
+    fridaySummary: WeeklyRebateDaySummary;
+}

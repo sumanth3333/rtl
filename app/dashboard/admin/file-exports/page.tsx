@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import Button from "@/components/ui/Button";
-import { fetchAllCompanies, fetchUploadedReports, fetchRetentionSuggestions, uploadFileExport } from "@/services/admin/adminService";
+import { fetchAllCompanies, fetchReportUploadSuggestions, fetchRetentionGroupedSuggestions, fetchUploadedReports, uploadFileExport } from "@/services/admin/adminService";
 import { FileExportResult, FileExportType, SimpleCompany, UploadedReport } from "@/types/fileExportTypes";
-import { RetentionSuggestionGroup, RetentionSuggestionItem } from "@/types/retentionSuggestion";
+import { ReportUploadSuggestionGroup, ReportUploadSuggestionItem, ReportUploadSuggestionStatus } from "@/types/retentionSuggestion";
 import DateRangePopover from "./components/DateRangePopover";
 import FileUploadBox from "./components/FileUploadBox";
 // import UploadProgressBar from "./components/UploadProgressBar";
@@ -93,7 +93,7 @@ export default function FileExportsPage() {
     const [uploadsLoading, setUploadsLoading] = useState(false);
     const [sortAsc, setSortAsc] = useState(true);
 
-    const [retentionSuggestions, setRetentionSuggestions] = useState<RetentionSuggestionItem[]>([]);
+    const [reportSuggestions, setReportSuggestions] = useState<ReportUploadSuggestionItem[]>([]);
     const [suggestionsLoading, setSuggestionsLoading] = useState(false);
 
     // Fetch companies
@@ -171,36 +171,95 @@ export default function FileExportsPage() {
         setForm((prev) => ({ ...prev, [field]: value }));
     };
 
-    // Fetch retention upload suggestions per company
+    const statusClassName = (status?: ReportUploadSuggestionStatus) => {
+        if (status === "OVERDUE") {
+            return "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-100";
+        }
+        if (status === "PENDING" || status === "UPCOMING") {
+            return "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-100";
+        }
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-100";
+    };
+
+    const toLabel = (raw?: string) => {
+        if (!raw) { return "-"; }
+        return raw.replace(/_/g, " ");
+    };
+
+    const normalizeLegacyRetention = (item: ReportUploadSuggestionItem): ReportUploadSuggestionItem => ({
+        ...item,
+        reportType: item.reportType || "Retention_Report",
+        startDate: item.startDate || item.fromDate,
+        endDate: item.endDate || item.toDate,
+        expectedUploadDate: item.expectedUploadDate || item.suggestedUploadDate || item.uploadedDate || undefined,
+    });
+
+    // Fetch report upload suggestions per company
     useEffect(() => {
         const loadSuggestions = async () => {
             if (!form.companyName) {
-                setRetentionSuggestions([]);
+                setReportSuggestions([]);
                 return;
             }
             setSuggestionsLoading(true);
             try {
-                const groups: RetentionSuggestionGroup[] = await fetchRetentionSuggestions();
+                const [groups, legacyRetentionGroups] = await Promise.all([
+                    fetchReportUploadSuggestions(),
+                    fetchRetentionGroupedSuggestions(),
+                ]);
                 const match = groups.find((g) => g.companyName === form.companyName);
-                if (match) {
-                    const items: RetentionSuggestionItem[] = [
-                        ...(match.overdue || []),
-                        ...(match.upcoming || []),
-                        ...(match.uploaded || []),
-                    ].filter(Boolean as any);
+                const legacyMatch = legacyRetentionGroups.find((g) => g.companyName === form.companyName);
+                if (match || legacyMatch) {
+                    const withStatus = (items: ReportUploadSuggestionItem[] | undefined, defaultStatus: ReportUploadSuggestionStatus) =>
+                        (items || []).map((item) => ({ ...item, status: item.status || defaultStatus }));
 
-                    items.sort((a, b) => {
-                        const aDate = a.suggestedUploadDate || a.uploadedDate || "";
-                        const bDate = b.suggestedUploadDate || b.uploadedDate || "";
+                    const itemsFromNewApi: ReportUploadSuggestionItem[] = [
+                        ...withStatus(match?.overdue, "OVERDUE"),
+                        ...withStatus(match?.pending, "PENDING"),
+                        ...withStatus(match?.upcoming, "UPCOMING"),
+                        ...withStatus(match?.uploaded, "UPLOADED"),
+                    ];
+                    const itemsFromLegacyRetention: ReportUploadSuggestionItem[] = [
+                        ...withStatus(legacyMatch?.overdue, "OVERDUE"),
+                        ...withStatus(legacyMatch?.pending, "PENDING"),
+                        ...withStatus(legacyMatch?.upcoming, "UPCOMING"),
+                        ...withStatus(legacyMatch?.uploaded, "UPLOADED"),
+                    ].map(normalizeLegacyRetention);
+
+                    const merged = [...itemsFromNewApi, ...itemsFromLegacyRetention];
+                    const deduped = merged.filter((item, idx, arr) => {
+                        const key = `${item.reportType || ""}|${item.startDate || ""}|${item.endDate || ""}|${item.status || ""}|${item.expectedUploadDate || ""}`;
+                        return arr.findIndex((candidate) => (
+                            `${candidate.reportType || ""}|${candidate.startDate || ""}|${candidate.endDate || ""}|${candidate.status || ""}|${candidate.expectedUploadDate || ""}`
+                        ) === key) === idx;
+                    });
+
+                    deduped.sort((a, b) => {
+                        const aDate = a.expectedUploadDate || a.suggestedUploadDate || a.uploadedDate || "";
+                        const bDate = b.expectedUploadDate || b.suggestedUploadDate || b.uploadedDate || "";
                         return aDate.localeCompare(bDate);
                     });
 
-                    setRetentionSuggestions(items);
+                    const items: ReportUploadSuggestionItem[] = deduped.map((item) => ({
+                        ...item,
+                        reportType: item.reportType || (item.uploadType === "RETENTION" ? "Retention_Report" : item.uploadType),
+                        startDate: item.startDate || item.fromDate,
+                        endDate: item.endDate || item.toDate,
+                        expectedUploadDate: item.expectedUploadDate || item.suggestedUploadDate || item.uploadedDate || undefined,
+                    }));
+
+                    items.sort((a, b) => {
+                        const aDate = a.expectedUploadDate || a.suggestedUploadDate || a.uploadedDate || "";
+                        const bDate = b.expectedUploadDate || b.suggestedUploadDate || b.uploadedDate || "";
+                        return aDate.localeCompare(bDate);
+                    });
+
+                    setReportSuggestions(items);
                 } else {
-                    setRetentionSuggestions([]);
+                    setReportSuggestions([]);
                 }
             } catch (error) {
-                setRetentionSuggestions([]);
+                setReportSuggestions([]);
             } finally {
                 setSuggestionsLoading(false);
             }
@@ -309,45 +368,42 @@ export default function FileExportsPage() {
                 {form.companyName && (
                     <div className="mt-4 rounded-lg border border-indigo-100 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-900/30 p-3 space-y-2">
                         <div className="flex items-center justify-between">
-                            <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-100">Retention upload suggestions</p>
+                            <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-100">Report upload suggestions</p>
                             <span className="text-xs text-indigo-800 dark:text-indigo-200">
-                                {suggestionsLoading ? "Loading..." : `${retentionSuggestions.length} pending`}
+                                {suggestionsLoading ? "Loading..." : `${reportSuggestions.length} records`}
                             </span>
                         </div>
-                        {retentionSuggestions.length === 0 ? (
-                            <p className="text-xs text-indigo-900 dark:text-indigo-100">No upcoming retention uploads pending.</p>
+                        {reportSuggestions.length === 0 ? (
+                            <p className="text-xs text-indigo-900 dark:text-indigo-100">No report upload suggestions available.</p>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="min-w-full text-xs text-left">
                                     <thead className="text-indigo-900 dark:text-indigo-100">
                                         <tr>
-                                            <th className="px-2 py-1">Month</th>
-                                            <th className="px-2 py-1">Period</th>
+                                            <th className="px-2 py-1">Report</th>
+                                            <th className="px-2 py-1">Start Date</th>
+                                            <th className="px-2 py-1">End Date</th>
+                                            <th className="px-2 py-1">Expected Upload</th>
                                             <th className="px-2 py-1">Status</th>
-                                            <th className="px-2 py-1">From</th>
-                                            <th className="px-2 py-1">To</th>
-                                            <th className="px-2 py-1">Suggested Upload</th>
+                                            <th className="px-2 py-1">Message</th>
                                         </tr>
                                     </thead>
                                     <tbody className="text-indigo-950 dark:text-indigo-50">
-                                        {retentionSuggestions.map((item, idx) => (
-                                            <tr key={`${item.month}-${item.uploadType}-${idx}`} className="odd:bg-white even:bg-indigo-50/50 dark:odd:bg-indigo-900/40 dark:even:bg-indigo-900/20">
-                                                <td className="px-2 py-1">{item.month}</td>
-                                                <td className="px-2 py-1">{item.uploadType}</td>
+                                        {reportSuggestions.map((item, idx) => (
+                                            <tr
+                                                key={`${item.reportType || item.month || "report"}-${item.startDate || item.fromDate || idx}-${idx}`}
+                                                className="odd:bg-white even:bg-indigo-50/50 dark:odd:bg-indigo-900/40 dark:even:bg-indigo-900/20"
+                                            >
+                                                <td className="px-2 py-1">{toLabel(item.reportType || item.uploadType)}</td>
+                                                <td className="px-2 py-1">{item.startDate || item.fromDate || "-"}</td>
+                                                <td className="px-2 py-1">{item.endDate || item.toDate || "-"}</td>
+                                                <td className="px-2 py-1">{item.expectedUploadDate || item.suggestedUploadDate || item.uploadedDate || "-"}</td>
                                                 <td className="px-2 py-1">
-                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                                                        item.status === "OVERDUE"
-                                                            ? "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-100"
-                                                            : item.status === "UPCOMING"
-                                                                ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-100"
-                                                                : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-100"
-                                                    }`}>
-                                                        {item.status}
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${statusClassName(item.status)}`}>
+                                                        {item.status || "UPLOADED"}
                                                     </span>
                                                 </td>
-                                                <td className="px-2 py-1">{item.fromDate}</td>
-                                                <td className="px-2 py-1">{item.toDate}</td>
-                                                <td className="px-2 py-1">{item.suggestedUploadDate}</td>
+                                                <td className="px-2 py-1">{item.message || "-"}</td>
                                             </tr>
                                         ))}
                                     </tbody>

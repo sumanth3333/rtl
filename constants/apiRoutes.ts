@@ -10,11 +10,18 @@ export const API_ROUTES = {
     },
     LAST_UPLOADED_REPORTS: "/import/lastUploadedReportsForCompany",
     VIEW_REBATES: "/import/viewRebates",
+    WEEKLY_REBATES_SUMMARY: "/import/weekly-summary",
     RETENTION_COMPANY: "/import/accounts/92-days-ago",
     RETENTION_STORE: "/store/accounts/92-days-ago",
     RETENTION_SAVE: "/retention/save",
     RETENTION_REPORT: "/import/retentionReport",
     RETENTION_SUGGESTIONS: "/import/retention-grouped-suggestions",
+    REPORT_UPLOAD_SUGGESTIONS: "/admin/company/report-upload-suggestions",
+    DEALER_INVENTORY_COMMISSION: {
+        SAVE: "/dealer-inventory-commission/save",
+        UPDATE: "/dealer-inventory-commission/update",
+        GET: "/dealer-inventory-commission/view",
+    },
     RTPOS_REPORT: "/eodReport/viewRtposReport",
     ASSURANT: {
         SAVE_CLAIM: "/assurant/saveClaim",

@@ -2,7 +2,7 @@ import apiClient from "../api/apiClient";
 import { Company } from "@/schemas/schema";
 import { API_ROUTES } from "@/constants/apiRoutes";
 import { FileExportPayload, SimpleCompany, UploadedReport } from "@/types/fileExportTypes";
-import { RetentionSuggestionGroup } from "@/types/retentionSuggestion";
+import { ReportUploadSuggestionGroup } from "@/types/retentionSuggestion";
 import { AxiosProgressEvent } from "axios";
 
 export const createCompany = async (companyData: Company) => {
@@ -53,7 +53,12 @@ export const fetchUploadedReports = async (companyName: string, start?: string, 
     return response.data || [];
 };
 
-export const fetchRetentionSuggestions = async (): Promise<RetentionSuggestionGroup[]> => {
+export const fetchReportUploadSuggestions = async (): Promise<ReportUploadSuggestionGroup[]> => {
+    const response = await apiClient.get(API_ROUTES.REPORT_UPLOAD_SUGGESTIONS);
+    return response.data ?? [];
+};
+
+export const fetchRetentionGroupedSuggestions = async (): Promise<ReportUploadSuggestionGroup[]> => {
     const response = await apiClient.get(API_ROUTES.RETENTION_SUGGESTIONS);
     return response.data ?? [];
 };
