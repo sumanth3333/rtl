@@ -6,9 +6,7 @@ import { usePathname } from "next/navigation";
 export default function PaycheckNavbar() {
     const pathname = usePathname();
 
-    const basePath = pathname.includes("/dashboard/owner/paychecks")
-        ? "/dashboard/owner/paychecks"
-        : "/paychecks";
+    const basePath = "/dashboard/owner/paychecks";
 
     return (
         <nav className="relative w-full bg-white dark:bg-gray-900 shadow-md border-b border-gray-300 dark:border-gray-700">

@@ -51,6 +51,15 @@ const verifyJwt = async (jwt: string, secretKey: Uint8Array) => {
     return JSON.parse(payloadJson) as Record<string, unknown>;
 };
 
+const normalizeRole = (value: unknown): string | null => {
+    if (typeof value !== "string") { return null; }
+
+    const upper = value.trim().toUpperCase();
+    if (!upper) { return null; }
+
+    return upper.startsWith("ROLE_") ? upper.replace(/^ROLE_/, "") : upper;
+};
+
 const isRoleAllowedForPath = (role: string, pathname: string) => {
     // Allow non-dashboard paths configured in matcher (profile/settings) for any logged-in role
     if (pathname.startsWith("/profile") || pathname.startsWith("/settings")) { return true; }
@@ -94,15 +103,18 @@ export async function middleware(request: NextRequest) {
         })();
 
         const payload = await verifyJwt(jwt!, secretKey);
-        const role = payload["ROLE"] as string;
+        const roleFromPayload =
+            normalizeRole(payload["ROLE"]) ??
+            normalizeRole(payload["role"]) ??
+            normalizeRole(request.cookies.get("role")?.value);
 
-        if (!validRoles.includes(role)) {
+        if (!roleFromPayload || !validRoles.includes(roleFromPayload)) {
             return NextResponse.redirect(new URL("/unauthorized", request.url));
         }
 
         // Enforce role-based route access
         const path = request.nextUrl.pathname;
-        if (!isRoleAllowedForPath(role, path)) {
+        if (!isRoleAllowedForPath(roleFromPayload, path)) {
             return NextResponse.redirect(new URL("/unauthorized", request.url));
         }
 

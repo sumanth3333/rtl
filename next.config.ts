@@ -1,6 +1,6 @@
 const withPWA = require("next-pwa")({
   dest: "public",
-  register: true,
+  register: false,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development", // Enable only in production
   // Some Next.js internal manifests are not served at runtime; exclude them to avoid workbox install errors

@@ -1,9 +1,22 @@
 "use client"; // ✅ This makes it a Client Component
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export default function ServiceWorkerRegister() {
+  const pathname = usePathname();
+
   useEffect(() => {
+    const isAuthRoute = pathname.startsWith("/auth");
+
+    // Never run service worker on auth routes; keep login flow network-fresh.
+    if (isAuthRoute && "serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => registration.unregister());
+      });
+      return;
+    }
+
     // If not production, proactively unregister any SWs (avoids dev 404s for build manifests)
     if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) {
       navigator.serviceWorker?.getRegistrations().then((registrations) => {
@@ -44,7 +57,7 @@ export default function ServiceWorkerRegister() {
     };
 
     register();
-  }, []);
+  }, [pathname]);
 
   return null; // No UI needed, just runs the effect
 }

@@ -2,6 +2,13 @@ import { cookies } from "next/headers";
 import { jwtDecode } from "jwt-decode";
 import { NextResponse } from "next/server";
 
+const normalizeRole = (value: unknown): string | null => {
+    if (typeof value !== "string") { return null; }
+    const upper = value.trim().toUpperCase();
+    if (!upper) { return null; }
+    return upper.startsWith("ROLE_") ? upper.replace(/^ROLE_/, "") : upper;
+};
+
 export async function GET() {
     try {
         const cookieStore = await cookies();
@@ -12,11 +19,12 @@ export async function GET() {
         }
 
         try {
-            const decodedToken: { sub: string; ROLE: string } = jwtDecode(accessToken);
+            const decodedToken: { sub?: string; ROLE?: string; role?: string } = jwtDecode(accessToken);
+            const role = normalizeRole(decodedToken.ROLE ?? decodedToken.role);
 
             return NextResponse.json({
-                loginEmail: decodedToken.sub, // ✅ Extracted from JWT
-                role: decodedToken.ROLE, // ✅ Extracted from JWT
+                loginEmail: decodedToken.sub ?? null, // ✅ Extracted from JWT
+                role, // ✅ normalized role (OWNER/ADMIN/EMPLOYEE/MANAGER)
                 accessToken, // ✅ Include token if needed for further API calls
             });
         } catch (error) {
