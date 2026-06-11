@@ -72,6 +72,7 @@ export const getUser = async () => {
     try {
         const response = await fetch("/api/auth/me", {
             method: "GET",
+            cache: "no-store",
             credentials: "include", // ✅ Ensures cookies are sent
             headers: { "Content-Type": "application/json" },
         });

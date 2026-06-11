@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { getUser, logoutAPI } from "@/services/auth/authService";
+import { getUser, logoutAPI, refreshToken } from "@/services/auth/authService";
 import { AuthContextType } from "@/types/authTypes";
+import { AUTH_BROADCAST_CHANNEL, AUTH_SYNC_EVENT_KEY, AuthSyncEventType } from "@/constants/authSync";
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -19,28 +20,111 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     return upper.startsWith("ROLE_") ? upper.replace(/^ROLE_/, "") : upper;
   };
 
+  const emitAuthEvent = (type: AuthSyncEventType) => {
+    if (typeof window === "undefined") { return; }
+
+    const payload = JSON.stringify({ type, at: Date.now() });
+
+    try {
+      localStorage.setItem(AUTH_SYNC_EVENT_KEY, payload);
+    } catch {
+      // no-op
+    }
+
+    try {
+      if ("BroadcastChannel" in window) {
+        const channel = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+        channel.postMessage({ type, at: Date.now() });
+        channel.close();
+      }
+    } catch {
+      // no-op
+    }
+  };
+
+  const clearAuthState = useCallback(() => {
+    setIsAuthenticated(false);
+    setUsername(null);
+    setRole(null);
+    setIsLoading(false);
+  }, []);
+
   // ✅ Function to fetch user data and update state
   const fetchUser = useCallback(async () => {
-    const user = await getUser();
+    let user = await getUser();
+    let normalizedRole = normalizeRole(user?.role);
 
-    const normalizedRole = normalizeRole(user?.role);
+    // New tabs can have only refresh token available; restore access token once and retry.
+    if (!user?.loginEmail || !normalizedRole) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        user = await getUser();
+        normalizedRole = normalizeRole(user?.role);
+      }
+    }
 
     if (user?.loginEmail && normalizedRole) {
       setUsername(user.loginEmail.split("@")[0]);
       setRole(normalizedRole);
       setIsAuthenticated(true);
+      setIsLoading(false);
     } else {
-      setIsAuthenticated(false);
-      setUsername(null);
-      setRole(null);
+      clearAuthState();
     }
-    setIsLoading(false);
-  }, []);
+  }, [clearAuthState]);
 
   // ✅ Automatically fetch user on mount
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") { return; }
+
+    const handleAuthEvent = (eventType: AuthSyncEventType) => {
+      if (eventType === "logout") {
+        clearAuthState();
+        return;
+      }
+      fetchUser();
+    };
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== AUTH_SYNC_EVENT_KEY || !event.newValue) { return; }
+      try {
+        const parsed = JSON.parse(event.newValue) as { type?: AuthSyncEventType };
+        if (!parsed.type) { return; }
+        handleAuthEvent(parsed.type);
+      } catch {
+        // no-op
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+
+    let channel: BroadcastChannel | null = null;
+    if ("BroadcastChannel" in window) {
+      channel = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+      channel.onmessage = (message: MessageEvent<{ type?: AuthSyncEventType }>) => {
+        const eventType = message.data?.type;
+        if (!eventType) { return; }
+        handleAuthEvent(eventType);
+      };
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchUser();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      document.removeEventListener("visibilitychange", onVisibility);
+      channel?.close();
+    };
+  }, [clearAuthState, fetchUser]);
 
   // ✅ Logout Function
   const logout = async () => {
@@ -61,10 +145,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         });
 
         // ✅ Reset Authentication State
-        setIsAuthenticated(false);
-        setUsername(null);
-        setRole(null);
-        setIsLoading(false);
+        clearAuthState();
+        emitAuthEvent("logout");
       }
       return response;
     } catch (error) {

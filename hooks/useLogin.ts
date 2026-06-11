@@ -8,6 +8,7 @@ import { useEmployee } from "./useEmployee";
 import { AxiosError } from "axios";
 import { login } from "@/services/auth/authService";
 import { isPhoneDevice } from "@/utils/deviceType";
+import { AUTH_BROADCAST_CHANNEL, AUTH_SYNC_EVENT_KEY } from "@/constants/authSync";
 
 const loginSchema = z.object({
     userName: z.string().min(6, "Valid Username or Store ID is required"),
@@ -53,6 +54,21 @@ export function useLogin(onLoginSuccess: () => void) {
             const response = await login(data.userName, data.password);
             if (response.status === 200) {
                 await refreshAuth();
+                const payload = JSON.stringify({ type: "login", at: Date.now() });
+                try {
+                    localStorage.setItem(AUTH_SYNC_EVENT_KEY, payload);
+                } catch {
+                    // no-op
+                }
+                try {
+                    if ("BroadcastChannel" in window) {
+                        const channel = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+                        channel.postMessage({ type: "login", at: Date.now() });
+                        channel.close();
+                    }
+                } catch {
+                    // no-op
+                }
                 if (response.data.loginPerson) {
                     setOwnerData(response.data.loginPerson, response.data.loginEmail);
                 } else if (response.data.employee) {
