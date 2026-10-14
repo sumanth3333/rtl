@@ -83,4 +83,10 @@ export const API_ROUTES = {
         SERVER: "/admin/monitoring/server",
         SERVER_RESTART: "/admin/monitoring/server/restart",
     },
+    AWS_BILLING: {
+        OVERVIEW: "/admin/aws-billing/overview",
+        SERVICES: "/admin/aws-billing/services",
+        USAGE: "/admin/aws-billing/usage",
+        INVOICES: "/admin/aws-billing/invoices",
+    },
 };

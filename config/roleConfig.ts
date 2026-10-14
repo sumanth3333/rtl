@@ -16,6 +16,7 @@ import {
     CalendarClock,
     CalendarRange,
     Clock3,
+    CloudCog,
     FileText,
     FolderOpen,
     KeyRound,
@@ -91,6 +92,12 @@ export const sidebarLinks: Record<Role, SidebarLink[]> = {
             name: "Support Requests",
             path: "/dashboard/admin/contact-us",
             icon: LifeBuoy,
+            section: "Monitoring"
+        },
+        {
+            name: "AWS Billing",
+            path: "/dashboard/admin/aws-billing",
+            icon: CloudCog,
             section: "Monitoring"
         },
         {
