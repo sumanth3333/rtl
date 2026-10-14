@@ -42,7 +42,7 @@ export default function MtdMetricsCards({ metrics, loading }: Props) {
             <div className="grid grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-4">
                 {cards.map((card) => {
                     const value = metrics?.[card.key as keyof MtdMetrics];
-                    const display = card.key === "totalAccessories" ? fmtMoney(value as number | undefined) : fmt(value as number | undefined);
+                    const isMigrations = card.key === "totalMigrations";
 
                     return (
                         <div
@@ -52,9 +52,26 @@ export default function MtdMetricsCards({ metrics, loading }: Props) {
                             <div className={`absolute inset-0 bg-gradient-to-br ${card.accent}`} aria-hidden />
                             <div className="relative space-y-1">
                                 <p className="text-[9px] sm:text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">{card.label}</p>
-                                <p className={`text-sm sm:text-base lg:text-xl font-semibold tabular-nums ${card.text}`}>
-                                    {display}
-                                </p>
+                                {isMigrations ? (
+                                    <div className="flex gap-3 sm:gap-4">
+                                        <div>
+                                            <p className={`text-sm sm:text-base lg:text-xl font-semibold tabular-nums ${card.text}`}>
+                                                {fmt((value as MtdMetrics["totalMigrations"] | undefined)?.accounts)}
+                                            </p>
+                                            <p className="text-[8px] sm:text-[9px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Accts</p>
+                                        </div>
+                                        <div>
+                                            <p className={`text-sm sm:text-base lg:text-xl font-semibold tabular-nums ${card.text}`}>
+                                                {fmt((value as MtdMetrics["totalMigrations"] | undefined)?.lines)}
+                                            </p>
+                                            <p className="text-[8px] sm:text-[9px] uppercase tracking-wide text-gray-500 dark:text-gray-400">Lines</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className={`text-sm sm:text-base lg:text-xl font-semibold tabular-nums ${card.text}`}>
+                                        {card.key === "totalAccessories" ? fmtMoney(value as number | undefined) : fmt(value as number | undefined)}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     );

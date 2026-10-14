@@ -3,16 +3,26 @@
 import EodForm from "@/components/employee/EodForm";
 import { useEmployee } from "@/hooks/useEmployee";
 import apiClient from "@/services/api/apiClient";
-import { getEodDetails } from "@/services/employee/employeeService";
+import { getEodDetails, fetchLateOpeningStatus } from "@/services/employee/employeeService";
 import { EodReport } from "@/types/employeeSchema";
+import { LateOpeningStatus } from "@/types/lateOpeningTypes";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+const LATE_OPENING_POLL_INTERVAL_MS = 15000;
+
+const isEodSubmissionAllowed = (status: LateOpeningStatus) =>
+    status.allowEodSubmission === true || status.allowEodForNonDelivery === true;
 
 export default function LogEodReportPage() {
     const [showInstructionsModal, setShowInstructionsModal] = useState(true);
     const { employee, store } = useEmployee();
     const [hasInProgressImeis, setHasInProgressImeis] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [lateOpeningLoading, setLateOpeningLoading] = useState(true);
+    const [lateOpeningBlocked, setLateOpeningBlocked] = useState(false);
+    const [lateOpeningStatus, setLateOpeningStatus] = useState<LateOpeningStatus | null>(null);
+    const [checkingAgain, setCheckingAgain] = useState(false);
     const router = useRouter();
     const [eodFormValues, setEodFormValues] = useState<EodReport>({
         store: { dealerStoreId: store?.dealerStoreId ?? "" },
@@ -66,24 +76,55 @@ export default function LogEodReportPage() {
         checkInProgressImeis();
     }, [store?.dealerStoreId, router]);
 
+    // ✅ Verify late-opening status before allowing the EOD report to be submitted
+    const checkLateOpeningStatus = useCallback(async () => {
+        if (!store?.dealerStoreId || !employee?.employeeNtid) { return; }
+        try {
+            const status = await fetchLateOpeningStatus(employee.employeeNtid, store.dealerStoreId);
+            setLateOpeningStatus(status);
+            setLateOpeningBlocked(!isEodSubmissionAllowed(status));
+        } catch (err) {
+            console.error("❌ Failed to check late-opening status:", err);
+        } finally {
+            setLateOpeningLoading(false);
+            setCheckingAgain(false);
+        }
+    }, [store?.dealerStoreId, employee?.employeeNtid]);
 
-    // ✅ Fetch EOD details only if there are no pending IMEIs
     useEffect(() => {
-        if (!hasInProgressImeis && store?.dealerStoreId && employee?.employeeNtid) {
+        checkLateOpeningStatus();
+    }, [checkLateOpeningStatus]);
+
+    // ✅ While blocked (waiting on the employee's WhatsApp reply), keep polling for an update
+    useEffect(() => {
+        if (!lateOpeningBlocked) { return; }
+        const interval = setInterval(checkLateOpeningStatus, LATE_OPENING_POLL_INTERVAL_MS);
+        return () => clearInterval(interval);
+    }, [lateOpeningBlocked, checkLateOpeningStatus]);
+
+    const handleCheckAgain = () => {
+        setCheckingAgain(true);
+        checkLateOpeningStatus();
+    };
+
+
+    // ✅ Fetch EOD details only if there are no pending IMEIs and the employee isn't blocked
+    useEffect(() => {
+        if (!hasInProgressImeis && !lateOpeningBlocked && store?.dealerStoreId && employee?.employeeNtid) {
             getEodDetails(store.dealerStoreId, employee.employeeNtid)
                 .then((data) => setEodFormValues((prev) => ({ ...prev, ...data })))
                 .catch((err) =>
                     console.error("❌ Failed to fetch EOD Report details:", err)
                 );
         }
-    }, [store?.dealerStoreId, employee?.employeeNtid, hasInProgressImeis]);
+    }, [store?.dealerStoreId, employee?.employeeNtid, hasInProgressImeis, lateOpeningBlocked]);
 
     // ✅ Loading state
-    if (loading) {
+    if (loading || lateOpeningLoading) {
         return (
             <div className="flex justify-center items-center h-screen">
                 <p className="text-gray-500 text-lg animate-pulse">
-                    Checking pending IMEIs...
+                    Checking eligibility to submit EOD report...
                 </p>
             </div>
         );
@@ -104,6 +145,46 @@ export default function LogEodReportPage() {
                     <p className="text-sm text-gray-500 mt-3">
                         Redirecting to the Record IMEI page in 3 seconds...
                     </p>
+                </div>
+            </div>
+        );
+    }
+
+    // ✅ Block submission until the late-opening reason has been replied to in WhatsApp
+    if (lateOpeningBlocked) {
+        const deliveryStatus = lateOpeningStatus?.messageDeliveryStatus;
+        const blockMessage =
+            deliveryStatus === "READ"
+                ? "We see you've opened the WhatsApp message. Please send your reply with the reason for the late opening before submitting the report."
+                : "We've sent you a WhatsApp message asking for the reason your store opened late. Please reply to that message before submitting your EOD report.";
+
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50 px-4">
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-red-500 text-center max-w-md mx-auto">
+                    <h2 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-3">
+                        🚫 Late Opening – Reason Required
+                    </h2>
+                    <p className="text-gray-700 dark:text-gray-300">
+                        {blockMessage}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-3">
+                        This page will automatically continue once your reply is received.
+                    </p>
+                    <div className="flex items-center justify-center gap-3 mt-4">
+                        <button
+                            onClick={handleCheckAgain}
+                            disabled={checkingAgain}
+                            className="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-60 rounded-md transition"
+                        >
+                            {checkingAgain ? "Checking..." : "I've Replied – Check Again"}
+                        </button>
+                        <button
+                            onClick={() => router.push("/dashboard/employee")}
+                            className="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition"
+                        >
+                            Go to Home
+                        </button>
+                    </div>
                 </div>
             </div>
         );

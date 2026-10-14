@@ -97,8 +97,12 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
             setEmployee(parsedEmployee);
             setStore(parsedStore);
 
+            // Only worth checking clock-in status when there's an active employee session on
+            // an employee route — stale localStorage data (e.g. after cookie expiry without an
+            // explicit logout) would otherwise trigger an authenticated call on every page,
+            // including /auth/login, causing a redirect loop when that call 401s.
             const today = new Date().toLocaleDateString("en-CA");
-            if (parsedEmployee?.employeeNtid) {
+            if (parsedEmployee?.employeeNtid && window.location.pathname.startsWith("/dashboard/employee")) {
                 fetchClockInStatus(parsedEmployee?.employeeNtid, parsedStore.dealerStoreId, today);
             }
         }

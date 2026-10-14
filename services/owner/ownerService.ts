@@ -1,5 +1,5 @@
 import apiClient from "@/services/api/apiClient";
-import { Employee, EodReport } from "@/types/employeeSchema";
+import { Employee, EodReport, InactiveEmployee } from "@/types/employeeSchema";
 import { Store } from "@/schemas/storeSchema";
 import { AssignedTodo } from "@/types/todosTypes";
 import { EodReportByOwner } from "@/types/ownerTypes";
@@ -35,18 +35,14 @@ export const getEmployees = async (companyName: string): Promise<Employee[]> => 
 };
 
 // ✅ Add store and then refetch stores
+// Errors (e.g. address validation failures) are left to throw so the UI can surface the backend's details.
 export const addStore = async (companyName: string, newStore: Store): Promise<Store[]> => {
-    try {
-        await apiClient.post("/company/storeRegistration", newStore, {
-            headers: { "Content-Type": "application/json" },
-        });
+    await apiClient.post("/company/storeRegistration", newStore, {
+        headers: { "Content-Type": "application/json" },
+    });
 
-        // ✅ After adding a store, refetch all stores
-        return await getStores(companyName);
-    } catch (error) {
-        console.error("❌ Error adding store:", error);
-        return [];
-    }
+    // ✅ After adding a store, refetch all stores
+    return await getStores(companyName);
 };
 
 export const addEmployee = async (companyName: string, newStore: Employee): Promise<Employee[]> => {
@@ -123,6 +119,24 @@ export const updateEmployee = async (companyName: string, employee: Employee): P
     }
 }
 
+// ✅ Fetch inactive employees for a company
+// Errors (e.g. company not found) are left to throw so the UI can surface the backend message.
+export const getInactiveEmployees = async (companyName: string): Promise<InactiveEmployee[]> => {
+    const response = await apiClient.get<InactiveEmployee[]>("/company/inactiveEmployees", {
+        params: { companyName },
+    });
+    return response.data || [];
+};
+
+// ✅ Reactivate an existing inactive employee (does not create a new record)
+export const reactivateEmployee = async (companyName: string, employeeNtid: string): Promise<string> => {
+    const response = await apiClient.put("/company/reactivateEmployee", {
+        companyName,
+        employeeNtid,
+    });
+    return response.data;
+};
+
 export const getWhoIsWorking = async (companyName: string) => {
     try {
         const response = await apiClient.get("/company/whoIsWorking", {
@@ -165,7 +179,10 @@ export type MtdMetrics = {
     totalBts: number;
     totalAccessories: number;
     totalUpgrades: number;
-    totalMigrations: number;
+    totalMigrations: {
+        accounts: number;
+        lines: number;
+    };
     totalFreeLines: number;
 };
 

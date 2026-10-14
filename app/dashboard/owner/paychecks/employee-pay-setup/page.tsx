@@ -11,7 +11,10 @@ export default function EmployeePaySetupPage() {
     const { companyName } = useOwner();
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    // ✅ Keyed by employeeNtid so only the row being saved shows a "Saving..." state
+    const [savingNtid, setSavingNtid] = useState<string | null>(null);
+    // ✅ Prefilled from each employee's maxHours when the backend sends one, otherwise 0
+    const [maxHoursByNtid, setMaxHoursByNtid] = useState<Record<string, number>>({});
 
     useEffect(() => {
         if (!companyName) { return };
@@ -19,6 +22,9 @@ export default function EmployeePaySetupPage() {
         getEmployees(companyName)
             .then((data) => {
                 setEmployees(data);
+                setMaxHoursByNtid(
+                    Object.fromEntries(data.map((emp) => [emp.employeeNtid, emp.maxHours ?? 0]))
+                );
             })
             .catch((error) => console.error("❌ Failed to fetch employees:", error))
             .finally(() => setLoading(false));
@@ -33,17 +39,22 @@ export default function EmployeePaySetupPage() {
         setEmployees(updated);
     };
 
-    const handleSave = async (employeeName: string, employeeNtid: string, payRate: number, commission: number) => {
-        setSaving(true);
+    const handleMaxHoursChange = (employeeNtid: string, value: string) => {
+        setMaxHoursByNtid((prev) => ({ ...prev, [employeeNtid]: parseFloat(value) || 0 }));
+    };
+
+    const handleSave = async (employeeName: string, employeeNtid: string, payRate: number, commission: number, maxHours: number) => {
+        setSavingNtid(employeeNtid);
         try {
             await apiClient.post(
-                "/company/setupEmployeeHourlyPay",
+                "/company/setupEmployeeHourlyPayAndMaximumHours",
                 null, // ⬅️ No body, but POST still needs something here
                 {
                     params: {
                         employeeNtid,
                         payRate,
                         commissionPercentage: commission,
+                        hours: maxHours,
                     },
                 }
             );
@@ -53,7 +64,7 @@ export default function EmployeePaySetupPage() {
             toast.error(`Failed to save for ${employeeName}`);
             console.error(err);
         } finally {
-            setSaving(false);
+            setSavingNtid(null);
         }
     };
 
@@ -74,6 +85,7 @@ export default function EmployeePaySetupPage() {
                                 <th className="text-left p-3">Employee Name</th>
                                 <th className="text-left p-3">Hourly Rate ($)</th>
                                 <th className="text-left p-3">Commission (%)</th>
+                                <th className="text-left p-3">Maximum Hours</th>
                                 <th className="text-left p-3">Actions</th>
                             </tr>
                         </thead>
@@ -98,19 +110,28 @@ export default function EmployeePaySetupPage() {
                                         />
                                     </td>
                                     <td className="p-3">
+                                        <input
+                                            type="number"
+                                            value={maxHoursByNtid[emp.employeeNtid] ?? 0}
+                                            onChange={(e) => handleMaxHoursChange(emp.employeeNtid, e.target.value)}
+                                            className="w-24 p-2 border rounded dark:bg-gray-800 dark:text-white"
+                                        />
+                                    </td>
+                                    <td className="p-3">
                                         <button
                                             onClick={() =>
                                                 handleSave(
                                                     emp.employeeName,
                                                     emp.employeeNtid,
                                                     emp.employeePayRatePerHour,
-                                                    emp.commissionPercentage
+                                                    emp.commissionPercentage,
+                                                    maxHoursByNtid[emp.employeeNtid] ?? 0
                                                 )
                                             }
-                                            disabled={saving}
-                                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                            disabled={savingNtid === emp.employeeNtid}
+                                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60"
                                         >
-                                            {saving ? "Saving..." : "Save"}
+                                            {savingNtid === emp.employeeNtid ? "Saving..." : "Save"}
                                         </button>
                                     </td>
                                 </tr>

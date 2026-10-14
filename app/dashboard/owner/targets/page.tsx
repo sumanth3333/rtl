@@ -5,6 +5,8 @@ import { StoreTarget, EmployeeTarget, StoreTargetResponse, EmployeeTargetRespons
 import { getEmployeeTargets, getStoreTargets, updateEmployeeTarget, updateStoreTarget } from "@/services/owner/targetService";
 import StoreTargetTable from "@/components/owner/targets/StoreTargetTable";
 import EmployeeTargetTable from "@/components/owner/targets/EmployeeTargetTable";
+import AvailableStrategiesOverview from "@/components/owner/targets/AvailableStrategiesOverview";
+import PhaseAssignmentsTable from "@/components/owner/targets/PhaseAssignmentsTable";
 import { useOwner } from "@/hooks/useOwner";
 import { format, subMonths } from "date-fns";
 
@@ -77,6 +79,11 @@ export default function MonthlyTargets() {
                         );
                     })}
                 </select>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+                <AvailableStrategiesOverview />
+                {companyName && <PhaseAssignmentsTable companyName={companyName} yearMonth={targetMonth} />}
             </div>
 
             {loading ? (

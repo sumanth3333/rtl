@@ -6,10 +6,26 @@ import InputField from "@/components/ui/InputField";
 import AddressFields from "@/components/ui/addressFields/AddressFields";
 import { useContext, useEffect, useState } from "react";
 import { OwnerContext } from "@/contexts/OwnerContext";
-import { Store, storeSchema } from "@/schemas/storeSchema";
+import { Store, storeSchema, StoreAddressValidationError } from "@/schemas/storeSchema";
+import { ApiError } from "@/services/api/errorHandler";
 import Button from "@/components/ui/Button";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import SuccessModal from "@/components/ui/modals/SuccessModal";
+import AddressVerificationModal from "@/components/ui/modals/AddressVerificationModal";
+
+const extractAddressValidationError = (error: unknown): StoreAddressValidationError | null => {
+    if (
+        error instanceof ApiError &&
+        error.status === 400 &&
+        error.data &&
+        typeof error.data === "object" &&
+        "suggestedAddress" in error.data &&
+        "submittedAddress" in error.data
+    ) {
+        return error.data as StoreAddressValidationError;
+    }
+    return null;
+};
 
 interface StoreFormProps {
     onSubmit: (store: Store) => Promise<void>;
@@ -23,6 +39,8 @@ export default function StoreForm({ onSubmit }: StoreFormProps) {
     const [showSuccess, setShowSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
     const [storeData, setStoreData] = useState<Store | null>(null);
+    const [addressValidationError, setAddressValidationError] = useState<StoreAddressValidationError | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const { register, handleSubmit, formState: { errors, isValid }, setValue, reset } = useForm<Store>({
         resolver: zodResolver(storeSchema),
@@ -43,16 +61,43 @@ export default function StoreForm({ onSubmit }: StoreFormProps) {
     const handleConfirm = async () => {
         if (!storeData) { return; }
         setLoading(true);
+        setSubmitError(null);
         //console.log("🚀 Submitting store data:", storeData);
         try {
             await onSubmit(storeData);
             setShowSuccess(true);
+            setShowConfirmation(false);
             reset();
         } catch (error) {
-            console.error("❌ Error adding store:", error);
+            setShowConfirmation(false);
+            const addressError = extractAddressValidationError(error);
+            if (addressError) {
+                setAddressValidationError(addressError);
+            } else {
+                console.error("❌ Error adding store:", error);
+                setSubmitError(error instanceof ApiError ? error.message : "Failed to add store. Please try again.");
+            }
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
-        setShowConfirmation(false);
+    };
+
+    const handleUseSuggestedAddress = () => {
+        if (!addressValidationError || !storeData) { return; }
+
+        const correctedAddress = { ...storeData.address };
+        addressValidationError.corrections.forEach((correction) => {
+            if (correction.field in correctedAddress) {
+                (correctedAddress as Record<string, string>)[correction.field] = correction.newValue;
+            }
+        });
+
+        // ✅ Reflect the corrected values in the visible form fields; the employee still has to hit Enroll Store to save
+        Object.entries(correctedAddress).forEach(([field, value]) => {
+            setValue(`address.${field}` as any, value, { shouldValidate: true });
+        });
+        setStoreData({ ...storeData, address: correctedAddress });
+        setAddressValidationError(null);
     };
 
     return (
@@ -104,6 +149,10 @@ export default function StoreForm({ onSubmit }: StoreFormProps) {
                     />
                 </div>
 
+                {submitError && (
+                    <p className="text-sm text-rose-600 dark:text-rose-400 text-center">{submitError}</p>
+                )}
+
                 {/* 🔹 Submit Button */}
                 <div className="flex justify-center">
                     <Button type="submit" variant="primary" isLoading={loading} fullWidth disabled={!isValid}>
@@ -130,6 +179,19 @@ export default function StoreForm({ onSubmit }: StoreFormProps) {
                     message="The store has been enrolled successfully."
                     onClose={() => setShowSuccess(false)}
                 />
+
+                {/* 🔹 Address Verification Modal */}
+                {addressValidationError && (
+                    <AddressVerificationModal
+                        isOpen
+                        message={addressValidationError.message}
+                        submittedAddress={addressValidationError.submittedAddress}
+                        suggestedAddress={addressValidationError.suggestedAddress}
+                        corrections={addressValidationError.corrections}
+                        onUseSuggested={handleUseSuggestedAddress}
+                        onEditManually={() => setAddressValidationError(null)}
+                    />
+                )}
             </form>
         </div>
     );

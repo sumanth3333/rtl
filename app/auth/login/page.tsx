@@ -1,20 +1,47 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import LoginForm from "@/components/auth/LoginForm";
 import { motion } from "framer-motion";
 
+const STORE_DELETION_TOKEN_KEY = "storeDeletionToken";
+
 export default function LoginPage() {
     const { isAuthenticated, role } = useAuth();
     const router = useRouter();
 
+    // ✅ Computed synchronously on first client render so the redirect effect below never races
+    // the token-capture effect - both must agree on this before either one fires.
+    const [hasPendingStoreDeletionReview] = useState<boolean>(() => {
+        if (typeof window === "undefined") { return false; }
+        if (new URLSearchParams(window.location.search).get(STORE_DELETION_TOKEN_KEY)) { return true; }
+        try {
+            return !!sessionStorage.getItem(STORE_DELETION_TOKEN_KEY);
+        } catch {
+            return false;
+        }
+    });
+
+    // Capture a store-deletion authorization token from the email link into sessionStorage,
+    // then strip it from the visible URL immediately.
+    useEffect(() => {
+        const token = new URLSearchParams(window.location.search).get(STORE_DELETION_TOKEN_KEY);
+        if (!token) { return; }
+        try {
+            sessionStorage.setItem(STORE_DELETION_TOKEN_KEY, token);
+        } catch {
+            // sessionStorage unavailable - the review page will show an invalid-link state
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }, []);
+
     useEffect(() => {
         if (isAuthenticated && role) {
-            router.push(`/dashboard/${role.toLowerCase()}`);
+            router.push(hasPendingStoreDeletionReview ? "/store-deletion/authorization" : `/dashboard/${role.toLowerCase()}`);
         }
-    }, [isAuthenticated, role, router]);
+    }, [isAuthenticated, role, router, hasPendingStoreDeletionReview]);
 
     if (isAuthenticated) { return <div className="flex items-center justify-center min-h-screen text-gray-600 dark:text-gray-400">Redirecting...</div>; }
 

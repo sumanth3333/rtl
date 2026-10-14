@@ -1,35 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useOwner } from "@/hooks/useOwner";
 import { fetchEmployeePaychecks } from "@/services/owner/paycheckService";
 import EmployeePaycheckCard from "@/components/owner/paycheck/generate-pay/EmployeePaycheckCard";
 import PaycheckFilters from "@/components/owner/paycheck/generate-pay/PaycheckFilters";
-import { EmployeePaycheck } from "@/types/paycheckTypes";
+import { EmployeePaycheck, PaycheckResponse } from "@/types/paycheckTypes";
 
 export default function GeneratePayPage() {
     const { companyName } = useOwner();
     const [paychecks, setPaychecks] = useState<EmployeePaycheck[]>([]); // ✅ Correctly typed
-    const [totalPaycheck, setTotalPaycheck] = useState<number | null>(null);
+    const [totals, setTotals] = useState<Omit<PaycheckResponse, "paychecks" | "commissionReference"> | null>(null);
+    const [isFetching, setIsFetching] = useState(false);
+    const [fetchError, setFetchError] = useState<string | null>(null);
+    const [hasSearched, setHasSearched] = useState(false);
 
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
     const [includeBoxes, setIncludeBoxes] = useState<string>("NO");
     const [includeAccessories, setIncludeAccessories] = useState<string>("NO");
     const [includeTaxes, setIncludeTaxes] = useState<string>("NO");
+    const [commissionPerCompletedAccount, setCommissionPerCompletedAccount] = useState<string>("NO");
 
     // ✅ Fetch Paychecks
     const fetchPaychecks = async () => {
-        const response = await fetchEmployeePaychecks(companyName, startDate, endDate, includeBoxes, includeAccessories, includeTaxes);
+        setIsFetching(true);
+        setFetchError(null);
+        setHasSearched(true);
+
+        const response = await fetchEmployeePaychecks(companyName, startDate, endDate, includeBoxes, includeAccessories, includeTaxes, commissionPerCompletedAccount);
 
         if (response.success && response.data) {
             setPaychecks(response.data.paychecks); // ✅ Only set if data is present
-            setTotalPaycheck(response.data.totalPayCheckForCompany ?? null);
+            const { totalHourlyPay, totalSalesCommission, totalMagentaCommission, totalAccessoriesCommission, totalCommission, totalGrossPay, totalTaxes, totalPayCheckForCompany } = response.data;
+            setTotals({ totalHourlyPay, totalSalesCommission, totalMagentaCommission, totalAccessoriesCommission, totalCommission, totalGrossPay, totalTaxes, totalPayCheckForCompany });
         } else {
             setPaychecks([]);
-            setTotalPaycheck(null);
-            console.error(response.error || "Unknown error fetching paychecks");
+            setTotals(null);
+            setFetchError(response.error || "Something went wrong while fetching paychecks. Please try again.");
         }
+
+        setIsFetching(false);
     };
 
     return (
@@ -43,18 +55,46 @@ export default function GeneratePayPage() {
                 includeBoxes={includeBoxes}
                 includeAccessories={includeAccessories}
                 includeTaxes={includeTaxes}
+                commissionPerCompletedAccount={commissionPerCompletedAccount}
                 setStartDate={setStartDate}
                 setEndDate={setEndDate}
                 setIncludeBoxes={setIncludeBoxes}
                 setIncludeTaxes={setIncludeTaxes}
                 setIncludeAccessories={setIncludeAccessories}
+                setCommissionPerCompletedAccount={setCommissionPerCompletedAccount}
                 fetchPaychecks={fetchPaychecks}
+                isLoading={isFetching}
             />
 
-            {totalPaycheck !== null && (
-                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                    <span className="font-semibold text-emerald-900">Total payout:</span>{" "}
-                    {totalPaycheck.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+            {fetchError && (
+                <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950/40 px-4 py-3">
+                    <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
+                    <div>
+                        <p className="text-sm font-semibold text-red-800 dark:text-red-300">Couldn&apos;t generate paychecks</p>
+                        <p className="text-sm text-red-700 dark:text-red-400">{fetchError}</p>
+                    </div>
+                </div>
+            )}
+
+            {totals !== null && (
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-900 px-4 py-3 text-sm text-emerald-800 dark:text-emerald-200">
+                    {[
+                        ["Hourly Pay", totals.totalHourlyPay],
+                        ["Sales Commission", totals.totalSalesCommission],
+                        ["Magenta Commission", totals.totalMagentaCommission],
+                        ["Accessories Commission", totals.totalAccessoriesCommission],
+                        ["Total Commission", totals.totalCommission],
+                        ["Gross Pay", totals.totalGrossPay],
+                        ["Taxes", totals.totalTaxes],
+                        ["Total Payout", totals.totalPayCheckForCompany],
+                    ].map(([label, value]) => (
+                        <div key={label} className="flex flex-col">
+                            <span className="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{label}</span>
+                            <span className="font-semibold text-emerald-900 dark:text-emerald-100">
+                                {(value as number).toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                            </span>
+                        </div>
+                    ))}
                 </div>
             )}
 
@@ -66,7 +106,9 @@ export default function GeneratePayPage() {
                     ))}
                 </div>
             ) : (
-                <p className="text-gray-600 text-center mt-4">No paychecks found for the selected period.</p>
+                hasSearched && !isFetching && !fetchError && (
+                    <p className="text-gray-600 dark:text-gray-400 text-center mt-4">No paychecks found for the selected period.</p>
+                )
             )}
         </div>
     );

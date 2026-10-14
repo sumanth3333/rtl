@@ -19,3 +19,19 @@ export const storeSchema = z.object({
 
 // ✅ Store Type from Schema
 export type Store = z.infer<typeof storeSchema>;
+
+// ✅ Shape of the 400 response when the submitted address fails USPS/verification checks
+export interface StoreAddressCorrection {
+    field: string;
+    oldValue: string;
+    newValue: string;
+}
+
+export interface StoreAddressValidationError {
+    status: number;
+    error: string;
+    message: string;
+    submittedAddress: string;
+    suggestedAddress: string;
+    corrections: StoreAddressCorrection[];
+}

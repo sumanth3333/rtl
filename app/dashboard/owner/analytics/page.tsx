@@ -250,7 +250,7 @@ export default function OwnerAnalyticsPage() {
             <header className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gradient-to-r from-slate-50 via-white to-slate-100 dark:from-[#0a0f1c] dark:via-[#0d1324] dark:to-[#0a0f1c] p-4 shadow-sm space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p className="text-[11px] uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">Owner Analytics</p>
+                        <p className="text-[11px] uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">Sales Analytics</p>
                         <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">Sales intelligence for {companyName || "your company"}</h1>
                         <p className="text-sm text-gray-600 dark:text-gray-400">All metrics respect your device timezone ({timezone}).</p>
                     </div>

@@ -131,7 +131,7 @@ export default function RebatesPage() {
                 </div>
             )}
 
-            <WeeklySummaryTable summaries={weeklySummary} currency={currency} />
+            <WeeklySummaryTable summaries={weeklySummary} currency={currency} companyName={companyName} />
 
             {overall && (
                 <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

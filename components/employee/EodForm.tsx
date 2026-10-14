@@ -2,10 +2,11 @@
 
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { EodReport, eodReportSchema } from "@/types/employeeSchema";
+import { EmployeeSaleEntry, EodReport, eodReportSchema } from "@/types/employeeSchema";
 import Button from "@/components/ui/Button";
 import { useEmployee } from "@/hooks/useEmployee";
-import { getEmployeesWorking } from "@/services/employee/employeeService";
+import { getEmployeesWorking, getCompanyEmployees } from "@/services/employee/employeeService";
+import { useCompanyName } from "@/hooks/useComanyName";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import ConfirmationModal from "../ui/modals/ConfirmationModal";
 import SuccessModal from "../ui/modals/SuccessModal";
@@ -16,6 +17,8 @@ import AccessoriesSection from "./eod/AccessoriesSection";
 import SalesSummarySection from "./eod/SalesSummarySection";
 import ExpensesSection from "./eod/ExpensesSection";
 import IndividualEntriesSection from "./eod/IndividualEntriesSection";
+import CrossStoreCreditSection from "./eod/CrossStoreCreditSection";
+import YesNoPrompt from "./eod/YesNoPrompt";
 import ConfirmClockOut from "./eod/ConfirmClockOut";
 import { useEodSubmission } from "@/hooks/useEodSubmission";
 
@@ -25,6 +28,15 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const [employeesWorking, setEmployeesWorking] = useState<{ employeeNtid: string; employeeName: string }[]>([]);
     const [individualEntries, setIndividualEntries] = useState<EodReport[]>([]);
     const [showIndividualForm, setShowIndividualForm] = useState(false);
+
+    // ✅ Sequential gate questions shown after the store-level totals
+    const [hasExpenses, setHasExpenses] = useState<boolean | null>(null);
+    const [hasOtherStoreSales, setHasOtherStoreSales] = useState<boolean | null>(null);
+    const [crossStoreEntries, setCrossStoreEntries] = useState<EmployeeSaleEntry[]>([]);
+    const [companyEmployees, setCompanyEmployees] = useState<{ employeeNtid: string; employeeName: string }[]>([]);
+    const [companyEmployeesLoading, setCompanyEmployeesLoading] = useState(false);
+
+    const { companyName } = useCompanyName({ employeeNtid: employee?.employeeNtid });
 
     const logout = useLogout();
 
@@ -79,6 +91,57 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         }
         return () => { isMounted = false; };
     }, [store?.dealerStoreId]);
+
+    // ✅ When crediting a sale to someone outside this store, the submitter also needs an explicit
+    // breakdown row (otherwise there's no way to know how much of the total is theirs vs. the credit).
+    useEffect(() => {
+        if (hasOtherStoreSales !== true || employeesWorking.length > 0 || !employee) { return; }
+        setEmployeesWorking([{ employeeNtid: employee.employeeNtid, employeeName: employee.employeeName }]);
+        setShowIndividualForm(true);
+    }, [hasOtherStoreSales, employeesWorking.length, employee]);
+
+    // ✅ Fetch the full company roster only once the employee says they need to credit someone else
+    useEffect(() => {
+        if (hasOtherStoreSales !== true || !companyName || companyEmployees.length > 0) { return; }
+        let isMounted = true;
+        setCompanyEmployeesLoading(true);
+        getCompanyEmployees(companyName)
+            .then((emps) => {
+                if (isMounted) { setCompanyEmployees(emps); }
+            })
+            .catch((error) => {
+                console.error("❌ Failed to fetch company employees:", error);
+            })
+            .finally(() => {
+                if (isMounted) { setCompanyEmployeesLoading(false); }
+            });
+        return () => { isMounted = false; };
+    }, [hasOtherStoreSales, companyName, companyEmployees.length]);
+
+    const handleAddCrossStoreEntry = useCallback((entry: EmployeeSaleEntry) => {
+        setCrossStoreEntries((prev) => [...prev, entry]);
+    }, []);
+
+    const handleUpdateCrossStoreEntry = useCallback((index: number, entry: EmployeeSaleEntry) => {
+        setCrossStoreEntries((prev) => prev.map((e, i) => (i === index ? entry : e)));
+    }, []);
+
+    const handleRemoveCrossStoreEntry = useCallback((index: number) => {
+        setCrossStoreEntries((prev) => prev.filter((_, i) => i !== index));
+    }, []);
+
+    const handleApplySplit = useCallback((values: Array<{
+        boxesSold: number;
+        upgrade: number;
+        migrations: number;
+        hsiSold: number;
+        tabletsSold: number;
+        watchesSold: number;
+        accessoriesByEmployee: number;
+        systemAccessories: number;
+    }>) => {
+        setIndividualEntries((prev) => prev.map((entry, i) => ({ ...entry, ...values[i] })));
+    }, []);
 
     // Initialize per-employee entries with zeroed defaults so inputs start at 0
     const lastTransactionTime = watchLastTxn;
@@ -172,6 +235,32 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         };
     }, [watchActualCash, watchActualCard, watchSystemCash, watchSystemCard, watchExpenses]);
 
+    // ✅ The split tools only divide what's left for self + same-store coworkers,
+    // i.e. the store total minus whatever's already credited to other stores' employees
+    const splitTotals = useMemo(() => {
+        const sumCross = (field: keyof EmployeeSaleEntry) =>
+            crossStoreEntries.reduce((sum, entry) => sum + (entry[field] as number), 0);
+        return {
+            boxesSold: (watchBoxesSold ?? 0) - sumCross("boxesSold"),
+            upgrade: (watchUpgrade ?? 0) - sumCross("upgrade"),
+            migrations: (watchMigrations ?? 0) - sumCross("migrations"),
+            hsiSold: (watchHsiSold ?? 0) - sumCross("hsiSold"),
+            tabletsSold: (watchTabletsSold ?? 0) - sumCross("tabletsSold"),
+            watchesSold: (watchWatchesSold ?? 0) - sumCross("watchesSold"),
+            accessoriesByEmployee: parseFloat((accessoriesByEmployee - sumCross("accessoriesByEmployee")).toFixed(2)),
+            systemAccessories: parseFloat(((watchSystemAccessories ?? 0) - sumCross("systemAccessories")).toFixed(2)),
+        };
+    }, [
+        watchBoxesSold,
+        watchUpgrade,
+        watchMigrations,
+        watchHsiSold,
+        watchTabletsSold,
+        watchWatchesSold,
+        accessoriesByEmployee,
+        watchSystemAccessories,
+        crossStoreEntries,
+    ]);
 
     // Handle individual employee data change
     const handleEmployeeDataChange = useCallback((index: number, field: string, value: number) => {
@@ -214,6 +303,8 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         individualEntries,
         setIndividualEntries,
         showIndividualForm,
+        crossStoreEntries,
+        hasExpenses,
         accessoriesByEmployee,
         watchBoxesSold,
         watchMigrations,
@@ -244,7 +335,32 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                     <CardSummarySection cardDifference={cardDifference} />
                     <AccessoriesSection accessoriesByEmployee={accessoriesByEmployee} />
                     <SalesSummarySection validationErrors={validationErrors} />
-                    <ExpensesSection />
+
+                    <YesNoPrompt
+                        question="Do you have any expenses or transaction from other store to record?"
+                        value={hasExpenses}
+                        onChange={setHasExpenses}
+                    />
+                    {hasExpenses === true && <ExpensesSection />}
+
+                    {hasExpenses !== null && (
+                        <YesNoPrompt
+                            question="Any box sales from another store?"
+                            value={hasOtherStoreSales}
+                            onChange={setHasOtherStoreSales}
+                        />
+                    )}
+                    {hasOtherStoreSales === true && (
+                        <CrossStoreCreditSection
+                            companyEmployees={companyEmployees}
+                            excludeNtids={employeesWorking.map((emp) => emp.employeeNtid)}
+                            entries={crossStoreEntries}
+                            onAdd={handleAddCrossStoreEntry}
+                            onUpdate={handleUpdateCrossStoreEntry}
+                            onRemove={handleRemoveCrossStoreEntry}
+                            loading={companyEmployeesLoading}
+                        />
+                    )}
 
                     {showIndividualForm && (
                         <IndividualEntriesSection
@@ -252,18 +368,24 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                             individualEntries={individualEntries}
                             validationErrors={validationErrors}
                             onChange={handleEmployeeDataChange}
+                            totals={splitTotals}
+                            onApplySplit={handleApplySplit}
                         />
                     )}
 
-                    <ConfirmClockOut
-                        confirmClockOut={confirmClockOut}
-                        setConfirmClockOut={setConfirmClockOut}
-                        validationErrors={validationErrors}
-                    />
+                    {hasExpenses !== null && hasOtherStoreSales !== null && (
+                        <>
+                            <ConfirmClockOut
+                                confirmClockOut={confirmClockOut}
+                                setConfirmClockOut={setConfirmClockOut}
+                                validationErrors={validationErrors}
+                            />
 
-                    <Button type="submit" variant="primary" isLoading={loading} fullWidth disabled={!confirmClockOut}>
-                        Submit Report
-                    </Button>
+                            <Button type="submit" variant="primary" isLoading={loading} fullWidth disabled={!confirmClockOut}>
+                                Submit Report
+                            </Button>
+                        </>
+                    )}
                 </form >
             </FormProvider>
 

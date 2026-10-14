@@ -7,17 +7,26 @@ import {
     BellAlertIcon
 } from "@heroicons/react/24/outline";
 import {
+    Activity,
+    AlertTriangle,
     BadgePercent,
     Banknote,
     BarChart3,
     Boxes,
+    CalendarClock,
+    CalendarRange,
     Clock3,
     FileText,
+    FolderOpen,
+    KeyRound,
+    LifeBuoy,
     ListChecks,
+    Mail,
     MapPin,
     MessageSquareText,
     Package,
     RefreshCcw,
+    RotateCcw,
     Settings,
     ShoppingCart,
     Smartphone,
@@ -45,7 +54,44 @@ export const sidebarLinks: Record<Role, SidebarLink[]> = {
         {
             name: "Home",
             path: "/dashboard/admin",
-            icon: HomeIcon
+            icon: HomeIcon,
+            section: "Overview"
+        },
+        {
+            name: "Server Health",
+            path: "/dashboard/admin/monitoring/server",
+            icon: Activity,
+            section: "Monitoring"
+        },
+        {
+            name: "Incidents",
+            path: "/dashboard/admin/monitoring/incidents",
+            icon: AlertTriangle,
+            section: "Monitoring"
+        },
+        {
+            name: "Restarts",
+            path: "/dashboard/admin/monitoring/restarts",
+            icon: RotateCcw,
+            section: "Monitoring"
+        },
+        {
+            name: "Email Outbox",
+            path: "/dashboard/admin/monitoring/emails",
+            icon: Mail,
+            section: "Monitoring"
+        },
+        {
+            name: "System Files",
+            path: "/dashboard/admin/monitoring/files",
+            icon: FolderOpen,
+            section: "Monitoring"
+        },
+        {
+            name: "Support Requests",
+            path: "/dashboard/admin/contact-us",
+            icon: LifeBuoy,
+            section: "Monitoring"
         },
         {
             name: "Create Company",
@@ -71,6 +117,26 @@ export const sidebarLinks: Record<Role, SidebarLink[]> = {
             name: "File Exports",
             path: "/dashboard/admin/file-exports",
             icon: FileSpreadsheet
+        },
+        {
+            name: "Manage Products",
+            path: "/dashboard/admin/manage-products",
+            icon: ShoppingCart
+        },
+        {
+            name: "Sales Phase Strategy",
+            path: "/dashboard/admin/sales-phase-strategy",
+            icon: Target
+        },
+        {
+            name: "Late Openings",
+            path: "/dashboard/admin/late-openings",
+            icon: MessageSquareText
+        },
+        {
+            name: "Company Credentials",
+            path: "/dashboard/admin/company-credentials",
+            icon: KeyRound
         }
     ],
 
@@ -141,6 +207,21 @@ export const sidebarLinks: Record<Role, SidebarLink[]> = {
             icon: ShoppingCart
         },
         {
+            name: "Schedule Availability",
+            path: "/dashboard/employee/schedule-availability",
+            icon: CalendarClock
+        },
+        {
+            name: "Verify My Records",
+            path: "/dashboard/employee/verify-records",
+            icon: CheckCircleIcon
+        },
+        {
+            name: "Contact Support",
+            path: "/dashboard/employee/contact-us",
+            icon: LifeBuoy
+        },
+        {
             name: "Settings",
             path: "/dashboard/employee/settings",
             icon: Settings,
@@ -173,9 +254,15 @@ export const sidebarLinks: Record<Role, SidebarLink[]> = {
             section: "Overview"
         },
         {
-            name: "Analytics",
+            name: "Sales Analytics",
             path: "/dashboard/owner/analytics",
             icon: BarChart3,
+            section: "Overview"
+        },
+        {
+            name: "Growth Analytics",
+            path: "/dashboard/owner/growth-analytics",
+            icon: TrendingUp,
             section: "Overview"
         },
         // {
@@ -187,6 +274,12 @@ export const sidebarLinks: Record<Role, SidebarLink[]> = {
             name: "Manage Employees",
             path: "/dashboard/owner/manage-employees",
             icon: Users,
+            section: "People"
+        },
+        {
+            name: "Employee Requests",
+            path: "/dashboard/owner/employee-requests",
+            icon: ClipboardDocumentListIcon,
             section: "People"
         },
         {
@@ -231,6 +324,12 @@ export const sidebarLinks: Record<Role, SidebarLink[]> = {
             section: "Operations"
         },
         {
+            name: "Employee Schedule",
+            path: "/dashboard/owner/schedule",
+            icon: CalendarClock,
+            section: "Operations"
+        },
+        {
             name: "End of Day Report",
             path: "/dashboard/owner/eod-report",
             icon: FileText,
@@ -246,6 +345,18 @@ export const sidebarLinks: Record<Role, SidebarLink[]> = {
             name: "EOD Remarks",
             path: "/dashboard/owner/eod-remarks",
             icon: MessageSquareText,
+            section: "Reports"
+        },
+        {
+            name: "Late Opening Report",
+            path: "/dashboard/owner/late-openings",
+            icon: BellAlertIcon,
+            section: "Reports"
+        },
+        {
+            name: "Metric Report by Date Range",
+            path: "/dashboard/owner/metric-report",
+            icon: CalendarRange,
             section: "Reports"
         },
         {
@@ -297,6 +408,12 @@ export const sidebarLinks: Record<Role, SidebarLink[]> = {
             section: "Operations"
         },
         {
+            name: "Contact Support",
+            path: "/dashboard/owner/contact-us",
+            icon: LifeBuoy,
+            section: "System"
+        },
+        {
             name: "Settings",
             path: "/dashboard/owner/settings",
             icon: Settings,
@@ -315,6 +432,10 @@ export const dashboardCards: Record<Role, { title: string; description: string; 
         { title: "Generate Invoices", description: "Create invoices for companies", link: "/dashboard/admin/invoices" },
         { title: "Setup Payments", description: "Configure payment methods", link: "/dashboard/admin/payments" },
         { title: "File Exports", description: "Upload activation or sales reports", link: "/dashboard/admin/file-exports" },
+        { title: "Manage Products", description: "Add new products with category, brand, and price", link: "/dashboard/admin/manage-products" },
+        { title: "Sales Phase Strategy", description: "Define how monthly goals split across four phases", link: "/dashboard/admin/sales-phase-strategy" },
+        { title: "Late Openings", description: "Review late store openings and WhatsApp reminder replies", link: "/dashboard/admin/late-openings" },
+        { title: "Company Credentials", description: "View every company's stored login credentials", link: "/dashboard/admin/company-credentials" },
     ],
     EMPLOYEE: [
 
@@ -325,6 +446,7 @@ export const dashboardCards: Record<Role, { title: string; description: string; 
     ],
     OWNER: [
         { title: "RTPOS Sales", description: "Verified store sales metrics", link: "/dashboard/owner/rtpos-report" },
+        { title: "Growth Analytics", description: "Sprint phase performance by store", link: "/dashboard/owner/growth-analytics" },
         // {
         //     title: "Manage Managers",
         //     description: "Oversee and assign managerial roles within the company.",

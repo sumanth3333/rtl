@@ -7,6 +7,7 @@ interface SidebarItemProps {
     icon?: React.ElementType;
     isCollapsed: boolean;
     onClick?: () => void;
+    badge?: number;
 }
 
 export default function SidebarItem({
@@ -15,6 +16,7 @@ export default function SidebarItem({
     icon: Icon,
     isCollapsed,
     onClick,
+    badge,
 }: SidebarItemProps) {
     const pathname = usePathname();
     const isActive = pathname === path;
@@ -34,20 +36,30 @@ export default function SidebarItem({
             >
                 {/* Icon - Always Visible */}
                 <div
-                    className={`transition-all duration-200 ${isActive
+                    className={`relative transition-all duration-200 ${isActive
                             ? "text-blue-700 dark:text-blue-200"
                             : "text-gray-500 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200"
                         }`}
                 >
                     {Icon && <Icon className="w-5 h-5" />}
+                    {!!badge && isCollapsed && (
+                        <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold leading-none">
+                            {badge > 99 ? "99+" : badge}
+                        </span>
+                    )}
                 </div>
 
                 {/* Name - Hidden when collapsed */}
                 <span
-                    className={`text-[13px] leading-5 font-medium transition-opacity duration-300 ease-in-out ${isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"
+                    className={`flex-1 flex items-center justify-between text-[13px] leading-5 font-medium transition-opacity duration-300 ease-in-out ${isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"
                         }`}
                 >
                     {name}
+                    {!!badge && (
+                        <span className="ml-2 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none">
+                            {badge > 99 ? "99+" : badge}
+                        </span>
+                    )}
                 </span>
 
                 {/* Tooltip for collapsed mode */}

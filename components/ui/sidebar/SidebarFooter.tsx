@@ -3,11 +3,62 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmployee } from "@/hooks/useEmployee";
-import { clockInEmployee, clockOutEmployee } from "@/services/employee/employeeService";
+import { useLogout } from "@/hooks/useLogout";
+import { clockInEmployee, clockOutEmployee, getSecureCodeStatus } from "@/services/employee/employeeService";
+import { ApiError } from "@/services/api/errorHandler";
 import { useRouter } from "next/navigation";
+import SecureCodeSetupModal from "@/components/employee/SecureCodeSetupModal";
+import SecureCodeVerifyModal from "@/components/employee/SecureCodeVerifyModal";
 
 type SidebarFooterProps = {
     isCollapsed: boolean;
+};
+
+type ClockInErrorKind = "permission" | "location-required" | "distance" | "store-config" | "generic";
+
+interface ClockInErrorState {
+    kind: ClockInErrorKind;
+    title: string;
+    message: string;
+}
+
+const getCurrentPosition = (): Promise<GeolocationPosition> =>
+    new Promise((resolve, reject) => {
+        if (typeof navigator === "undefined" || !navigator.geolocation) {
+            reject(new Error("Geolocation is not supported on this device."));
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+        });
+    });
+
+const classifyClockInError = (error: unknown): ClockInErrorState => {
+    if (error instanceof ApiError) {
+        const message = error.message;
+        const lowerMessage = message.toLowerCase();
+        const distanceMeters = error.data?.distanceMeters;
+
+        if (distanceMeters !== null && distanceMeters !== undefined) {
+            return { kind: "distance", title: "Too Far From Store", message };
+        }
+        if (lowerMessage.includes("location is required")) {
+            return { kind: "location-required", title: "Location Required", message };
+        }
+        if (lowerMessage.includes("store location is not configured")) {
+            return { kind: "store-config", title: "Store Setup Issue", message };
+        }
+        return { kind: "generic", title: "Clock-In Failed", message };
+    }
+
+    return {
+        kind: "permission",
+        title: "Location Access Needed",
+        message:
+            "We couldn't get your current location. Please allow location access for this site in your browser and try again.",
+    };
 };
 
 export default function SidebarFooter({ isCollapsed }: SidebarFooterProps) {
@@ -21,10 +72,15 @@ export default function SidebarFooter({ isCollapsed }: SidebarFooterProps) {
     } = useEmployee();
     const { role } = useAuth();
     const router = useRouter();
+    const logout = useLogout();
     const [isClockedIn, setIsClockedIn] = useState<boolean>(isClockin);
     const [showEarlyClockoutModal, setShowEarlyClockoutModal] =
         useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isClockingIn, setIsClockingIn] = useState(false);
+    const [clockInError, setClockInError] = useState<ClockInErrorState | null>(null);
+    const [showSecureCodeSetup, setShowSecureCodeSetup] = useState(false);
+    const [showSecureCodeVerify, setShowSecureCodeVerify] = useState(false);
 
     useEffect(() => {
         setIsClockedIn(isClockin);
@@ -33,29 +89,89 @@ export default function SidebarFooter({ isCollapsed }: SidebarFooterProps) {
     const isEligibleRole = role === "EMPLOYEE" || role === "MANAGER";
     if (!isEligibleRole) { return null; }
 
+    const performClockIn = async () => {
+        if (!employee || !store) { return; }
+
+        setClockInError(null);
+        setIsClockingIn(true);
+
+        try {
+            // ✅ Location must come from the device; never fall back to 0/0 or the store's coordinates
+            const position = await getCurrentPosition();
+
+            await clockInEmployee(employee.employeeNtid, store.dealerStoreId, {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracyMeters: position.coords.accuracy,
+            });
+
+            const currentTime = new Date().toLocaleTimeString();
+            setClockIn(true, store.storeName, currentTime);
+
+            // ✅ Redirect to inventory with message
+            router.push(
+                `/dashboard/employee/log-inventory?notice=clockin`
+            );
+        } catch (error) {
+            console.error("Clock-in failed:", error);
+            setClockInError(classifyClockInError(error));
+        } finally {
+            setIsClockingIn(false);
+        }
+    };
+
     const handleClockIn = async () => {
         if (!employee || !store) {
             console.error("❌ Employee or Store data is missing.");
             return;
         }
 
-        const response = await clockInEmployee(
-            employee.employeeNtid,
-            store.dealerStoreId
-        );
+        setClockInError(null);
+        setIsClockingIn(true);
 
-        if (response?.error) {
-            console.error("Clock-in failed:", response.error);
+        // ✅ A secure code must be set up before the very first clock-in attempt
+        let status;
+        try {
+            status = await getSecureCodeStatus(employee.employeeNtid);
+        } catch (error) {
+            console.error("Failed to check secure code status:", error);
+            setIsClockingIn(false);
+            setClockInError({
+                kind: "generic",
+                title: "Clock-In Failed",
+                message: "We couldn't verify your secure code setup. Please try again.",
+            });
             return;
         }
 
-        const currentTime = new Date().toLocaleTimeString();
-        setClockIn(true, store.storeName, currentTime);
+        setIsClockingIn(false);
 
-        // ✅ Redirect to inventory with message
-        router.push(
-            `/dashboard/employee/log-inventory?notice=clockin`
-        );
+        if (!status.secureCodeSetup) {
+            setShowSecureCodeSetup(true);
+            return;
+        }
+
+        // ✅ Already set up - confirm the code every time before actually clocking in
+        setShowSecureCodeVerify(true);
+    };
+
+    const handleSecureCodeSetupComplete = () => {
+        setShowSecureCodeSetup(false);
+        performClockIn();
+    };
+
+    const handleSecureCodeVerified = () => {
+        setShowSecureCodeVerify(false);
+        performClockIn();
+    };
+
+    const handleSecureCodeVerifyCancel = () => {
+        setShowSecureCodeVerify(false);
+    };
+
+    const handleSecureCodeVerifySetupRequired = () => {
+        setShowSecureCodeVerify(false);
+        setShowSecureCodeSetup(true);
     };
 
     const handleOpenEarlyClockoutModal = () => {
@@ -103,10 +219,11 @@ export default function SidebarFooter({ isCollapsed }: SidebarFooterProps) {
                         </p>
                         {!isClockedIn ? (
                             <button
-                                className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-blue-700 hover:to-indigo-700"
+                                className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-70"
                                 onClick={handleClockIn}
+                                disabled={isClockingIn}
                             >
-                                Click Here to Clock In
+                                {isClockingIn ? "Checking your location..." : "Click Here to Clock In"}
                             </button>
                         ) : (
                             <button
@@ -159,6 +276,63 @@ export default function SidebarFooter({ isCollapsed }: SidebarFooterProps) {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Clock-In Location Error Modal */}
+            {clockInError && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl text-center">
+                        <h2 className="text-base font-semibold text-zinc-900">
+                            {clockInError.title}
+                        </h2>
+                        <p className="mt-3 text-sm text-zinc-700">
+                            {clockInError.message}
+                        </p>
+
+                        <div className="mt-5 flex justify-center gap-2">
+                            <button
+                                type="button"
+                                className="rounded-lg border border-zinc-200 px-4 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                                onClick={() => setClockInError(null)}
+                            >
+                                Close
+                            </button>
+                            {clockInError.kind !== "store-config" && (
+                                <button
+                                    type="button"
+                                    className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                                    onClick={() => {
+                                        setClockInError(null);
+                                        handleClockIn();
+                                    }}
+                                >
+                                    Try Again
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Secure Code Setup - blocks everything except logout until completed */}
+            {showSecureCodeSetup && employee && (
+                <SecureCodeSetupModal
+                    employeeName={employee.employeeName}
+                    employeeNtid={employee.employeeNtid}
+                    onComplete={handleSecureCodeSetupComplete}
+                    onLogout={logout}
+                />
+            )}
+
+            {/* Secure Code Verify - required before every clock-in once already set up */}
+            {showSecureCodeVerify && employee && (
+                <SecureCodeVerifyModal
+                    employeeName={employee.employeeName}
+                    employeeNtid={employee.employeeNtid}
+                    onVerified={handleSecureCodeVerified}
+                    onCancel={handleSecureCodeVerifyCancel}
+                    onSetupRequired={handleSecureCodeVerifySetupRequired}
+                />
             )}
         </>
     );

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import SkeletonTable from "@/components/ui/skeletons/SkeletonTable";
 import { useAuth } from "@/hooks/useAuth";
 import { useOwner } from "@/hooks/useOwner";
 
@@ -121,55 +120,19 @@ export default function OwnerDashboard() {
             <main className="space-y-4">
                 <MtdMetricsCards metrics={mtdMetrics} loading={loadingMetrics} />
                 {/* Goals Trending */}
-                <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-4 space-y-3 overflow-x-auto">
-                    {loadingGoals ? (
-                        <SkeletonTable rows={4} />
-                    ) : goalsTrending.length > 0 ? (
-                        <GoalsTrendingTable rows={goalsTrending} />
-                    ) : (
-                        <p className="text-gray-500 text-sm text-center">No goals data available.</p>
-                    )}
-                </div>
+                <GoalsTrendingTable rows={goalsTrending} loading={loadingGoals} />
 
                 {/* Who is Working */}
-                <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-4 space-y-3">
-                    {loadingEmployees ? (
-                        <SkeletonTable rows={3} />
-                    ) : workingEmployees.length > 0 ? (
-                        <EmployeeList employees={workingEmployees} />
-                    ) : (
-                        <p className="text-gray-500 text-sm text-center">No employees currently working.</p>
-                    )}
-                </div>
+                <EmployeeList employees={workingEmployees} loading={loadingEmployees} />
+
                 {/* Latest EOD Summary (moved above Today Goals) */}
-                <section className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-4 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                            📊 EOD Summary
-                        </h2>
-                        <div className="flex items-center gap-2 text-xs sm:text-sm">
-                            <label htmlFor="eod-date" className="text-gray-600 dark:text-gray-300">Date:</label>
-                            <input
-                                id="eod-date"
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => setSelectedDate(e.target.value)}
-                                className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1 text-gray-900 dark:text-gray-100 text-xs sm:text-sm"
-                            />
-                        </div>
-                    </div>
-
-                    {loadingEod ? (
-                        <SkeletonTable rows={3} />
-                    ) : latestEod.length > 0 ? (
-                        <LatestEodList eodList={latestEod} totals={latestTotals ?? undefined} />
-                    ) : (
-                        <p className="text-gray-500 text-sm text-center">No EOD reports available.</p>
-                    )}
-                </section>
-
-
-                <div><TodayGoalsSection companyName={companyName} /></div>
+                <LatestEodList
+                    eodList={latestEod}
+                    totals={latestTotals ?? undefined}
+                    selectedDate={selectedDate}
+                    onDateChange={setSelectedDate}
+                    loading={loadingEod}
+                />
 
                 {/* ELB Scorecard */}
                 <section>

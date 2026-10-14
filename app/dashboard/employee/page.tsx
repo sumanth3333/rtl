@@ -7,11 +7,14 @@ import { getEmployeeTargets, getPendingTodosCount, getStoreTargets } from "@/ser
 import WelcomeSection from "@/components/employee/WelcomeSection";
 import TargetSummary from "@/components/employee/TargetSummary";
 import ReminderSummary from "@/components/employee/ReminderSummary";
-import { getTodayGoal } from "@/services/employee/employeeService";
 import DailyGoalSummary from "@/components/employee/DailyGoalSummary";
 import { getStoreCurrentTrends } from "@/services/employee/storeTrendsService";
 import StoreCurrentTrendsCard from "@/components/employee/StoreCurrentTrendsCard";
 import type { StoreCurrentTrends } from "@/types/storeTrends";
+import { fetchStoreGoalStrategy } from "@/services/employee/salesSprintStrategyService";
+import type { StoreGoalStrategy } from "@/types/storeGoalStrategy";
+import FocusSuggestionCard from "@/components/employee/FocusSuggestionCard";
+import PhaseCalendar from "@/components/employee/PhaseCalendar";
 
 
 export default function EmployeeDashboard() {
@@ -21,9 +24,10 @@ export default function EmployeeDashboard() {
     const [employeeTargets, setEmployeeTargets] = useState(null);
     const [pendingTodos, setPendingTodos] = useState(0);
     const [showClockinReminder, setShowClockinReminder] = useState(false);
-    const [dailyGoal, setDailyGoal] = useState(null);
     const [storeTrends, setStoreTrends] = useState<StoreCurrentTrends | null>(null);
     const [loadingTrends, setLoadingTrends] = useState(false);
+    const [storeGoalStrategy, setStoreGoalStrategy] = useState<StoreGoalStrategy | null>(null);
+    const [loadingStoreGoal, setLoadingStoreGoal] = useState(false);
 
     useEffect(() => {
 
@@ -36,9 +40,11 @@ export default function EmployeeDashboard() {
                 .then((count) => setPendingTodos(count))
                 .catch((error) => console.error("Failed to fetch pending todos:", error));
 
-            getTodayGoal(store.dealerStoreId)
-                .then(setDailyGoal)
-                .catch((error) => console.error("Failed to fetch today's goal:", error));
+            setLoadingStoreGoal(true);
+            fetchStoreGoalStrategy(store.dealerStoreId)
+                .then(setStoreGoalStrategy)
+                .catch((error) => console.error("Failed to fetch store goal strategy:", error))
+                .finally(() => setLoadingStoreGoal(false));
         }
         if (employee?.employeeNtid) {
             getEmployeeTargets(employee.employeeNtid).then(setEmployeeTargets);
@@ -110,8 +116,13 @@ export default function EmployeeDashboard() {
                     pendingTodos={pendingTodos}
                 />
 
-                <section className="grid grid-cols-1 gap-6 md:grid-cols-2 items-stretch">
-                    <DailyGoalSummary dailyGoal={dailyGoal} />
+                <FocusSuggestionCard
+                    focusSuggestions={storeGoalStrategy?.focusSuggestions ?? []}
+                    loading={loadingStoreGoal}
+                />
+
+                <section className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-stretch">
+                    <DailyGoalSummary dailyGoal={storeGoalStrategy?.todayGoal ?? null} />
                     <StoreCurrentTrendsCard
                         storeName={store?.storeName}
                         trends={storeTrends}
@@ -119,14 +130,14 @@ export default function EmployeeDashboard() {
                     />
                 </section>
 
-
+                <PhaseCalendar data={storeGoalStrategy} loading={loadingStoreGoal} />
 
                 <div className="md:col-span-1">
                     <ReminderSummary />
                 </div>
                 <section className="grid grid-cols-1 gap-6">
                     <TargetSummary
-                        title="📊 Store Target Progress"
+                        title="Store Target Progress"
                         targetData={storeTargets}
                         isEmployee={false}
                         cardStyle="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition duration-300"
@@ -134,7 +145,7 @@ export default function EmployeeDashboard() {
                         highlightStyle="text-2xl font-bold text-blue-600 dark:text-blue-400"
                     />
                     <TargetSummary
-                        title="🎯 Your Personal Targets"
+                        title="Your Personal Targets"
                         targetData={employeeTargets}
                         isEmployee={true}
                         cardStyle="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition duration-300"

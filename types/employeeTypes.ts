@@ -13,6 +13,19 @@ export type ClockInPayload = {
     employeeName: string;
 };
 
+export interface ClockInLocation {
+    latitude: number | null;
+    longitude: number | null;
+    accuracyMeters: number | null;
+}
+
+export interface ClockInLocationErrorData {
+    message: string;
+    distanceMeters: number | null;
+    displayDistance: string | null;
+    accuracyMeters: number | null;
+}
+
 export interface EmployeeContextType {
     isClockin: boolean;
     clockinLocation: string | null;

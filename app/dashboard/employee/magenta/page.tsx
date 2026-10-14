@@ -451,6 +451,8 @@ export default function EmployeeMagentaPage() {
                                                 <dd>{order.numberOfLines ?? "—"}</dd>
                                                 <dt className="font-semibold">Order Date</dt>
                                                 <dd>{asDisplayDate(order.orderDate)}</dd>
+                                                <dt className="font-semibold">Ordered By</dt>
+                                                <dd>{order.orderedEmployeeName || "—"}</dd>
                                                 <dt className="font-semibold">New Account Number</dt>
                                                 <dd>{order.newAccountNumber || "—"}</dd>
                                                 <dt className="font-semibold">New Account Pin</dt>
@@ -600,6 +602,7 @@ export default function EmployeeMagentaPage() {
                                     <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">Phone: {item.phoneNumber}</p>
                                     <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">T-Mobile Temp #: {item.temporaryNumber || "—"}</p>
                                     <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">Lines: {item.numberOfLines}</p>
+                                    <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">Ordered By: {item.orderedEmployeeName || "—"}</p>
                                     <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">Completed By: {item.completedEmployeeName || "—"}</p>
                                     <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">Date: {asDisplayDate(item.completedDate)}</p>
                                 </div>

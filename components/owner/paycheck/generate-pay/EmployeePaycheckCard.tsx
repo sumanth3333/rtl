@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronUpIcon, CheckCircleIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { EmployeePaycheck } from "@/types/paycheckTypes";
 import apiClient from "@/services/api/apiClient";
 
@@ -14,6 +14,7 @@ interface EmployeePaycheckProps {
 
 export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, includeBoxes, includeAccessories, includeTaxes }: EmployeePaycheckProps) {
     const [expanded, setExpanded] = useState(false);
+    const [showCommissionBreakdown, setShowCommissionBreakdown] = useState(false);
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -25,12 +26,32 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
     const numericAdjust = parseFloat(adjustAmount || "0");
     const adjustedPay = paycheck.netPay.netPay + (isNaN(numericAdjust) ? 0 : numericAdjust);
 
+    const magentaCommission = paycheck.commissionCalculations.reduce((sum, calc) => sum + calc.magentaCommission, 0);
+    const totalCommission = paycheck.commission.boxesCommission + paycheck.commission.accessoriesCommission + magentaCommission;
+
     const handleGeneratePay = async () => {
         setLoading(true);
         setSuccessMessage(null);
         setErrorMessage(null);
 
-        const payload = {
+        const work: Record<string, unknown> = {
+            workingHoursPay: paycheck.work.workingHoursPay,
+            numberOfHoursWorked: paycheck.work.numberOfHoursWorked,
+            numberOfDaysWorked: paycheck.work.numberOfDaysWorked,
+            totalAccessories: paycheck.work.totalAccessories,
+            boxesSold: paycheck.work.boxesSold,
+            upgradesSold: paycheck.work.upgradesSold,
+            tabletsSold: paycheck.work.tabletsSold,
+            hsiSold: paycheck.work.hsiSold,
+            watchesSold: paycheck.work.watchesSold,
+            migration: paycheck.work.migration,
+            totalPreActivatedPhones: paycheck.work.totalPreActivatedPhones,
+        };
+        if (paycheck.work.notEligibleForCommission.length > 0) {
+            work.notEligibleForCommission = paycheck.work.notEligibleForCommission;
+        }
+
+        const payload: Record<string, unknown> = {
             fromDate,
             toDate,
             includeBoxesInPaycheck: includeBoxes,
@@ -40,18 +61,7 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 employeeNtid: paycheck.employee.employeeNtid,
                 employeeName: paycheck.employee.employeeName,
             },
-            work: {
-                numberOfHoursWorked: paycheck.work.numberOfHoursWorked,
-                numberOfDaysWorked: paycheck.work.numberOfDaysWorked,
-                workingHoursPay: paycheck.work.workingHoursPay,
-                totalAccessories: paycheck.work.totalAccessories,
-                boxesSold: paycheck.work.boxesSold,
-                upgrade: paycheck.work.upgradesSold,
-                migrations: paycheck.work.migration,
-                tabletsSold: paycheck.work.tabletsSold,
-                hsiSold: paycheck.work.hsiSold,
-                watchesSold: paycheck.work.watchesSold,
-            },
+            work,
             commission: {
                 boxesCommission: paycheck.commission.boxesCommission,
                 accessoriesCommission: paycheck.commission.accessoriesCommission,
@@ -63,16 +73,29 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 },
                 netPay: paycheck.netPay.netPay,
             },
-            adjustment: {
-                amount: adjustAmount,
-                reason: adjustReason,
-            }
-
+            employeeSalesHistory: paycheck.sales,
+            commissionCalculations: paycheck.commissionCalculations,
         };
+
+        if (!isNaN(numericAdjust) && numericAdjust !== 0) {
+            payload.adjustments = [
+                {
+                    amount: numericAdjust,
+                    reason: adjustReason,
+                },
+            ];
+        }
         try {
             const response = await apiClient.post("/company/payslip", payload);
-            if (response.data) {
-                // ✅ Decode Base64 to a Blob (PDF)
+
+            // A 200 response with no usable PDF payload is still a failure —
+            // some business-rule rejections come back this way instead of a non-2xx status.
+            if (!response.data?.response) {
+                throw new Error(response.data?.message || "The server did not return a payslip. Please review the details and try again.");
+            }
+
+            let blobUrl: string;
+            try {
                 const byteCharacters = atob(response.data.response); // Decode base64
                 const byteNumbers = new Array(byteCharacters.length);
                 for (let i = 0; i < byteCharacters.length; i++) {
@@ -80,26 +103,20 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 }
                 const byteArray = new Uint8Array(byteNumbers);
                 const blob = new Blob([byteArray], { type: "application/pdf" });
-
-                // ✅ Create a URL and open the PDF in a new tab
-                const blobUrl = URL.createObjectURL(blob);
-                window.open(blobUrl, "_blank");
-
-                setSuccessMessage("✅ Payslip generated successfully!");
+                blobUrl = URL.createObjectURL(blob);
+            } catch {
+                throw new Error("The payslip was generated but could not be read. Please try again.");
             }
+
+            window.open(blobUrl, "_blank");
+            setSuccessMessage("✅ Payslip generated successfully!");
         } catch (error) {
-            // ✅ Safely extract error message
-            let errorMessage = "❌ Failed to generate payslip.";
+            const message =
+                error instanceof Error && error.message
+                    ? error.message
+                    : "Failed to generate payslip. Please try again.";
 
-            if (error instanceof Error) {
-                errorMessage = error.message; // ✅ Use error.message if available
-            } else if (typeof error === "string") {
-                errorMessage = error; // ✅ If error is a string, use it
-            } else if (error && typeof error === "object" && "message" in error) {
-                errorMessage = String(error.message); // ✅ If error has a "message" property
-            }
-
-            setErrorMessage(errorMessage);
+            setErrorMessage(message);
         } finally {
             setLoading(false);
         }
@@ -126,15 +143,11 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                         ["Accessories Sold", paycheck.work.totalAccessories],
                         ["Activations", paycheck.work.boxesSold],
                         ["Upgrades", paycheck.work.upgradesSold],
-                        ["Migrations", paycheck.work.migration],
+                        ["Migrations", `${paycheck.work.migration.accounts} acct / ${paycheck.work.migration.lines} lines`],
                         ["BTS", paycheck.work.tabletsSold],
                         ["HSI", paycheck.work.hsiSold],
                         ["Free Lines", paycheck.work.watchesSold],
-                        ["Preacts Activated", paycheck.preActivations.numberOfPreActivationPhonesActivated,],
-                        ["Preacts Sold", paycheck.preActivations.numberOfPreActivatedPhonesSold],
-                        ["Preacts Activation Cost", paycheck.preActivations.activatedValue],
-                        ["Total Preacts Sold Price", paycheck.preActivations.soldValue],
-                        ["Total Deduction for preacts", paycheck.preActivations.deductedAmountForPreActivationFromAccessories],
+                        ["Preactivated Phones", paycheck.work.totalPreActivatedPhones],
                     ].map(([label, value], index) => (
                         <div key={index} className="flex flex-col items-center">
                             <span className="text-gray-500 dark:text-gray-400 text-xs uppercase">{label}</span>
@@ -142,6 +155,15 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                         </div>
                     ))}
                 </div>
+
+                {paycheck.work.notEligibleForCommission.length > 0 && (
+                    <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">
+                        Not eligible for commission:{" "}
+                        {paycheck.work.notEligibleForCommission
+                            .map((entry) => `${entry.date} (${entry.totalPreActivatedPhones} preactivated)`)
+                            .join(", ")}
+                    </p>
+                )}
             </div>
 
             {/* Commission, Deductions & Net Pay */}
@@ -150,13 +172,18 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                 <div className="flex flex-col items-center text-sm sm:text-base">
                     <p className="text-sm text-gray-500 uppercase tracking-wide">Commission</p>
                     <span className="text-xl font-semibold text-blue-600 dark:text-blue-400">
-                        +${(paycheck.commission.boxesCommission + paycheck.commission.accessoriesCommission).toFixed(2)}
+                        +${totalCommission.toFixed(2)}
                     </span>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                         Boxes: <span className="text-gray-800 dark:text-gray-200 font-medium">${paycheck.commission.boxesCommission.toFixed(2)}</span>
                     </p><p className="text-xs text-gray-500 dark:text-gray-400">
                         Accessories: <span className="text-gray-800 dark:text-gray-200 font-medium">${paycheck.commission.accessoriesCommission.toFixed(2)}</span>
                     </p>
+                    {magentaCommission > 0 && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Magenta: <span className="text-gray-800 dark:text-gray-200 font-medium">${magentaCommission.toFixed(2)}</span>
+                        </p>
+                    )}
                 </div>
 
                 {/* Paid for Hours */}
@@ -267,10 +294,87 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
 
             {/* ✅ Success/Error Messages */}
             {successMessage && (
-                <p className="mt-3 text-center text-green-600 dark:text-green-400 font-medium">{successMessage}</p>
+                <div className="mt-4 flex items-start gap-2 rounded-lg border border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-950/40 px-4 py-3">
+                    <CheckCircleIcon className="h-5 w-5 flex-shrink-0 text-green-600 dark:text-green-400" />
+                    <p className="text-sm font-medium text-green-800 dark:text-green-300">{successMessage}</p>
+                </div>
             )}
             {errorMessage && (
-                <p className="mt-3 text-center text-red-500 font-medium">{errorMessage}</p>
+                <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950/40 px-4 py-3">
+                    <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
+                    <div>
+                        <p className="text-sm font-semibold text-red-800 dark:text-red-300">Couldn&apos;t generate paycheck</p>
+                        <p className="text-sm text-red-700 dark:text-red-400">{errorMessage}</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Expandable Commission Breakdown */}
+            {paycheck.commissionCalculations.length > 0 && (
+                <div className="mt-4">
+                    <button
+                        className="w-full flex justify-between items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
+                        onClick={() => setShowCommissionBreakdown(!showCommissionBreakdown)}
+                    >
+                        <span>{showCommissionBreakdown ? "Hide Commission Breakdown" : "Show Commission Breakdown"}</span>
+                        {showCommissionBreakdown ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
+                    </button>
+
+                    {showCommissionBreakdown && (
+                        <div className="mt-5 bg-gray-50 dark:bg-gray-800 p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 space-y-6">
+                            {paycheck.commissionCalculations.map((calc, index) => (
+                                <div key={index}>
+                                    <h5 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                                        {calc.startDate} – {calc.endDate} ({calc.structureType})
+                                    </h5>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm border-collapse">
+                                            <thead>
+                                                <tr className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300">
+                                                    <th className="p-3 text-left">Category</th>
+                                                    <th className="p-3 text-center">Sales Count</th>
+                                                    <th className="p-3 text-center">Applied Threshold</th>
+                                                    <th className="p-3 text-center">Rate</th>
+                                                    <th className="p-3 text-left">Calculation</th>
+                                                    <th className="p-3 text-right">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {calc.categories.map((cat, catIndex) => (
+                                                    <tr
+                                                        key={catIndex}
+                                                        className={`border-b border-gray-300 dark:border-gray-700 ${catIndex % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-100 dark:bg-gray-800"
+                                                            }`}
+                                                    >
+                                                        <td className="p-3 font-medium text-gray-700 dark:text-gray-300">{cat.category}</td>
+                                                        <td className="p-3 text-center text-gray-700 dark:text-gray-300">{cat.salesCount}</td>
+                                                        <td className="p-3 text-center text-gray-700 dark:text-gray-300">{cat.appliedThreshold}</td>
+                                                        <td className="p-3 text-center text-gray-700 dark:text-gray-300">${cat.commissionRate}</td>
+                                                        <td className="p-3 text-gray-500 dark:text-gray-400">{cat.calculation}</td>
+                                                        <td className="p-3 text-right font-semibold text-green-600 dark:text-green-400">${cat.commissionAmount.toFixed(2)}</td>
+                                                    </tr>
+                                                ))}
+                                                <tr className="border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
+                                                    <td className="p-3 font-medium text-gray-700 dark:text-gray-300">Magenta</td>
+                                                    <td className="p-3 text-center text-gray-700 dark:text-gray-300">
+                                                        {calc.magenta.totalAccounts} acct / {calc.magenta.totalLines} lines
+                                                    </td>
+                                                    <td className="p-3 text-center text-gray-700 dark:text-gray-300">{calc.magenta.appliedThreshold}</td>
+                                                    <td className="p-3 text-center text-gray-700 dark:text-gray-300">${calc.magenta.commissionRate}</td>
+                                                    <td className="p-3 text-gray-500 dark:text-gray-400">{calc.magenta.calculation}</td>
+                                                    <td className="p-3 text-right font-semibold text-green-600 dark:text-green-400">${calc.magenta.commissionAmount.toFixed(2)}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <p className="mt-2 text-right text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                        Period Commission: ${calc.periodCommission.toFixed(2)}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             )}
 
             {/* Expandable Sales Section */}
@@ -339,7 +443,7 @@ export default function EmployeePaycheckCard({ paycheck, fromDate, toDate, inclu
                                                     {sale.upgrade}
                                                 </td>
                                                 <td className="p-3 text-center text-blue-600 dark:text-blue-400 font-bold">
-                                                    {sale.migrations}
+                                                    {sale.migrations.accounts} acct / {sale.migrations.lines} lines
                                                 </td>
                                                 <td className="p-3 text-center text-green-600 dark:text-green-400 font-semibold">
                                                     ${sale.accessories.toFixed(2)}

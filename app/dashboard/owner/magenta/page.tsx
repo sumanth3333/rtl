@@ -130,6 +130,7 @@ export default function OwnerMagentaPage() {
                                                     <th className="px-2 py-1 text-left">Transfer PIN Validity</th>
                                                     <th className="px-2 py-1 text-left">Order ID</th>
                                                     <th className="px-2 py-1 text-left">Order Date</th>
+                                                    <th className="px-2 py-1 text-left">Ordered By</th>
                                                     <th className="px-2 py-1 text-left">New Account #</th>
                                                     <th className="px-2 py-1 text-left">New Account PIN</th>
                                                     <th className="px-2 py-1 text-left">Lines</th>
@@ -147,6 +148,7 @@ export default function OwnerMagentaPage() {
                                                         <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{asDisplayDate(order.transferPinValidity)}</td>
                                                         <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.orderId || "—"}</td>
                                                         <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{asDisplayDate(order.orderDate)}</td>
+                                                        <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.orderedEmployeeName || "—"}</td>
                                                         <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.newAccountNumber || "—"}</td>
                                                         <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.newAccountPin || "—"}</td>
                                                         <td className="px-2 py-1 text-gray-700 dark:text-gray-200">{order.numberOfLines ?? "—"}</td>
@@ -208,6 +210,7 @@ export default function OwnerMagentaPage() {
                                                     <th className="px-2 py-1 text-left">Phone</th>
                                                     <th className="px-2 py-1 text-left">T-Mobile Temp #</th>
                                                     <th className="px-2 py-1 text-left">Lines</th>
+                                                    <th className="px-2 py-1 text-left">Ordered By</th>
                                                     <th className="px-2 py-1 text-left">Completed By</th>
                                                     <th className="px-2 py-1 text-left">Completed Date</th>
                                                 </tr>
@@ -219,6 +222,7 @@ export default function OwnerMagentaPage() {
                                                         <td className="px-2 py-1">{item.phoneNumber || "—"}</td>
                                                         <td className="px-2 py-1">{item.temporaryNumber || "—"}</td>
                                                         <td className="px-2 py-1">{item.numberOfLines ?? "—"}</td>
+                                                        <td className="px-2 py-1">{item.orderedEmployeeName || "—"}</td>
                                                         <td className="px-2 py-1">{item.completedEmployeeName || "—"}</td>
                                                         <td className="px-2 py-1">{asDisplayDate(item.completedDate)}</td>
                                                     </tr>

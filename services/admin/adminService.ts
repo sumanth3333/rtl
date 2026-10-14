@@ -3,6 +3,7 @@ import { Company } from "@/schemas/schema";
 import { API_ROUTES } from "@/constants/apiRoutes";
 import { FileExportPayload, SimpleCompany, UploadedReport } from "@/types/fileExportTypes";
 import { ReportUploadSuggestionGroup } from "@/types/retentionSuggestion";
+import { AdminCompanyCredential } from "@/types/companyCredentialTypes";
 import { AxiosProgressEvent } from "axios";
 
 export const createCompany = async (companyData: Company) => {
@@ -60,5 +61,11 @@ export const fetchReportUploadSuggestions = async (): Promise<ReportUploadSugges
 
 export const fetchRetentionGroupedSuggestions = async (): Promise<ReportUploadSuggestionGroup[]> => {
     const response = await apiClient.get(API_ROUTES.RETENTION_SUGGESTIONS);
+    return response.data ?? [];
+};
+
+// ✅ Every company's stored credentials, already decrypted - ADMIN-role gated on the backend, no OTP step here
+export const fetchAllCompanyCredentials = async (): Promise<AdminCompanyCredential[]> => {
+    const response = await apiClient.get<AdminCompanyCredential[]>("/admin/view/company-credentials");
     return response.data ?? [];
 };

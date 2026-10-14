@@ -8,6 +8,11 @@ export interface Store {
     storeName: string;
 }
 
+export interface Migration {
+    accounts: number;
+    lines: number;
+}
+
 export interface Sale {
     boxesSold: number;
     accessories: number; // previously was integer, now float
@@ -15,12 +20,17 @@ export interface Sale {
     tabletsSold: number;
     hsiSold: number;
     watchesSold: number;
-    migrations: number;
+    migrations: Migration;
     clockInTime: string;
     clockOutTime: string;
     numberOfHoursWorkedByEmployee: number; // was string, now number
     saleDate: string;
     store: Store;
+}
+
+export interface NotEligibleForCommissionEntry {
+    date: string;
+    totalPreActivatedPhones: number;
 }
 
 export interface WorkDetails {
@@ -33,7 +43,9 @@ export interface WorkDetails {
     tabletsSold: number;
     hsiSold: number;
     watchesSold: number;
-    migration: number;
+    migration: Migration;
+    totalPreActivatedPhones: number;
+    notEligibleForCommission: NotEligibleForCommissionEntry[];
 }
 
 export interface CommissionDetails {
@@ -51,12 +63,55 @@ export interface NetPayDetails {
     netPay: number;
 }
 
-export interface Preact {
-    numberOfPreActivationPhonesActivated: number;
-    numberOfPreActivatedPhonesSold: number;
-    activatedValue: number;
-    soldValue: number;
-    deductedAmountForPreActivationFromAccessories: number;
+export interface CommissionThreshold {
+    itemType: string;
+    threshold: number;
+    payAmount: number;
+}
+
+export interface CommissionReference {
+    referenceId: string;
+    startDate: string;
+    endDate: string;
+    structureType: string;
+    customStructure: unknown | null;
+    defaultThresholds: CommissionThreshold[];
+}
+
+export interface CommissionCategoryCalculation {
+    category: string;
+    salesCount: number;
+    appliedThreshold: number;
+    commissionRate: number;
+    commissionAmount: number;
+    calculation: string;
+}
+
+export interface MagentaCommissionCalculation {
+    totalAccounts: number;
+    totalLines: number;
+    calculationType: string;
+    appliedThreshold: number;
+    commissionRate: number;
+    commissionAmount: number;
+    calculation: string;
+}
+
+export interface CommissionCalculation {
+    referenceId: string;
+    startDate: string;
+    endDate: string;
+    structureType: string;
+    categories: CommissionCategoryCalculation[];
+    magenta: MagentaCommissionCalculation;
+    salesCommission: number;
+    magentaCommission: number;
+    periodCommission: number;
+}
+
+export interface Adjustment {
+    amount: number;
+    reason: string;
 }
 
 export interface EmployeePaycheck {
@@ -64,12 +119,20 @@ export interface EmployeePaycheck {
     work: WorkDetails;
     commission: CommissionDetails;
     netPay: NetPayDetails;
-    preActivations: Preact;
     sales: Sale[];
+    commissionCalculations: CommissionCalculation[];
 }
 
 export interface PaycheckResponse {
+    totalHourlyPay: number;
+    totalSalesCommission: number;
+    totalMagentaCommission: number;
+    totalAccessoriesCommission: number;
+    totalCommission: number;
+    totalGrossPay: number;
+    totalTaxes: number;
     totalPayCheckForCompany: number;
+    commissionReference: CommissionReference[];
     paychecks: EmployeePaycheck[];
 }
 

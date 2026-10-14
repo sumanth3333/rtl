@@ -8,6 +8,7 @@ import CommissionTable from "@/components/owner/paycheck/company-commission/Comm
 import PayFrequencySelect from "@/components/owner/paycheck/company-commission/PayFrequencySelect";
 import { useOwner } from "@/hooks/useOwner";
 import PreactivationDeductionTable from "@/components/owner/paycheck/company-commission/PreactivationDeductionTable";
+import CommissionSpiffs from "@/components/owner/paycheck/company-commission/CommissionSpiffs";
 
 export default function CompanyPayStructurePage() {
     const { companyName } = useOwner();
@@ -110,6 +111,9 @@ export default function CompanyPayStructurePage() {
                     </div>
                 )}
             </div>
+
+            {/* ✅ Limited-Time Spiffs */}
+            <CommissionSpiffs companyName={companyName} />
         </div>
     );
 }

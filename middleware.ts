@@ -4,7 +4,7 @@ import { validRoles } from "./constants/validRoles";
 
 const roleRoutePrefixes: Record<string, string[]> = {
     ADMIN: ["/dashboard/admin"],
-    OWNER: ["/dashboard/owner"],
+    OWNER: ["/dashboard/owner", "/store-deletion"],
     MANAGER: ["/dashboard/manager"],
     EMPLOYEE: ["/dashboard/employee"],
 };
@@ -136,5 +136,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/profile", "/settings"],
+    matcher: ["/dashboard/:path*", "/profile", "/settings", "/store-deletion/:path*"],
 };

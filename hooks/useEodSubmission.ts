@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { EodReport } from "@/types/employeeSchema";
+import { EmployeeSaleEntry, EodReport, EodSubmissionRequest } from "@/types/employeeSchema";
 import { submitEodReport } from "@/services/employee/employeeService";
 
 type EmployeeMeta = { employeeNtid: string; employeeName: string };
@@ -10,6 +10,8 @@ interface Params {
     individualEntries: EodReport[];
     setIndividualEntries: React.Dispatch<React.SetStateAction<EodReport[]>>;
     showIndividualForm: boolean;
+    crossStoreEntries: EmployeeSaleEntry[];
+    hasExpenses: boolean | null;
     accessoriesByEmployee: number;
     watchBoxesSold: number;
     watchMigrations: number;
@@ -35,6 +37,8 @@ export function useEodSubmission({
     individualEntries,
     setIndividualEntries,
     showIndividualForm,
+    crossStoreEntries,
+    hasExpenses,
     accessoriesByEmployee,
     watchBoxesSold,
     watchMigrations,
@@ -54,10 +58,26 @@ export function useEodSubmission({
     logout,
 }: Params) {
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-    const [formData, setFormData] = useState<EodReport | null>(null);
+    const [formData, setFormData] = useState<EodSubmissionRequest | null>(null);
     const [loading, setLoading] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+
+    const toEmployeeSaleEntry = useCallback(
+        (entry: EodReport, salesCreditOnly: boolean): EmployeeSaleEntry => ({
+            employeeNtid: entry.employee.employeeNtid,
+            salesCreditOnly,
+            boxesSold: entry.boxesSold || 0,
+            systemAccessories: entry.systemAccessories || 0,
+            accessoriesByEmployee: entry.accessoriesByEmployee || 0,
+            upgrade: entry.upgrade || 0,
+            tabletsSold: entry.tabletsSold || 0,
+            hsiSold: entry.hsiSold || 0,
+            watchesSold: entry.watchesSold || 0,
+            migrations: entry.migrations || 0,
+        }),
+        []
+    );
 
     const onSubmit = useCallback((data: EodReport) => {
         if (!confirmClockOut) {
@@ -81,6 +101,8 @@ export function useEodSubmission({
             }
         }
 
+        let employeeSales: EmployeeSaleEntry[];
+
         if (showIndividualForm) {
             const preparedEntries = employeesWorking.map((emp, index) => ({
                 store: { dealerStoreId: storeDealerStoreId || "" },
@@ -103,16 +125,28 @@ export function useEodSubmission({
                 systemAccessories: individualEntries[index]?.systemAccessories || 0,
             }));
 
-            const totalBoxesSold = preparedEntries.reduce((sum, entry) => sum + entry.boxesSold, 0);
-            const totalMigrations = preparedEntries.reduce((sum, entry) => sum + entry.migrations, 0);
-            const totalUpgrades = preparedEntries.reduce((sum, entry) => sum + entry.upgrade, 0);
-            const totalHSISold = preparedEntries.reduce((sum, entry) => sum + entry.hsiSold, 0);
-            const totalTabletsSold = preparedEntries.reduce((sum, entry) => sum + entry.tabletsSold, 0);
-            const totalWatchesSold = preparedEntries.reduce((sum, entry) => sum + entry.watchesSold, 0);
-            const totalAccessoriesByEmployee = parseFloat(preparedEntries.reduce((sum, entry) => sum + entry.accessoriesByEmployee, 0).toFixed(2));
-            const totalsystemAccessories = parseFloat(
-                preparedEntries.reduce((sum, entry) => sum + entry.systemAccessories, 0).toFixed(2)
+            // ✅ Store totals must equal the sum of everyone credited here, including cross-store entries
+            const totalBoxesSold = preparedEntries.reduce((sum, entry) => sum + entry.boxesSold, 0)
+                + crossStoreEntries.reduce((sum, entry) => sum + entry.boxesSold, 0);
+            const totalMigrations = preparedEntries.reduce((sum, entry) => sum + entry.migrations, 0)
+                + crossStoreEntries.reduce((sum, entry) => sum + entry.migrations, 0);
+            const totalUpgrades = preparedEntries.reduce((sum, entry) => sum + entry.upgrade, 0)
+                + crossStoreEntries.reduce((sum, entry) => sum + entry.upgrade, 0);
+            const totalHSISold = preparedEntries.reduce((sum, entry) => sum + entry.hsiSold, 0)
+                + crossStoreEntries.reduce((sum, entry) => sum + entry.hsiSold, 0);
+            const totalTabletsSold = preparedEntries.reduce((sum, entry) => sum + entry.tabletsSold, 0)
+                + crossStoreEntries.reduce((sum, entry) => sum + entry.tabletsSold, 0);
+            const totalWatchesSold = preparedEntries.reduce((sum, entry) => sum + entry.watchesSold, 0)
+                + crossStoreEntries.reduce((sum, entry) => sum + entry.watchesSold, 0);
+            const totalAccessoriesByEmployee = parseFloat(
+                (preparedEntries.reduce((sum, entry) => sum + entry.accessoriesByEmployee, 0)
+                    + crossStoreEntries.reduce((sum, entry) => sum + entry.accessoriesByEmployee, 0)).toFixed(2)
             );
+            const totalsystemAccessories = parseFloat(
+                (preparedEntries.reduce((sum, entry) => sum + entry.systemAccessories, 0)
+                    + crossStoreEntries.reduce((sum, entry) => sum + entry.systemAccessories, 0)).toFixed(2)
+            );
+
             const errors: Record<string, string> = {};
             if (totalBoxesSold !== watchBoxesSold) { errors["boxesSold"] = "Total does not match sum of individual entries."; }
             if (totalMigrations !== watchMigrations) { errors["migrations"] = "Total does not match sum of individual entries."; }
@@ -130,66 +164,68 @@ export function useEodSubmission({
 
             setValidationErrors({});
             setIndividualEntries(preparedEntries);
+
+            employeeSales = [
+                ...preparedEntries.map((entry) => toEmployeeSaleEntry(entry, false)),
+                ...crossStoreEntries,
+            ];
+        } else {
+            setValidationErrors({});
+            employeeSales = [
+                toEmployeeSaleEntry(data, false),
+                ...crossStoreEntries,
+            ];
         }
 
-        const formattedData: EodReport = {
-            ...data,
-            actualCash: parseFloat(adjCash.toFixed(2)),
+        const payload: EodSubmissionRequest = {
+            dealerStoreId: storeDealerStoreId || "",
             systemCash: parseFloat((data.systemCash ?? 0).toFixed(2)),
+            systemCard: parseFloat((data.systemCard ?? 0).toFixed(2)),
+            actualCash: parseFloat(adjCash.toFixed(2)),
             actualCard: parseFloat(adjCard.toFixed(2)),
             creditCard: parseFloat((data.creditCard ?? 0).toFixed(2)),
             debitCard: parseFloat((data.debitCard ?? 0).toFixed(2)),
-            systemCard: parseFloat((data.systemCard ?? 0).toFixed(2)),
-            systemAccessories: parseFloat((data.systemAccessories ?? 0).toFixed(2)),
-            accessoriesByEmployee: parseFloat((data.accessoriesByEmployee ?? 0).toFixed(2)),
             lastTransactionTime: data.lastTransactionTime,
-            boxesSold: parseFloat((data.boxesSold ?? 0).toFixed(2)),
-            migrations: parseFloat((data.migrations ?? 0).toFixed(2)),
-            upgrade: parseFloat((data.upgrade ?? 0).toFixed(2)),
-            hsiSold: parseFloat((data.hsiSold ?? 0).toFixed(2)),
-            tabletsSold: parseFloat((data.tabletsSold ?? 0).toFixed(2)),
-            watchesSold: parseFloat((data.watchesSold ?? 0).toFixed(2)),
-            expenses: data.expenses?.map(exp => ({
-                id: exp.id,
-                amount: parseFloat(exp.amount.toFixed(2)),
-                reason: exp.reason,
-                expenseType: exp.expenseType,
-                paymentType: exp.paymentType,
-            })) ?? [],
+            employeeSales,
+            expenses: hasExpenses
+                ? (data.expenses ?? []).map((exp) => ({
+                    id: exp.id,
+                    amount: parseFloat(exp.amount.toFixed(2)),
+                    reason: exp.reason,
+                    expenseType: exp.expenseType,
+                    paymentType: exp.paymentType,
+                }))
+                : [],
         };
 
-        setFormData(formattedData);
+        setFormData(payload);
         setShowConfirm(true);
     }, [
         accessoriesByEmployee,
-        adjustedActualCash,
-        adjustedActualCard,
         confirmClockOut,
+        crossStoreEntries,
         employeesWorking,
+        hasExpenses,
         individualEntries,
+        setIndividualEntries,
         showIndividualForm,
         storeDealerStoreId,
+        toEmployeeSaleEntry,
         watchBoxesSold,
         watchHsiSold,
         watchMigrations,
         watchSystemAccessories,
         watchTabletsSold,
         watchUpgrade,
-        watchWatchesSold
+        watchWatchesSold,
     ]);
 
     const handleConfirm = useCallback(async () => {
-        if (!formData && !showIndividualForm) { return; }
+        if (!formData) { return; }
         setShowConfirm(false);
         setLoading(true);
         try {
-            if (!showIndividualForm) {
-                await submitEodReport(formData as EodReport);
-            } else {
-                await Promise.all(
-                    individualEntries.map((entry) => submitEodReport(entry))
-                );
-            }
+            await submitEodReport(formData);
             setShowSuccess(true);
             resetForm();
             setTimeout(() => { logout(); }, 3000);
@@ -202,7 +238,7 @@ export function useEodSubmission({
         } finally {
             setLoading(false);
         }
-    }, [formData, individualEntries, logout, resetForm, showIndividualForm]);
+    }, [formData, logout, resetForm]);
 
     return {
         onSubmit,

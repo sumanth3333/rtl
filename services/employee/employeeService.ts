@@ -1,43 +1,101 @@
-import { EodReport } from "@/types/employeeSchema";
+import { EodSubmissionRequest } from "@/types/employeeSchema";
 import apiClient from "../api/apiClient";
 import { Todo } from "@/types/todos";
+import { LateOpeningStatus } from "@/types/lateOpeningTypes";
+import { ClockInLocation } from "@/types/employeeTypes";
+import {
+    SecureCodeStatus,
+    SecureCodeValidationResult,
+    SecureCodeResetOtpSent,
+    SecureCodeResetOtpVerified,
+    SecureCodeResetConfirmed,
+} from "@/types/secureCodeTypes";
 
-export const clockInEmployee = async (employeeNtid: string, dealerStoreId: string) => {
-    try {
-        const response = await apiClient.post(`/employee/clockin`, {
-            employeeNtid,
-            dealerStoreId,
-        });
-
-        //console.log("✅ Clock-in response:", response.data);
-        return response.data || {}; // Ensure data is always returned
-    } catch (error) {
-        console.error("❌ Error clocking in:", error);
-        return { error: "An error occurred during clock-in." }; // Return an error object instead of throwing
-    }
+export const getSecureCodeStatus = async (employeeNtid: string): Promise<SecureCodeStatus> => {
+    const response = await apiClient.get<SecureCodeStatus>("/employee/secureCode/status", {
+        params: { employeeNtid },
+    });
+    return response.data;
 };
 
-export const getTodayGoal = async (dealerStoreId: string) => {
-    try {
-        const response = await apiClient.get(`/store/todayGoal`, {
-            params: { dealerStoreId },
-        });
-
-        // ✅ Always return parsed data (even if backend returns null)
-        return response.data || {};
-    } catch (error) {
-        console.error("❌ Error fetching today's goal:", error);
-        return { error: "Failed to fetch today's goal." };
-    }
+export const setupSecureCode = async (employeeNtid: string, secureCode: string): Promise<SecureCodeStatus> => {
+    const response = await apiClient.post<SecureCodeStatus>("/employee/setupSecureCode", null, {
+        params: { employeeNtid, secureCode },
+    });
+    return response.data;
 };
 
+// ✅ codeValidation=false is a normal response (wrong code, mismatched employee, not configured) - not an HTTP error
+export const validateSecureCode = async (employeeNtid: string, secureCode: string): Promise<SecureCodeValidationResult> => {
+    const response = await apiClient.post<SecureCodeValidationResult>("/employee/validateSecureCode", null, {
+        params: { employeeNtid, secureCode },
+    });
+    return response.data;
+};
 
+// ✅ Forgot-secure-code flow: send-otp -> verify-otp (returns a short-lived resetToken) -> confirm
+export const sendSecureCodeResetOtp = async (employeeNtid: string): Promise<SecureCodeResetOtpSent> => {
+    const response = await apiClient.post<SecureCodeResetOtpSent>("/employee/secure-code/reset/send-otp", {
+        employeeNtid,
+    });
+    return response.data;
+};
 
-export const submitEodReport = async (data: EodReport) => {
+export const verifySecureCodeResetOtp = async (
+    employeeNtid: string,
+    otp: string
+): Promise<SecureCodeResetOtpVerified> => {
+    const response = await apiClient.post<SecureCodeResetOtpVerified>("/employee/secure-code/reset/verify-otp", {
+        employeeNtid,
+        otp,
+    });
+    return response.data;
+};
+
+export const confirmSecureCodeReset = async (
+    employeeNtid: string,
+    resetToken: string,
+    newSecureCode: string
+): Promise<SecureCodeResetConfirmed> => {
+    const response = await apiClient.post<SecureCodeResetConfirmed>("/employee/secure-code/reset/confirm", {
+        employeeNtid,
+        resetToken,
+        newSecureCode,
+    });
+    return response.data;
+};
+
+export const fetchLateOpeningStatus = async (
+    employeeNtid: string,
+    dealerStoreId: string
+): Promise<LateOpeningStatus> => {
+    const response = await apiClient.get<LateOpeningStatus>("/employee/late-opening/status", {
+        params: { employeeNtid, dealerStoreId },
+    });
+    return response.data;
+};
+
+export const clockInEmployee = async (
+    employeeNtid: string,
+    dealerStoreId: string,
+    location: ClockInLocation
+) => {
+    // ✅ Let location-validation errors (ApiError, with distance/message details) propagate to the caller
+    const response = await apiClient.post(`/employee/clockin`, {
+        employeeNtid,
+        dealerStoreId,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        accuracyMeters: location.accuracyMeters,
+    });
+
+    return response.data || {};
+};
+
+// ✅ One request covering every employee credited for this store/date (self, coworkers, and cross-store credits)
+export const submitEodReport = async (data: EodSubmissionRequest) => {
     try {
-        console.log(data);
         const response = await apiClient.post("/sale/saveSaleDetails", data);
-        //console.log("✅ EOD Report Submitted Successfully:", response.data);
         return response.data; // Return the API response if needed
     } catch (error: unknown) {
         let errorMessage = "An unknown error occurred";
@@ -54,6 +112,16 @@ export const submitEodReport = async (data: EodReport) => {
         console.error("❌ Failed to Submit EOD Report:", errorMessage);
         throw new Error(errorMessage); // Re-throw error for UI handling
     }
+};
+
+// ✅ Full company employee roster, used to pick who gets cross-store sales credit
+export const getCompanyEmployees = async (
+    companyName: string
+): Promise<{ employeeNtid: string; employeeName: string }[]> => {
+    const response = await apiClient.get("/company/viewAllEmployeesUnderTheCompany", {
+        params: { companyName },
+    });
+    return response.data?.employees || [];
 };
 
 export const getEodDetails = async (dealerStoreId: string, employeeNtid: string) => {

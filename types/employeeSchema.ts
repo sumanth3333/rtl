@@ -16,6 +16,7 @@ export const employeeSchema = z.object({
     employeePayRatePerHour: z.number().min(0, "Please enter pay rate per hour"),
     commissionPercentage: z.number().min(0, "Please enter accessories commission %"),
     perBoxCommission: z.number().min(0, "Please enter commission per box"),
+    maxHours: z.number().min(0, "Please enter maximum hours").optional(),
     accessLevel: z.string().optional(),
     AssignedManager: z.string().optional(),
     company: z.object({
@@ -25,6 +26,20 @@ export const employeeSchema = z.object({
 
 // ✅ Store Type from Schema
 export type Employee = z.infer<typeof employeeSchema>;
+
+// ✅ Shape returned by GET /employee/inactiveEmployees - distinct from the add/edit Employee form schema
+export interface InactiveEmployee {
+    employeeId: number;
+    employeeNtid: string;
+    employeeName: string;
+    phoneNumber: number;
+    email: string;
+    employeePayRatePerHour: number;
+    commissionPercentage: number;
+    perBoxCommission: number;
+    active: boolean;
+    havingAssurantAccess: boolean;
+}
 
 export const eodReportSchema = z.object({
     store: z.object({ dealerStoreId: z.string().min(1, "Store ID is required") }),
@@ -57,3 +72,40 @@ export const eodReportSchema = z.object({
 });
 
 export type EodReport = z.infer<typeof eodReportSchema>;
+
+// ✅ One employee's sale credit inside a saveSaleDetails submission.
+// salesCreditOnly=true means this employee gets the credit without having physically worked at this store.
+export interface EmployeeSaleEntry {
+    employeeNtid: string;
+    salesCreditOnly: boolean;
+    boxesSold: number;
+    systemAccessories: number;
+    accessoriesByEmployee: number;
+    upgrade: number;
+    tabletsSold: number;
+    hsiSold: number;
+    watchesSold: number;
+    migrations: number;
+}
+
+export interface EodExpenseEntry {
+    id: number;
+    amount: number;
+    reason: string;
+    expenseType: "Short" | "Over";
+    paymentType: "Cash" | "Card";
+}
+
+// ✅ Body for POST /sale/saveSaleDetails - one request covering every employee credited for this store/date
+export interface EodSubmissionRequest {
+    dealerStoreId: string;
+    systemCash: number;
+    systemCard: number;
+    actualCash: number;
+    actualCard: number;
+    creditCard: number;
+    debitCard: number;
+    lastTransactionTime: string;
+    employeeSales: EmployeeSaleEntry[];
+    expenses: EodExpenseEntry[];
+}

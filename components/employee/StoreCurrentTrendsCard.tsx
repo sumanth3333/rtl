@@ -1,5 +1,6 @@
 "use client";
 
+import { TrendingUp } from "lucide-react";
 import type { StoreCurrentTrends } from "@/types/storeTrends";
 
 type Props = {
@@ -25,8 +26,9 @@ export default function StoreCurrentTrendsCard({ storeName, trends, loading }: P
         <div className="h-full flex flex-col bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
             <div className="flex items-start justify-between gap-3">
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        📈 Current Trends
+                    <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
+                        <TrendingUp className="w-5 h-5 shrink-0" />
+                        Current Trends
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                         {storeName ? `Store: ${storeName}` : "Store trend snapshot for this month"}

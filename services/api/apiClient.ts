@@ -12,6 +12,36 @@ const apiClient = axios.create({
     withCredentials: true, // ✅ Ensures HTTP-only cookies are sent with requests
 });
 
+// ✅ Best-effort browser geolocation, requested once per page load and cached - unlike
+// Timezone this can't be resolved synchronously (needs user permission), so the very first
+// request(s) may go out without it. Never blocks a request and is silently omitted if
+// permission is denied/unavailable - this is audit metadata only, never required.
+let cachedCoords: { latitude: number; longitude: number } | null = null;
+let geolocationRequested = false;
+
+const requestGeolocationOnce = () => {
+    if (geolocationRequested || typeof window === "undefined" || !navigator.geolocation) { return; }
+    geolocationRequested = true;
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            cachedCoords = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+        },
+        () => {
+            // Permission denied/unavailable - cachedCoords stays null, headers are simply omitted.
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 5 * 60 * 1000 }
+    );
+};
+
+apiClient.interceptors.request.use((config) => {
+    requestGeolocationOnce();
+    if (cachedCoords) {
+        config.headers.set("Latitude", String(cachedCoords.latitude));
+        config.headers.set("Longitude", String(cachedCoords.longitude));
+    }
+    return config;
+});
+
 // **Response Interceptor with Auto Token Refresh & Retry**
 apiClient.interceptors.response.use(
     (response) => response,
@@ -35,7 +65,10 @@ apiClient.interceptors.response.use(
                 }
             } catch (refreshError) {
                 console.error("❌ Refresh token failed. Logging out...");
-                if (typeof window !== "undefined") {
+                if (typeof window !== "undefined" && window.location.pathname !== "/auth/login") {
+                    // Clear stale session data so a future load doesn't retrigger this same loop
+                    localStorage.clear();
+                    sessionStorage.clear();
                     window.location.href = "/auth/login"; // ✅ Redirect user to login
                 }
                 return Promise.reject(refreshError);

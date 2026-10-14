@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "@/components/ui/sidebar/Sidebar";
 import Header from "@/components/ui/home/Header";
 import Footer from "@/components/ui/home/Footer";
+import HelpFloatingButton from "@/components/contactUs/HelpFloatingButton";
 
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
     const [isCollapsed, setIsCollapsed] = useState(true);
@@ -44,6 +45,8 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
 
                 <Footer />
             </div>
+
+            <HelpFloatingButton role="OWNER" />
         </div>
     );
 }

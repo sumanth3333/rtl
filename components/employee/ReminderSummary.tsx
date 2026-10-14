@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CalendarDays } from "lucide-react";
 import apiClient from "@/services/api/apiClient";
 import { useEmployee } from "@/hooks/useEmployee";
 
@@ -47,8 +48,9 @@ export default function ReminderSummary() {
             className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition duration-300"
         >
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                    📅 Today's Follow-ups
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    <CalendarDays className="w-5 h-5 shrink-0" />
+                    Today&apos;s Follow-ups
                 </h2>
                 <button
                     onClick={() => router.push("/dashboard/employee/remainders")}

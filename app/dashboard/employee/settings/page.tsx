@@ -1,102 +1,73 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { isPhoneDevice } from "@/utils/deviceType";
+import { useState } from "react";
+import { ShieldQuestion, Contact } from "lucide-react";
+import SecureCodeSettings from "@/components/employee/settings/SecureCodeSettings";
+import ContactVerificationSettings from "@/components/employee/settings/ContactVerificationSettings";
 
-interface DeviceInfo {
-    deviceType: string;
-    browser: string;
-    os: string;
-}
+const sections = [
+    {
+        key: "secureCode",
+        label: "Secure Code",
+        description: "Reset your clock-in secure code",
+        icon: ShieldQuestion,
+        Component: SecureCodeSettings,
+    },
+    {
+        key: "contactInfo",
+        label: "Contact Information",
+        description: "Update and verify your email and WhatsApp number",
+        icon: Contact,
+        Component: ContactVerificationSettings,
+    },
+];
 
 export default function SettingsPage() {
-    const [deviceInfo, setDeviceInfo] = useState<DeviceInfo>({
-        deviceType: "Detecting...",
-        browser: "Detecting...",
-        os: "Detecting...",
-    });
-
-    const [uaDetails, setUaDetails] = useState("");
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-
-    useEffect(() => {
-        const ua = navigator.userAgent || navigator.vendor || (window as any).opera || "";
-        setUaDetails(ua);
-
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        setDimensions({ width, height });
-
-        let deviceType = "Desktop";
-
-        if (isPhoneDevice()) {
-            deviceType = "Phone";
-        }
-        else if ((navigator as any).maxTouchPoints > 1 && width >= 820) {
-            deviceType = "Tablet";
-
-            const aspectRatio = height / width;
-
-            // ✅ 1) Portrait phones in desktop site mode
-            if (aspectRatio > 1.65) {
-                deviceType = "Phone";
-            }
-
-            // ✅ 2) Landscape phones (too short height)
-            if (height < 550) {
-                deviceType = "Phone";
-            }
-        }
-
-        // ✅ Browser detection
-        let browser = "Unknown";
-        if (/chrome|crios|crmo/i.test(ua)) {
-            browser = "Chrome";
-        } else if (/firefox|fxios/i.test(ua)) {
-            browser = "Firefox";
-        } else if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) {
-            browser = "Safari";
-        } else if (/edg/i.test(ua)) {
-            browser = "Edge";
-        }
-
-        // ✅ OS detection
-        let os = "Unknown";
-        if ((navigator as any).userAgentData?.platform) {
-            os = (navigator as any).userAgentData.platform;
-        } else if (/windows/i.test(ua)) {
-            os = "Windows";
-        } else if (/macintosh|mac os x/i.test(ua)) {
-            os = "MacOS";
-        } else if (/android/i.test(ua)) {
-            os = "Android";
-        } else if (/ios|iphone|ipad/i.test(ua)) {
-            os = "iOS";
-        } else if (/linux/i.test(ua)) {
-            os = "Linux";
-        }
-
-        setDeviceInfo({ deviceType, browser, os });
-    }, []);
+    const [activeKey, setActiveKey] = useState(sections[0].key);
+    const active = sections.find((s) => s.key === activeKey) ?? sections[0];
+    const ActiveComponent = active.Component;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#E3F2FD] via-[#BBDEFB] to-[#90CAF9] dark:from-[#0F172A] dark:via-[#1E293B] dark:to-[#334155] py-10 px-6">
-            <div className="max-w-3xl mx-auto bg-white/30 dark:bg-gray-900/30 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/50 p-6">
-                <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-6">
-                    Settings
-                </h1>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Settings</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Manage your account and security preferences.
+                    </p>
+                </div>
 
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mb-6">
-                    <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3">
-                        Device Information
-                    </h2>
-                    <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-                        <li><strong>Device Type:</strong> {deviceInfo.deviceType}</li>
-                        <li><strong>Browser:</strong> {deviceInfo.browser}</li>
-                        <li><strong>Operating System:</strong> {deviceInfo.os}</li>
-                        <li><strong>Viewport:</strong> {dimensions.width} × {dimensions.height}</li>
-                        <li className="break-all text-xs text-gray-500 dark:text-gray-400">{uaDetails}</li>
-                    </ul>
+                <div className="flex flex-col md:flex-row gap-6 items-start">
+                    {/* Section nav */}
+                    <nav className="w-full md:w-64 shrink-0 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-2">
+                        {sections.map((section) => {
+                            const Icon = section.icon;
+                            const isActive = section.key === activeKey;
+                            return (
+                                <button
+                                    key={section.key}
+                                    type="button"
+                                    onClick={() => setActiveKey(section.key)}
+                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-left transition ${isActive
+                                        ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                        }`}
+                                >
+                                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-400"}`} />
+                                    {section.label}
+                                </button>
+                            );
+                        })}
+                    </nav>
+
+                    {/* Content panel */}
+                    <div className="flex-1 w-full bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                        <div className="mb-5 pb-4 border-b border-gray-100 dark:border-gray-800">
+                            <h2 className="text-base font-semibold text-gray-900 dark:text-white">{active.label}</h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{active.description}</p>
+                        </div>
+                        <ActiveComponent />
+                    </div>
                 </div>
             </div>
         </div>

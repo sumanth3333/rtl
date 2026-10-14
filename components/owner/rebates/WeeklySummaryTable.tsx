@@ -1,18 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { WeeklyRebateStoreSummary } from "@/types/rebates";
+import { useFetchReorderSummary } from "@/hooks/useFetchReorderSummary";
+import { useFetchCurrentInventory } from "@/hooks/useFetchCurrentInventory";
+import { StoreCurrentStock } from "@/types/currentInventoryTypes";
 
 type Props = {
     summaries: WeeklyRebateStoreSummary[];
     currency: (value: number) => string;
+    companyName: string;
 };
+
+interface ReorderLineItem {
+    productName: string;
+    minimumQuantity: number;
+    currentQuantity: number;
+    reorderQuantity: number;
+}
+
+interface StoreReorderInfo {
+    estimatedReorderValue: number;
+    items: ReorderLineItem[];
+}
 
 const uniqueValues = (vals: string[]) => Array.from(new Set(vals.filter(Boolean)));
 const sum = (vals: number[]) => vals.reduce((acc, val) => acc + val, 0);
 
-export default function WeeklySummaryTable({ summaries, currency }: Props) {
+export default function WeeklySummaryTable({ summaries, currency, companyName }: Props) {
     const [showDetails, setShowDetails] = useState(false);
+    const [expandedStore, setExpandedStore] = useState<string | null>(null);
+
+    const { data: reorderStores, isLoading: reorderLoading } = useFetchReorderSummary(companyName);
+    const { data: currentStock, isLoading: stockLoading } = useFetchCurrentInventory(companyName);
+    const inventoryLoading = reorderLoading || stockLoading;
+
+    const reorderByStore = useMemo(() => {
+        const map = new Map<string, StoreReorderInfo>();
+        reorderStores.forEach((store) => {
+            const items = store.inventory
+                .filter((item) => item.currentQuantity < item.minimumQuantity)
+                .map((item) => ({
+                    productName: item.productName,
+                    minimumQuantity: item.minimumQuantity,
+                    currentQuantity: item.currentQuantity,
+                    reorderQuantity: item.minimumQuantity - item.currentQuantity,
+                }));
+            map.set(store.store.dealerStoreId, { estimatedReorderValue: store.estimatedReorderValue, items });
+        });
+        return map;
+    }, [reorderStores]);
+
+    const stockByStore = useMemo(() => {
+        const map = new Map<string, StoreCurrentStock>();
+        currentStock.forEach((stock) => map.set(stock.store.dealerStoreId, stock));
+        return map;
+    }, [currentStock]);
 
     if (!summaries.length) {
         return null;
@@ -90,6 +133,8 @@ export default function WeeklySummaryTable({ summaries, currency }: Props) {
                             <th className="px-3 py-2 text-right font-semibold text-indigo-700 dark:text-indigo-300">Total Rebate</th>
                             <th className="px-3 py-2 text-right font-semibold text-rose-700 dark:text-rose-300">Deductions</th>
                             <th className="px-3 py-2 text-right font-semibold text-emerald-700 dark:text-emerald-300">After Deductions</th>
+                            <th className="px-3 py-2 text-right font-semibold text-amber-700 dark:text-amber-300">Reorder Amount</th>
+                            <th className="px-3 py-2 text-center font-semibold text-gray-500 dark:text-gray-400">Details</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -99,22 +144,92 @@ export default function WeeklySummaryTable({ summaries, currency }: Props) {
                             const totalRebate = (tue?.totalCost || 0) + (fri?.totalCost || 0);
                             const totalDeductions = (tue?.dealerDeduction || 0) + (fri?.dealerDeduction || 0);
                             const afterDeductions = (tue?.expectedRebates || 0) + (fri?.expectedRebates || 0);
+
+                            const storeId = row.store.dealerStoreId;
+                            const reorder = reorderByStore.get(storeId);
+                            const stock = stockByStore.get(storeId);
+                            const isExpanded = expandedStore === storeId;
+
                             return (
-                                <tr key={row.store.dealerStoreId} className="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 align-top">
-                                    <td className="px-3 py-2">
-                                        <div className="font-medium text-gray-900 dark:text-gray-100">{row.store.storeName}</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">{row.store.dealerStoreId}</div>
-                                        {showDetails && (
-                                            <div className="mt-2 space-y-1 text-[11px] text-gray-600 dark:text-gray-300">
-                                                <p>Tue: {currency(tue?.totalCost || 0)} | Deduction: {currency(tue?.dealerDeduction || 0)} | After: {currency(tue?.expectedRebates || 0)}</p>
-                                                <p>Fri: {currency(fri?.totalCost || 0)} | Deduction: {currency(fri?.dealerDeduction || 0)} | After: {currency(fri?.expectedRebates || 0)}</p>
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td className="px-3 py-2 text-right font-semibold text-indigo-700 dark:text-indigo-300">{currency(totalRebate)}</td>
-                                    <td className="px-3 py-2 text-right font-semibold text-rose-700 dark:text-rose-300">{currency(totalDeductions)}</td>
-                                    <td className="px-3 py-2 text-right font-semibold text-emerald-700 dark:text-emerald-300">{currency(afterDeductions)}</td>
-                                </tr>
+                                <Fragment key={storeId}>
+                                    <tr className="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 align-top">
+                                        <td className="px-3 py-2">
+                                            <div className="font-medium text-gray-900 dark:text-gray-100">{row.store.storeName}</div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">{row.store.dealerStoreId}</div>
+                                            {showDetails && (
+                                                <div className="mt-2 space-y-1 text-[11px] text-gray-600 dark:text-gray-300">
+                                                    <p>Tue: {currency(tue?.totalCost || 0)} | Deduction: {currency(tue?.dealerDeduction || 0)} | After: {currency(tue?.expectedRebates || 0)}</p>
+                                                    <p>Fri: {currency(fri?.totalCost || 0)} | Deduction: {currency(fri?.dealerDeduction || 0)} | After: {currency(fri?.expectedRebates || 0)}</p>
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="px-3 py-2 text-right font-semibold text-indigo-700 dark:text-indigo-300">{currency(totalRebate)}</td>
+                                        <td className="px-3 py-2 text-right font-semibold text-rose-700 dark:text-rose-300">{currency(totalDeductions)}</td>
+                                        <td className="px-3 py-2 text-right font-semibold text-emerald-700 dark:text-emerald-300">{currency(afterDeductions)}</td>
+                                        <td className="px-3 py-2 text-right font-semibold text-amber-700 dark:text-amber-300">
+                                            {inventoryLoading ? "…" : reorder ? currency(reorder.estimatedReorderValue) : "—"}
+                                        </td>
+                                        <td className="px-3 py-2 text-center">
+                                            <button
+                                                type="button"
+                                                onClick={() => setExpandedStore((prev) => (prev === storeId ? null : storeId))}
+                                                disabled={inventoryLoading}
+                                                className="inline-flex items-center gap-1 rounded-full border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                            >
+                                                {isExpanded ? "Hide" : "View"}
+                                                <span className="text-[9px]">{isExpanded ? "▲" : "▼"}</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    {isExpanded && (
+                                        <tr className="bg-amber-50/50 dark:bg-amber-950/10">
+                                            <td colSpan={6} className="px-3 py-3">
+                                                {inventoryLoading ? (
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Loading inventory details...</p>
+                                                ) : !reorder ? (
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">No reorder data available for this store.</p>
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        <p className="text-[11px] text-gray-600 dark:text-gray-300">
+                                                            📦{" "}
+                                                            {stock
+                                                                ? <>Inventory updated {stock.updatedDate} at {stock.updatedTime}{stock.updatedPerson ? ` by ${stock.updatedPerson}` : ""}</>
+                                                                : "Inventory update time unavailable"}
+                                                        </p>
+
+                                                        {reorder.items.length === 0 ? (
+                                                            <p className="text-xs text-emerald-600 dark:text-emerald-400">✅ Fully stocked — no models need reorder.</p>
+                                                        ) : (
+                                                            <div className="overflow-x-auto">
+                                                                <table className="min-w-full text-xs">
+                                                                    <thead className="text-gray-500 dark:text-gray-400">
+                                                                        <tr>
+                                                                            <th className="px-2 py-1 text-left font-semibold">Model</th>
+                                                                            <th className="px-2 py-1 text-center font-semibold">Min Qty</th>
+                                                                            <th className="px-2 py-1 text-center font-semibold">Current Qty</th>
+                                                                            <th className="px-2 py-1 text-center font-semibold text-amber-600 dark:text-amber-400">Reorder Qty</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                                                        {reorder.items.map((item, index) => (
+                                                                            <tr key={index}>
+                                                                                <td className="px-2 py-1">{item.productName}</td>
+                                                                                <td className="px-2 py-1 text-center">{item.minimumQuantity}</td>
+                                                                                <td className="px-2 py-1 text-center">{item.currentQuantity}</td>
+                                                                                <td className="px-2 py-1 text-center font-semibold text-amber-600 dark:text-amber-400">{item.reorderQuantity}</td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    )}
+                                </Fragment>
                             );
                         })}
                     </tbody>

@@ -2,10 +2,12 @@
 
 import { useMemo, useState } from "react";
 import type { GoalsTrendingCurrentlyItem } from "@/types/goalsTrending";
+import SkeletonTable from "@/components/ui/skeletons/SkeletonTable";
 
 type Props = {
     rows: GoalsTrendingCurrentlyItem[];
     selectedMonth?: string;
+    loading?: boolean;
 };
 
 type SortKey = "store" | "trending" | "achievedPct";
@@ -75,7 +77,7 @@ function progressChipClasses(pct: number) {
     return "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-100 dark:border-rose-800";
 }
 
-export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
+export default function GoalsTrendingTable({ rows, selectedMonth, loading }: Props) {
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDir }>({ key: "store", direction: "asc" });
     const daysLeft = useMemo(() => daysLeftInSelectedMonth(selectedMonth), [selectedMonth]);
 
@@ -166,6 +168,13 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
                 </div>
             </div>
 
+            {loading ? (
+                <div className="p-3">
+                    <SkeletonTable rows={4} />
+                </div>
+            ) : sorted.length === 0 ? (
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm text-center py-6">No goals data available.</p>
+            ) : (
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs sm:text-sm table-auto">
 
@@ -279,14 +288,6 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
                                 </tr>
                             );
                         })}
-
-                        {sorted.length === 0 && (
-                            <tr>
-                                <td className="px-2 py-3 text-center text-sm text-zinc-500" colSpan={8}>
-                                    No goals data available.
-                                </td>
-                            </tr>
-                        )}
                     </tbody>
 
                     {/* ✅ TOTALS FOOTER ROW */}
@@ -334,6 +335,7 @@ export default function GoalsTrendingTable({ rows, selectedMonth }: Props) {
                     )}
                 </table>
             </div>
+            )}
         </div>
     );
 }

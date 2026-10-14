@@ -36,6 +36,7 @@ export const fetchEmployeePaychecks = async (
     includeBoxes: string,
     includeAccessories: string,
     includeTaxes: string,
+    commissionPerCompletedAccount: string = "NO",
 ): Promise<{ success: boolean; data?: PaycheckResponse; error?: string }> => {
     try {
         const response = await apiClient.get<PaycheckResponse>("/company/paycheckForEmployees", {
@@ -46,11 +47,13 @@ export const fetchEmployeePaychecks = async (
                 includeBoxesInPaycheck: includeBoxes,
                 includeAccessoriesInPaycheck: includeAccessories,
                 isTaxesIncluded: includeTaxes,
+                commissionPerCompletedAccount,
             },
         });
 
         return { success: true, data: response.data };
     } catch (error) {
-        return { success: false, error: "Failed to fetch paycheck data." };
+        const message = error instanceof Error && error.message ? error.message : "Failed to fetch paycheck data.";
+        return { success: false, error: message };
     }
 };

@@ -34,6 +34,7 @@ export type MagentaOrder = {
     transferPin: string;
     transferPinValidity: string;
     orderDate: string;
+    orderedEmployeeName?: string;
     orderId: string;
     newAccountNumber: string;
     newAccountPin?: string;
@@ -56,6 +57,7 @@ export type MagentaSuccessOrder = {
     customerName?: string;
     numberOfLines: number;
     phoneNumber: string;
+    orderedEmployeeName?: string;
     temporaryNumber?: string;
     completedDate: string;
     completedEmployeeName: string;

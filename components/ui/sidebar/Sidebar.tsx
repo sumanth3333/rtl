@@ -10,6 +10,8 @@ import { useEffect, useMemo, useState } from "react";
 import { refreshToken } from "@/services/auth/authService";
 import { useCompanyName } from "@/hooks/useComanyName";
 import { useEmployee } from "@/hooks/useEmployee";
+import { fetchPendingCorrectionRequestsCount } from "@/services/correctionRequestService";
+import { fetchNewContactRequestsCount } from "@/services/admin/contactUsAdminService";
 
 export default function Sidebar({
     isCollapsed,
@@ -62,6 +64,28 @@ export default function Sidebar({
 
     const normalizedRole = (typeof role === "string" ? role.toUpperCase() : role) as Role | undefined;
     const typedRole = normalizedRole ?? "EMPLOYEE";
+
+    // ✅ Owner-only badge: pending employee correction requests needing review.
+    const [pendingCorrectionRequests, setPendingCorrectionRequests] = useState(0);
+    useEffect(() => {
+        if (typedRole !== "OWNER") { return; }
+        let cancelled = false;
+        fetchPendingCorrectionRequestsCount().then((count) => {
+            if (!cancelled) { setPendingCorrectionRequests(count); }
+        });
+        return () => { cancelled = true; };
+    }, [typedRole]);
+
+    // ✅ Admin-only badge: new (unclaimed) support requests.
+    const [newSupportRequests, setNewSupportRequests] = useState(0);
+    useEffect(() => {
+        if (typedRole !== "ADMIN") { return; }
+        let cancelled = false;
+        fetchNewContactRequestsCount().then((count) => {
+            if (!cancelled) { setNewSupportRequests(count); }
+        });
+        return () => { cancelled = true; };
+    }, [typedRole]);
 
     const links = useMemo(() => {
         if (authLoading) { return []; }
@@ -134,6 +158,13 @@ export default function Sidebar({
                                                         path={link.path}
                                                         icon={link.icon}
                                                         isCollapsed={isCollapsed}
+                                                        badge={
+                                                            link.path === "/dashboard/owner/employee-requests"
+                                                                ? pendingCorrectionRequests
+                                                                : link.path === "/dashboard/admin/contact-us"
+                                                                    ? newSupportRequests
+                                                                    : undefined
+                                                        }
                                                         onClick={() => {
                                                             if (isMobile) { setIsCollapsed(true); }
                                                         }}
