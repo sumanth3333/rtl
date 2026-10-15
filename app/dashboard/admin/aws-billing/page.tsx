@@ -58,6 +58,7 @@ interface LoadErrors {
     overview?: string;
     services?: string;
     usage?: string;
+    invoices?: string;
 }
 
 export default function AwsBillingPage() {
@@ -74,21 +75,6 @@ export default function AwsBillingPage() {
     const [hideZeroCostUsage, setHideZeroCostUsage] = useState(true);
 
     const [invoices, setInvoices] = useState<AwsBillingInvoices | null>(null);
-    const [invoicesError, setInvoicesError] = useState<string | null>(null);
-
-    // ✅ Invoices aren't scoped by the month picker - each row carries its own billingPeriod -
-    // so this fetches once on mount instead of re-running alongside the other three.
-    useEffect(() => {
-        let cancelled = false;
-        fetchAwsBillingInvoices()
-            .then((data) => { if (!cancelled) { setInvoices(data); } })
-            .catch((err) => {
-                if (!cancelled) {
-                    setInvoicesError(err instanceof ApiError ? err.message : "Failed to load invoices.");
-                }
-            });
-        return () => { cancelled = true; };
-    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -98,7 +84,8 @@ export default function AwsBillingPage() {
             fetchAwsBillingOverview(month),
             fetchAwsBillingServices(month),
             fetchAwsBillingUsage(month),
-        ]).then(([overviewResult, servicesResult, usageResult]) => {
+            fetchAwsBillingInvoices(month),
+        ]).then(([overviewResult, servicesResult, usageResult, invoicesResult]) => {
             if (cancelled) { return; }
 
             const nextErrors: LoadErrors = {};
@@ -125,6 +112,14 @@ export default function AwsBillingPage() {
                 nextErrors.usage = usageResult.reason instanceof ApiError
                     ? usageResult.reason.message
                     : "Failed to load usage details.";
+            }
+
+            if (invoicesResult.status === "fulfilled") {
+                setInvoices(invoicesResult.value);
+            } else {
+                nextErrors.invoices = invoicesResult.reason instanceof ApiError
+                    ? invoicesResult.reason.message
+                    : "Failed to load invoices.";
             }
 
             setErrors(nextErrors);
@@ -349,8 +344,8 @@ export default function AwsBillingPage() {
                         </div>
                     )}
 
-                    {invoicesError && (
-                        <p className="text-sm text-rose-600 dark:text-rose-400">{invoicesError}</p>
+                    {errors.invoices && (
+                        <p className="text-sm text-rose-600 dark:text-rose-400">{errors.invoices}</p>
                     )}
 
                     {invoices && invoices.invoices.length === 0 && (

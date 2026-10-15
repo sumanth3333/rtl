@@ -7,11 +7,18 @@ import ExpectedPbTable from "@/components/pb/ExpectedPbTable";
 import PbCommissionCard from "@/components/pb/PbCommissionCard";
 import PAndENavBar from "@/components/owner/finance/PAndENavBar";
 import { useOwner } from "@/hooks/useOwner";
+import { ApiError } from "@/services/api/errorHandler";
+
+const getLastMonth = () => {
+    const now = new Date();
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, "0")}`;
+};
 
 export default function PbForecastPage() {
     const { companyName } = useOwner();
 
-    const [selectedMonth, setSelectedMonth] = useState("2026-01");
+    const [selectedMonth, setSelectedMonth] = useState(getLastMonth);
 
     const [rows, setRows] = useState<ExpectedPBStore[]>([]);
     const [loading, setLoading] = useState(false);
@@ -23,8 +30,8 @@ export default function PbForecastPage() {
         try {
             const res = await pbService.expectedPerformanceBonus(companyName, selectedMonth);
             setRows(res.data?.expectedPerformanceBonus ?? []);
-        } catch (e: any) {
-            setError(e?.response?.data?.message ?? "Failed to load expected performance bonus.");
+        } catch (e: unknown) {
+            setError(e instanceof ApiError ? e.message : "Failed to load expected performance bonus.");
             setRows([]);
         } finally {
             setLoading(false);

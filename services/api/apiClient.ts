@@ -42,6 +42,35 @@ apiClient.interceptors.request.use((config) => {
     return config;
 });
 
+// ✅ Module-level, so it's shared across every axios instance (apiClient, whatsappApiClient,
+// ...) - N concurrent 401s, even across different instances, await this same in-flight
+// refresh instead of each firing its own POST /auth/refreshToken. Without this, a page that
+// fires several requests at once at the moment the token expires sends one refresh call per
+// request - and if the backend rotates/invalidates the refresh token on use, only the first
+// of those actually succeeds while the rest get treated as "refresh failed" and force a logout
+// despite the user having a perfectly valid session.
+let refreshPromise: Promise<unknown> | null = null;
+
+export const refreshAccessToken = (): Promise<unknown> => {
+    if (!refreshPromise) {
+        refreshPromise = apiClient
+            .post("/auth/refreshToken") // ✅ Backend sets the new cookie
+            .finally(() => {
+                refreshPromise = null;
+            });
+    }
+    return refreshPromise;
+};
+
+// ✅ Same recovery action every client takes when refresh itself fails - stale local state
+// would otherwise retrigger this same loop on the next page load.
+export const forceLogoutRedirect = () => {
+    if (typeof window === "undefined" || window.location.pathname === "/auth/login") { return; }
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = "/auth/login";
+};
+
 // **Response Interceptor with Auto Token Refresh & Retry**
 apiClient.interceptors.response.use(
     (response) => response,
@@ -58,19 +87,11 @@ apiClient.interceptors.response.use(
             console.warn("🔄 401 Unauthorized! Attempting token refresh...");
             originalRequest._retry = true;
             try {
-                const success = await apiClient.post("/auth/refreshToken"); // ✅ Backend should set new cookie
-                if (success) {
-                    //console.log("✅ Token refreshed successfully.");
-                    return apiClient(originalRequest); // ✅ Retry original request
-                }
+                await refreshAccessToken();
+                return apiClient(originalRequest); // ✅ Retry original request
             } catch (refreshError) {
                 console.error("❌ Refresh token failed. Logging out...");
-                if (typeof window !== "undefined" && window.location.pathname !== "/auth/login") {
-                    // Clear stale session data so a future load doesn't retrigger this same loop
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    window.location.href = "/auth/login"; // ✅ Redirect user to login
-                }
+                forceLogoutRedirect();
                 return Promise.reject(refreshError);
             }
         }

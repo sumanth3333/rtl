@@ -52,6 +52,14 @@ const extractMessage = (data: any): string | null => {
     return null;
 };
 
+// ✅ status 0 = no response reached us at all (DNS/connection failure, server process down);
+// 502/503/504 = a reachable gateway reporting the app server behind it is down. Both read the
+// same to a user: the site itself is unreachable, not "your request was invalid."
+export const isServerUnreachable = (error: ApiError): boolean =>
+    error.status === 0 || error.status === 502 || error.status === 503 || error.status === 504;
+
+export const MAINTENANCE_MESSAGE = "Website is under maintenance. We will be back soon.";
+
 export const handleApiError = (error: any) => {
     console.error("🚨 API Error:", error?.response?.data || error.message);
 

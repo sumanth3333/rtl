@@ -5,7 +5,7 @@ import * as z from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { useOwner } from "./useOwner";
 import { useEmployee } from "./useEmployee";
-import { AxiosError } from "axios";
+import { ApiError, isServerUnreachable, MAINTENANCE_MESSAGE } from "@/services/api/errorHandler";
 import { login } from "@/services/auth/authService";
 import { isPhoneDevice } from "@/utils/deviceType";
 import { AUTH_BROADCAST_CHANNEL, AUTH_SYNC_EVENT_KEY } from "@/constants/authSync";
@@ -81,9 +81,8 @@ export function useLogin(onLoginSuccess: () => void) {
         } catch (error: unknown) {
             console.error("🚨 Login error:", error);
 
-            // ✅ Correct way to handle Axios errors
-            if (error instanceof AxiosError) {
-                setErrorMessage(error.response?.data?.message || "An unexpected error occurred");
+            if (error instanceof ApiError && isServerUnreachable(error)) {
+                setErrorMessage(MAINTENANCE_MESSAGE);
             } else if (error instanceof Error) {
                 setErrorMessage(error.message);
             } else {

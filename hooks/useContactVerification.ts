@@ -158,18 +158,18 @@ export function useContactVerification(employeeNtid: string) {
         && (emailRequested || phoneRequested);
 
     const confirm = useCallback(async () => {
-        if (!requestId || !canConfirm) { return; }
+        if (!requestId || !pendingSecureCode || !canConfirm) { return; }
         setConfirming(true);
         setConfirmError(null);
         try {
-            await confirmContactVerification(employeeNtid, requestId);
+            await confirmContactVerification(employeeNtid, requestId, pendingSecureCode);
             setStep("done");
         } catch (error) {
             setConfirmError(error instanceof ApiError ? error.message : "Failed to save your contact changes. Please try again.");
         } finally {
             setConfirming(false);
         }
-    }, [employeeNtid, requestId, canConfirm]);
+    }, [employeeNtid, requestId, pendingSecureCode, canConfirm]);
 
     return {
         step,

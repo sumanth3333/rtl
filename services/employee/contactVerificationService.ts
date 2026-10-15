@@ -83,11 +83,13 @@ export const getWhatsappVerificationStatus = async (
 
 export const confirmContactVerification = async (
     employeeNtid: string,
-    requestId: string
+    requestId: string,
+    secureCode: string
 ): Promise<ConfirmContactUpdateResponse> => {
     const response = await apiClient.post<ConfirmContactUpdateResponse>(`${BASE}/confirm`, {
         employeeNtid,
         requestId,
+        secureCode,
     });
     return response.data;
 };

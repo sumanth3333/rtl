@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { PbCommission } from "@/types/pb";
 import { pbService } from "@/services/pbService";
+import { ApiError } from "@/services/api/errorHandler";
 import { safeNum } from "@/lib/pbFormat";
 import { CommissionPreview, FieldRow } from "@/components/pb/PbInputs";
 
@@ -34,8 +35,8 @@ export default function PbCommissionCard({
             const res = await pbService.viewCommission(companyName);
             setCommission(res.data);
             setDraft(res.data);
-        } catch (e: any) {
-            setError(e?.response?.data?.message ?? "Failed to load commission settings.");
+        } catch (e: unknown) {
+            setError(e instanceof ApiError ? e.message : "Failed to load commission settings.");
         } finally {
             setLoading(false);
         }
@@ -72,8 +73,8 @@ export default function PbCommissionCard({
             setMsg("Performance bonus commission saved.");
             await load();
             onSaved?.();
-        } catch (e: any) {
-            setError(e?.response?.data?.message ?? "Failed to save PB commission.");
+        } catch (e: unknown) {
+            setError(e instanceof ApiError ? e.message : "Failed to save PB commission.");
         } finally {
             setSaving(false);
         }

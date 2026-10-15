@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEmployee } from "@/hooks/useEmployee";
 import { useLogout } from "@/hooks/useLogout";
 import { clockInEmployee, clockOutEmployee, getSecureCodeStatus } from "@/services/employee/employeeService";
-import { ApiError } from "@/services/api/errorHandler";
+import { ApiError, isServerUnreachable, MAINTENANCE_MESSAGE } from "@/services/api/errorHandler";
 import { useRouter } from "next/navigation";
 import SecureCodeSetupModal from "@/components/employee/SecureCodeSetupModal";
 import SecureCodeVerifyModal from "@/components/employee/SecureCodeVerifyModal";
@@ -14,7 +14,7 @@ type SidebarFooterProps = {
     isCollapsed: boolean;
 };
 
-type ClockInErrorKind = "permission" | "location-required" | "distance" | "store-config" | "generic";
+type ClockInErrorKind = "permission" | "location-required" | "distance" | "store-config" | "maintenance" | "generic";
 
 interface ClockInErrorState {
     kind: ClockInErrorKind;
@@ -37,6 +37,10 @@ const getCurrentPosition = (): Promise<GeolocationPosition> =>
 
 const classifyClockInError = (error: unknown): ClockInErrorState => {
     if (error instanceof ApiError) {
+        if (isServerUnreachable(error)) {
+            return { kind: "maintenance", title: "Website Under Maintenance", message: MAINTENANCE_MESSAGE };
+        }
+
         const message = error.message;
         const lowerMessage = message.toLowerCase();
         const distanceMeters = error.data?.distanceMeters;

@@ -120,8 +120,8 @@ export type CorrectionChange = {
 
 export type CorrectionRequest = {
     requestId: number;
-    employeeId: number;
-    storeId: number;
+    employeeName: string;
+    storeName: string;
     date: string;
     status: CorrectionStatus;
     reason: string;

@@ -122,8 +122,8 @@ export default function EmployeeRequestsPage() {
                             {requests.map((req) => (
                                 <tr key={req.requestId} className="text-gray-800 dark:text-gray-200">
                                     <td className="py-3 px-4 font-medium">#{req.requestId}</td>
-                                    <td className="py-3 px-4">{req.employeeId}</td>
-                                    <td className="py-3 px-4">{req.storeId}</td>
+                                    <td className="py-3 px-4">{req.employeeName}</td>
+                                    <td className="py-3 px-4">{req.storeName}</td>
                                     <td className="py-3 px-4">{req.date}</td>
                                     <td className="py-3 px-4 max-w-xs truncate" title={req.reason}>{req.reason}</td>
                                     <td className="py-3 px-4">
@@ -158,7 +158,7 @@ export default function EmployeeRequestsPage() {
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                Employee #{selected.employeeId} · Store #{selected.storeId} · {selected.date}
+                                {selected.employeeName} · {selected.storeName} · {selected.date}
                             </p>
                         </div>
 

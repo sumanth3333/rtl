@@ -23,8 +23,9 @@ export const fetchAwsBillingUsage = async (month: string): Promise<AwsUsageBreak
     return response.data;
 };
 
-// ✅ Not scoped by month - the response carries each invoice's own billingPeriod.
-export const fetchAwsBillingInvoices = async (): Promise<AwsBillingInvoices> => {
-    const response = await apiClient.get<AwsBillingInvoices>(API_ROUTES.AWS_BILLING.INVOICES);
+export const fetchAwsBillingInvoices = async (month: string): Promise<AwsBillingInvoices> => {
+    const response = await apiClient.get<AwsBillingInvoices>(API_ROUTES.AWS_BILLING.INVOICES, {
+        params: { month },
+    });
     return response.data;
 };
