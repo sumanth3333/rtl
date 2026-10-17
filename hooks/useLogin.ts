@@ -7,7 +7,6 @@ import { useOwner } from "./useOwner";
 import { useEmployee } from "./useEmployee";
 import { ApiError, isServerUnreachable, MAINTENANCE_MESSAGE } from "@/services/api/errorHandler";
 import { login } from "@/services/auth/authService";
-import { isPhoneDevice } from "@/utils/deviceType";
 import { AUTH_BROADCAST_CHANNEL, AUTH_SYNC_EVENT_KEY } from "@/constants/authSync";
 
 const loginSchema = z.object({
@@ -29,25 +28,6 @@ export function useLogin(onLoginSuccess: () => void) {
     });
 
     const onSubmit = async (data: LoginData) => {
-
-        // 🚨 Determine if the user is an employee by checking for '@' in username
-        const isEmployee = !data.userName.includes("@");
-
-        // Block employees on phones (UA-based, not just width)
-        if (isEmployee && isPhoneDevice()) {
-            setErrorMessage("📱 Oh, look who’s back on their phone! 👀\n\n" +
-                "Nice try — but employee logins are *officially* blocked on phones now. " +
-                "Grab a store tablet like everyone else. 😎");
-            return;
-        }
-        // 🚨 Block employees from logging in on small screens before making any request
-        if (isEmployee && window.innerWidth < 768) {
-            setErrorMessage("📱 Oh, look who’s back on their phone! 👀\n\n" +
-                "Nice try — but employee logins are *officially* blocked on phones now. " +
-                "Grab a store tablet like everyone else. 😎");
-            return; // ❌ STOP LOGIN PROCESS HERE
-        }
-
         setIsLoading(true);
         setErrorMessage("");
         try {
