@@ -37,7 +37,11 @@ export default function ManageEmployees() {
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!companyName) { return; }
+        // companyName only ever comes from localStorage (set at interactive login) - if a
+        // restored session reaches this page without it (e.g. localStorage was cleared but
+        // the auth cookies are still valid), there's nothing to fetch. Without this branch
+        // `loading` stays true forever with no request ever firing and no error shown.
+        if (!companyName) { setLoading(false); return; }
         setLoading(true);
         Promise.all([getEmployees(companyName)]).then(([employeesData]) => {
             setEmployees(employeesData);
@@ -164,6 +168,14 @@ export default function ManageEmployees() {
             setSavingEdit(false);
         }
     };
+
+    if (!companyName) {
+        return (
+            <div className="m-6 rounded-md border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+                We couldn&apos;t find your company for this session. Please sign out and sign back in.
+            </div>
+        );
+    }
 
     return (
         <>

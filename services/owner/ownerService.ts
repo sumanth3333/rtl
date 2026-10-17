@@ -2,7 +2,7 @@ import apiClient from "@/services/api/apiClient";
 import { Employee, EodReport, InactiveEmployee } from "@/types/employeeSchema";
 import { Store } from "@/schemas/storeSchema";
 import { AssignedTodo } from "@/types/todosTypes";
-import { EodReportByOwner } from "@/types/ownerTypes";
+import { SubmitSaleOnBehalfOfEmployeeRequest } from "@/types/ownerTypes";
 
 // ✅ Fetch all stores
 export const getStores = async (companyName: string): Promise<Store[]> => {
@@ -299,9 +299,8 @@ export const getLatestEodByDate = async (companyName: string, date: string) => {
     }
 };
 
-export const submitEodReport = async (data: EodReportByOwner) => {
+export const submitEodReport = async (data: SubmitSaleOnBehalfOfEmployeeRequest) => {
     try {
-        console.log(data);
         const response = await apiClient.post("/company/submitSaleOnBehalfOfEmployee", data);
         //console.log("✅ EOD Report Submitted Successfully:", response.data);
         return response.data; // Return the API response if needed

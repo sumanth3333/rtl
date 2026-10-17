@@ -1,6 +1,7 @@
 import axios from "axios";
 import { handleApiError } from "./errorHandler";
 import { forceLogoutRedirect, refreshAccessToken } from "./apiClient";
+import { getCsrfState, isCsrfFailure, refreshCsrfState } from "./csrfManager";
 
 const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -13,6 +14,17 @@ const whatsappApiClient = axios.create({
         "Timezone": userTimezone,
     },
     withCredentials: true,
+});
+
+const CSRF_PROTECTED_METHODS = new Set(["post", "put", "patch", "delete"]);
+
+whatsappApiClient.interceptors.request.use(async (config) => {
+    const method = config.method?.toLowerCase();
+    if (method && CSRF_PROTECTED_METHODS.has(method)) {
+        const { token, headerName } = await getCsrfState();
+        config.headers.set(headerName, token);
+    }
+    return config;
 });
 
 // ✅ Same auto-refresh-and-retry apiClient has, reusing its shared in-flight refresh so a 401
@@ -36,6 +48,28 @@ whatsappApiClient.interceptors.response.use(
                 console.error("❌ Refresh token failed. Logging out...");
                 forceLogoutRedirect();
                 return Promise.reject(refreshError);
+            }
+        }
+
+        // ✅ Already refreshed once for this request and it's still 401 - session isn't
+        // recoverable, same reasoning as apiClient.
+        if (error.response && error.response.status === 401 && originalRequest?._retry) {
+            forceLogoutRedirect();
+        }
+
+        if (
+            error.response &&
+            error.response.status === 403 &&
+            isCsrfFailure(error.response.data) &&
+            originalRequest &&
+            !originalRequest._csrfRetry
+        ) {
+            originalRequest._csrfRetry = true;
+            try {
+                await refreshCsrfState();
+                return whatsappApiClient(originalRequest);
+            } catch {
+                // Couldn't refetch a CSRF token - fall through to the generic error below.
             }
         }
 

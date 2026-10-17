@@ -1,5 +1,6 @@
 import axios from "axios";
 import { handleApiError } from "./errorHandler";
+import { getCsrfState, isCsrfFailure, refreshCsrfState } from "./csrfManager";
 
 const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -33,12 +34,22 @@ const requestGeolocationOnce = () => {
     );
 };
 
-apiClient.interceptors.request.use((config) => {
+// Methods the backend's CSRF filter protects - GET/HEAD/OPTIONS are exempt by design.
+const CSRF_PROTECTED_METHODS = new Set(["post", "put", "patch", "delete"]);
+
+apiClient.interceptors.request.use(async (config) => {
     requestGeolocationOnce();
     if (cachedCoords) {
         config.headers.set("Latitude", String(cachedCoords.latitude));
         config.headers.set("Longitude", String(cachedCoords.longitude));
     }
+
+    const method = config.method?.toLowerCase();
+    if (method && CSRF_PROTECTED_METHODS.has(method)) {
+        const { token, headerName } = await getCsrfState();
+        config.headers.set(headerName, token);
+    }
+
     return config;
 });
 
@@ -64,8 +75,18 @@ export const refreshAccessToken = (): Promise<unknown> => {
 
 // ✅ Same recovery action every client takes when refresh itself fails - stale local state
 // would otherwise retrigger this same loop on the next page load.
+//
+// Guarded to run only once per page load: several components can each independently hit a
+// 401 around the same time (e.g. on initial dashboard mount), each attempt its own refresh
+// via the single-flight promise above, and each independently land in this function when
+// that shared refresh fails - without this guard, every one of them reassigns
+// window.location.href, which restarts the in-flight navigation each time and looks like
+// the page continuously reloading instead of navigating once.
+let loggingOut = false;
 export const forceLogoutRedirect = () => {
     if (typeof window === "undefined" || window.location.pathname === "/auth/login") { return; }
+    if (loggingOut) { return; }
+    loggingOut = true;
     localStorage.clear();
     sessionStorage.clear();
     window.location.href = "/auth/login";
@@ -93,6 +114,32 @@ apiClient.interceptors.response.use(
                 console.error("❌ Refresh token failed. Logging out...");
                 forceLogoutRedirect();
                 return Promise.reject(refreshError);
+            }
+        }
+
+        // ✅ We already refreshed once for this request and it STILL came back 401 -
+        // the session isn't recoverable. Without this, the user is stuck on a broken
+        // page (every request failing) with no real logout, since handleApiError below
+        // only logs - it never redirects.
+        if (error.response && error.response.status === 401 && originalRequest?._retry) {
+            forceLogoutRedirect();
+        }
+
+        // ✅ CSRF token rotated/expired server-side (e.g. session changed in another tab) -
+        // refetch once and retry, same single-retry shape as the 401/refresh handling above.
+        if (
+            error.response &&
+            error.response.status === 403 &&
+            isCsrfFailure(error.response.data) &&
+            originalRequest &&
+            !originalRequest._csrfRetry
+        ) {
+            originalRequest._csrfRetry = true;
+            try {
+                await refreshCsrfState();
+                return apiClient(originalRequest);
+            } catch {
+                // Couldn't refetch a CSRF token - fall through to the generic error below.
             }
         }
 

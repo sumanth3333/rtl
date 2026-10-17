@@ -13,6 +13,7 @@ import {
 import { DeletedStoreRequest, StoreDeletionPendingRequest } from "@/types/storeDeletion";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import SuccessModal from "@/components/ui/modals/SuccessModal";
+import StoreAddressSection from "@/components/admin/stores/StoreAddressSection";
 
 const formatDateTime = (value?: string) => {
     if (!value) { return "—"; }
@@ -107,6 +108,8 @@ export default function AdminStoresPage() {
                     Process owner-submitted store deletion requests and restore stores within their retention window.
                 </p>
             </div>
+
+            <StoreAddressSection />
 
             {/* Pending deletion requests */}
             <section>

@@ -2,7 +2,9 @@
 
 import apiClient from "@/services/api/apiClient";
 import { CurrentEmployee, CurrentStore, EmployeeContextType } from "@/types/employeeTypes";
-import { createContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useState, useEffect, useCallback, useContext, ReactNode } from "react";
+import { AuthContext } from "@/contexts/AuthContext";
+import { fetchAuthenticatedUser } from "@/services/auth/authService";
 
 export const EmployeeContext = createContext<EmployeeContextType>({
     isClockin: false,
@@ -53,7 +55,7 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const setEmployeeData = (data: any) => {
+    const setEmployeeData = useCallback((data: any) => {
         setEmployee(data.employee);
         setStore(data.store);
 
@@ -64,9 +66,10 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
             localStorage.setItem("employeeData", JSON.stringify(data.employee));
             localStorage.setItem("storeData", JSON.stringify(data.store));
         }
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-    const clearEmployeeData = () => {
+    const clearEmployeeData = useCallback(() => {
         setEmployee(null);
         setStore(null);
         setIsClockin(false);
@@ -80,7 +83,25 @@ export function EmployeeProvider({ children }: { children: ReactNode }) {
             localStorage.removeItem("employeeData");
             localStorage.removeItem("storeData");
         }
-    };
+    }, []);
+
+    // AuthContext is an ancestor of this provider (see app/layout.tsx).
+    const auth = useContext(AuthContext);
+    const isAuthenticated = auth?.isAuthenticated ?? false;
+    const role = auth?.role ?? null;
+
+    // Fallback: authenticated as EMPLOYEE but localStorage has nothing (cleared, different
+    // device, private window, ...) - re-fetch from the session instead of every page that
+    // needs employee/store data hanging forever with no request ever firing.
+    useEffect(() => {
+        if (!isAuthenticated || role !== "EMPLOYEE" || (employee && store)) { return; }
+        let cancelled = false;
+        fetchAuthenticatedUser().then((data) => {
+            if (cancelled || !data?.employee || !data?.store) { return; }
+            setEmployeeData(data);
+        });
+        return () => { cancelled = true; };
+    }, [isAuthenticated, role, employee, store, setEmployeeData]);
 
     useEffect(() => {
         if (typeof window !== "undefined") {

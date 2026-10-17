@@ -2,12 +2,12 @@
 
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { EmployeeSaleEntry, EodReport, eodReportSchema } from "@/types/employeeSchema";
+import { EmployeeSaleEntry, EodReport, eodReportSchema, MultiEmployeeSalesEntry } from "@/types/employeeSchema";
 import Button from "@/components/ui/Button";
 import { useEmployee } from "@/hooks/useEmployee";
-import { getEmployeesWorking, getCompanyEmployees } from "@/services/employee/employeeService";
+import { getEmployeesWorking, getCompanyEmployees, fetchMultiEmployeeSales } from "@/services/employee/employeeService";
 import { useCompanyName } from "@/hooks/useComanyName";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import ConfirmationModal from "../ui/modals/ConfirmationModal";
 import SuccessModal from "../ui/modals/SuccessModal";
 import { useLogout } from "@/hooks/useLogout";
@@ -28,6 +28,9 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
     const [employeesWorking, setEmployeesWorking] = useState<{ employeeNtid: string; employeeName: string }[]>([]);
     const [individualEntries, setIndividualEntries] = useState<EodReport[]>([]);
     const [showIndividualForm, setShowIndividualForm] = useState(false);
+    // ✅ Keyed by employeeNtid - whatever was last submitted for this store/date, used to
+    // pre-fill each individual entry below instead of starting every row at zero.
+    const [multiEmployeeSalesByNtid, setMultiEmployeeSalesByNtid] = useState<Record<string, MultiEmployeeSalesEntry["sales"]>>({});
 
     // ✅ Sequential gate questions shown after the store-level totals
     const [hasExpenses, setHasExpenses] = useState<boolean | null>(null);
@@ -81,6 +84,24 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
                     if (response.count > 1) {
                         setEmployeesWorking(response.employees);
                         setShowIndividualForm(true);
+
+                        // ✅ Pre-fill the per-employee split below with whatever was last
+                        // submitted for today, instead of leaving every row at zero.
+                        const today = new Date().toLocaleDateString("en-CA");
+                        fetchMultiEmployeeSales(store.dealerStoreId, today)
+                            .then((multiSales) => {
+                                if (!isMounted) { return; }
+                                const byNtid: Record<string, MultiEmployeeSalesEntry["sales"]> = {};
+                                multiSales.employees.forEach((emp) => {
+                                    byNtid[emp.employeeNtid] = emp.sales;
+                                });
+                                setMultiEmployeeSalesByNtid(byNtid);
+                            })
+                            .catch((error) => {
+                                if (isMounted) {
+                                    console.error("❌ Failed to fetch multi-employee sales:", error);
+                                }
+                            });
                     }
                 })
                 .catch((error) => {
@@ -143,37 +164,50 @@ export default function EodForm({ initialValues }: { initialValues: EodReport })
         setIndividualEntries((prev) => prev.map((entry, i) => ({ ...entry, ...values[i] })));
     }, []);
 
-    // Initialize per-employee entries with zeroed defaults so inputs start at 0
+    // Initialize per-employee entries - pre-filled from a previously submitted split when
+    // available, zeroed otherwise, so inputs don't start blank on every visit
     const lastTransactionTime = watchLastTxn;
     const watchedExpenses = watchExpenses ?? [];
+    // ✅ multiEmployeeSalesByNtid loads asynchronously, shortly after employeesWorking - this
+    // lets the entries below be re-seeded with real values the one time that data arrives,
+    // even though individualEntries was already zero-filled by then, without re-seeding again
+    // afterward and clobbering the employee's own edits.
+    const appliedMultiSalesRef = useRef(false);
 
     useEffect(() => {
         if (!employeesWorking.length) { return; }
+        const hasMultiSales = Object.keys(multiEmployeeSalesByNtid).length > 0;
+        const shouldApplyMultiSales = hasMultiSales && !appliedMultiSalesRef.current;
+
         setIndividualEntries((prev) => {
-            if (prev.length === employeesWorking.length) { return prev; } // keep user edits
-            return employeesWorking.map((emp, index) => ({
-                ...(prev[index] ?? {}),
-                store: { dealerStoreId: store?.dealerStoreId || "" },
-                employee: { employeeNtid: emp.employeeNtid },
-                systemCash: 0,
-                actualCash: 0,
-                systemCard: 0,
-                actualCard: 0,
-                creditCard: prev[index]?.creditCard ?? 0,
-                debitCard: prev[index]?.debitCard ?? 0,
-                lastTransactionTime: lastTransactionTime,
-                expenses: watchedExpenses,
-                boxesSold: prev[index]?.boxesSold ?? 0,
-                migrations: prev[index]?.migrations ?? 0,
-                upgrade: prev[index]?.upgrade ?? 0,
-                hsiSold: prev[index]?.hsiSold ?? 0,
-                tabletsSold: prev[index]?.tabletsSold ?? 0,
-                watchesSold: prev[index]?.watchesSold ?? 0,
-                accessoriesByEmployee: prev[index]?.accessoriesByEmployee ?? 0,
-                systemAccessories: prev[index]?.systemAccessories ?? 0,
-            }));
+            if (prev.length === employeesWorking.length && !shouldApplyMultiSales) { return prev; } // keep user edits
+            if (shouldApplyMultiSales) { appliedMultiSalesRef.current = true; }
+            return employeesWorking.map((emp, index) => {
+                const sales = multiEmployeeSalesByNtid[emp.employeeNtid];
+                return {
+                    ...(prev[index] ?? {}),
+                    store: { dealerStoreId: store?.dealerStoreId || "" },
+                    employee: { employeeNtid: emp.employeeNtid },
+                    systemCash: 0,
+                    actualCash: 0,
+                    systemCard: 0,
+                    actualCard: 0,
+                    creditCard: prev[index]?.creditCard ?? 0,
+                    debitCard: prev[index]?.debitCard ?? 0,
+                    lastTransactionTime: lastTransactionTime,
+                    expenses: watchedExpenses,
+                    boxesSold: sales?.boxesSold ?? prev[index]?.boxesSold ?? 0,
+                    migrations: sales?.migrations ?? prev[index]?.migrations ?? 0,
+                    upgrade: sales?.upgrade ?? prev[index]?.upgrade ?? 0,
+                    hsiSold: sales?.hsiSold ?? prev[index]?.hsiSold ?? 0,
+                    tabletsSold: sales?.tabletsSold ?? prev[index]?.tabletsSold ?? 0,
+                    watchesSold: sales?.watchesSold ?? prev[index]?.watchesSold ?? 0,
+                    accessoriesByEmployee: sales?.accessories ?? prev[index]?.accessoriesByEmployee ?? 0,
+                    systemAccessories: sales?.systemAccessories ?? prev[index]?.systemAccessories ?? 0,
+                };
+            });
         });
-    }, [employeesWorking, store?.dealerStoreId, lastTransactionTime, watchedExpenses]);
+    }, [employeesWorking, store?.dealerStoreId, lastTransactionTime, watchedExpenses, multiEmployeeSalesByNtid]);
 
     useEffect(() => {
         if (store?.dealerStoreId && employee?.employeeNtid) {

@@ -27,10 +27,12 @@ export const eodReportSchema = z.object({
     watchesSold: z.number().nonnegative("Watches cannot be negative"),
     expenses: z.array(
         z.object({
+            id: z.number().optional(), // present only when this expense already exists on the backend
             amount: z.number().nonnegative(),
             reason: z.string().min(1),
             expenseType: z.enum(["Short", "Over"]),
             paymentType: z.enum(["Cash", "Card"]),
+            deleteExpense: z.boolean().optional(), // true = remove this existing expense on submit
         })
     ).optional(),
     clockinTime: z.string().regex(
@@ -52,3 +54,45 @@ export const eodReportSchema = z.object({
 
 
 export type EodReportByOwner = z.infer<typeof eodReportSchema>;
+
+// ✅ Wire shape for POST /company/submitSaleOnBehalfOfEmployee - a store-level envelope around
+// a per-employee sales array. This form only ever submits for the one employee selected in the
+// page's dropdown, so employeeSales always has exactly one entry, and salesCreditOnly is always
+// false (this flow never credits a sale to someone who didn't work the shift).
+export interface SubmitSaleOnBehalfOfEmployeeExpense {
+    id: number;
+    reason: string;
+    amount: number;
+    paymentType: "Cash" | "Card";
+    expenseType: "Short" | "Over";
+    deleteExpense: boolean;
+}
+
+export interface SubmitSaleOnBehalfOfEmployeeEntry {
+    employeeNtid: string;
+    clockinTime: string;
+    clockoutTime: string;
+    salesCreditOnly: boolean;
+    boxesSold: number;
+    systemAccessories: number;
+    accessoriesByEmployee: number;
+    upgrade: number;
+    tabletsSold: number;
+    hsiSold: number;
+    watchesSold: number;
+    migrations: number;
+}
+
+export interface SubmitSaleOnBehalfOfEmployeeRequest {
+    dealerStoreId: string;
+    saleDate: string;
+    systemCash: number;
+    systemCard: number;
+    creditCard: number;
+    debitCard: number;
+    actualCash: number;
+    actualCard: number;
+    lastTransactionTime: string;
+    expenses: SubmitSaleOnBehalfOfEmployeeExpense[];
+    employeeSales: SubmitSaleOnBehalfOfEmployeeEntry[];
+}

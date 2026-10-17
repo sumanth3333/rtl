@@ -2,10 +2,21 @@
 
 import { createContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { getUser, logoutAPI, refreshToken } from "@/services/auth/authService";
+import { forceLogoutRedirect } from "@/services/api/apiClient";
 import { AuthContextType } from "@/types/authTypes";
 import { AUTH_BROADCAST_CHANNEL, AUTH_SYNC_EVENT_KEY, AuthSyncEventType } from "@/constants/authSync";
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// ✅ Mirrors middleware.ts's matcher - only these prefixes actually require a session.
+// Everything else (/auth/login, /setup-password, /unauthorized, ...) is intentionally
+// reachable with no session, so a confirmed "not authenticated" there is normal, not an error.
+const PROTECTED_PATH_PREFIXES = ["/dashboard", "/profile", "/settings", "/store-deletion"];
+
+const isOnProtectedRoute = () => {
+  if (typeof window === "undefined") { return false; }
+  return PROTECTED_PATH_PREFIXES.some((prefix) => window.location.pathname.startsWith(prefix));
+};
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -70,6 +81,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     } else {
       clearAuthState();
+      // ✅ Confirmed logged out (not "still checking") on a page that requires a session -
+      // without this, the user is left staring at a dashboard whose sidebar waits forever
+      // for a role that will never arrive, with no way back to the login screen.
+      if (isOnProtectedRoute()) {
+        forceLogoutRedirect();
+      }
     }
   }, [clearAuthState]);
 

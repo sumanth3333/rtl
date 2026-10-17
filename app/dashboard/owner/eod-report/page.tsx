@@ -5,6 +5,7 @@ import { getStores, getEmployees, getEodDetails } from "@/services/owner/ownerSe
 import { useOwner } from "@/hooks/useOwner";
 import { Store } from "@/schemas/storeSchema";
 import { Employee } from "@/types/employeeSchema";
+import { EodReportByOwner } from "@/types/ownerTypes";
 import EodForm from "@/components/owner/EodForm";
 import EodSummaryByDate from "@/components/owner/EodSummaryByDate";
 import ChangeEmployeeStore from "@/components/owner/ChangeEmployeeStore";
@@ -20,7 +21,7 @@ export default function LogEodReportOwnerPage() {
     const [summaryDate, setSummaryDate] = useState("");
     const [activeTab, setActiveTab] = useState<"summary" | "log" | "assignment">("summary");
 
-    const [eodFormValues, setEodFormValues] = useState({
+    const [eodFormValues, setEodFormValues] = useState<EodReportByOwner>({
         store: { dealerStoreId },
         employee: { employeeNtid },
         clockinTime: "10:00:00",
@@ -35,8 +36,7 @@ export default function LogEodReportOwnerPage() {
         accessories: 0,
         saleDate: selectedDate,
         lastTransactionTime: "10:00:00",
-        cashExpense: 0,
-        expenseReason: "NONE",
+        expenses: [],
         boxesSold: 0,
         upgrade: 0,
         migrations: 0,
@@ -75,8 +75,16 @@ export default function LogEodReportOwnerPage() {
                         saleDate: selectedDate,
                         accessories: data.accessories ?? 0,
                         lastTransactionTime: data.lastTransactionTime ?? "10:00:00",
-                        cashExpense: data.cashExpense ?? 0,
-                        expenseReason: data.expenseReason ?? "NONE",
+                        // ✅ Carry the real backend id for each existing expense - needed so the
+                        // form can tell the API which specific row to delete if it's removed.
+                        expenses: (data.expenses ?? []).map((exp: any) => ({
+                            id: exp.id,
+                            amount: exp.amount ?? 0,
+                            reason: exp.reason ?? "",
+                            expenseType: exp.expenseType ?? "Short",
+                            paymentType: exp.paymentType ?? "Cash",
+                            deleteExpense: false,
+                        })),
                         boxesSold: data.boxesSold ?? 0,
                         upgrade: data.upgrade ?? 0,
                         migrations: data.migrations ?? 0,
@@ -102,8 +110,7 @@ export default function LogEodReportOwnerPage() {
                         accessories: 0,
                         saleDate: selectedDate,
                         lastTransactionTime: "10:00:00",
-                        cashExpense: 0,
-                        expenseReason: "NONE",
+                        expenses: [],
                         boxesSold: 0,
                         upgrade: 0,
                         migrations: 0,
@@ -151,17 +158,19 @@ export default function LogEodReportOwnerPage() {
 
             {/* EOD Summary */}
             {activeTab === "summary" && (
-                <div className="w-full max-w-3xl mx-auto">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                        View Submitted EODs For:
-                    </label>
-                    <input
-                        type="date"
-                        max={new Date().toISOString().split("T")[0]}
-                        value={summaryDate}
-                        onChange={(e) => setSummaryDate(e.target.value)}
-                        className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white mb-4"
-                    />
+                <div className="w-full max-w-7xl mx-auto">
+                    <div className="max-w-xs">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                            View Submitted EODs For:
+                        </label>
+                        <input
+                            type="date"
+                            max={new Date().toISOString().split("T")[0]}
+                            value={summaryDate}
+                            onChange={(e) => setSummaryDate(e.target.value)}
+                            className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white mb-4"
+                        />
+                    </div>
                     {summaryDate && companyName && (
                         <EodSummaryByDate date={summaryDate} companyName={companyName} />
                     )}

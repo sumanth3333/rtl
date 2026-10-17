@@ -109,3 +109,62 @@ export interface EodSubmissionRequest {
     employeeSales: EmployeeSaleEntry[];
     expenses: EodExpenseEntry[];
 }
+
+// ✅ One employee's share within GET /sale/fetchMultiEmployeeSales - mirrors a previously
+// submitted EOD's per-employee split, not a separate/live POS feed.
+export interface MultiEmployeeSalesEntry {
+    employeeNtid: string;
+    employeeName: string;
+    workedAtStore: boolean;
+    saleCredit: boolean;
+    saleSubmitted: boolean;
+    clockInTime: string | null;
+    clockOutTime: string | null;
+    hoursWorked: number | null;
+    sales: {
+        boxesSold: number;
+        systemAccessories: number;
+        accessories: number;
+        upgrade: number;
+        tabletsSold: number;
+        hsiSold: number;
+        watchesSold: number;
+        migrations: number;
+    };
+}
+
+export interface MultiEmployeeStoreSales {
+    totalBoxesSold: number;
+    totalAccessories: number;
+    totalUpgrades: number;
+    totalTabletsSold: number;
+    totalHsiSold: number;
+    totalWatchesSold: number;
+    totalMigrations: number;
+}
+
+export interface MultiEmployeeStoreFinancials {
+    systemCash: number;
+    systemCard: number;
+    actualCash: number;
+    actualCard: number;
+    creditCard: number;
+    debitCard: number;
+    systemAccessories: number;
+    lastTransactionTime: string | null;
+    cashExpense: number;
+    expenseReason: string;
+}
+
+export interface MultiEmployeeSalesResponse {
+    dealerStoreId: string;
+    saleDate: string;
+    numberOfEmployeesWorking: number;
+    numberOfEmployeesWithSaleCredit: number;
+    multipleEmployees: boolean;
+    saleSubmitted: boolean;
+    employees: MultiEmployeeSalesEntry[];
+    storeSales: MultiEmployeeStoreSales;
+    storeFinancials: MultiEmployeeStoreFinancials;
+    expenses: EodExpenseEntry[];
+}

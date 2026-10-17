@@ -1,4 +1,4 @@
-import { EodSubmissionRequest } from "@/types/employeeSchema";
+import { EodSubmissionRequest, MultiEmployeeSalesResponse } from "@/types/employeeSchema";
 import apiClient from "../api/apiClient";
 import { Todo } from "@/types/todos";
 import { LateOpeningStatus } from "@/types/lateOpeningTypes";
@@ -248,6 +248,18 @@ export const getEmployeesWorking = async (dealerStoreId: string) => {
         console.error("❌ Failed to fetch employees working:", error);
         throw new Error("Failed to retrieve employees working data.");
     }
+};
+
+// ✅ Per-employee breakdown mirroring whatever was last submitted for this store/date - used
+// to pre-fill the multi-employee EOD split instead of starting every row at zero.
+export const fetchMultiEmployeeSales = async (
+    dealerStoreId: string,
+    date: string
+): Promise<MultiEmployeeSalesResponse> => {
+    const response = await apiClient.get<MultiEmployeeSalesResponse>("/sale/fetchMultiEmployeeSales", {
+        params: { dealerStoreId, date },
+    });
+    return response.data;
 };
 
 export const fetchCompanyNameByNtid = async (employeeNtid: string) => {

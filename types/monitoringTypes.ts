@@ -195,8 +195,30 @@ export type HealthStatus = "HEALTHY" | "WARNING" | "CRITICAL" | "UNKNOWN";
 
 export interface ServerHealthIssue {
     code: string;
-    message: string;
     severity: HealthStatus;
+    component: string;
+    message: string;
+    recommendation?: string | null;
+}
+
+export interface ApiRecentError {
+    timestamp: string;
+    status: number;
+    exception: string;
+    message: string;
+}
+
+export interface ApiEndpointStats {
+    method: string;
+    endpoint: string;
+    requests: number;
+    errors: number;
+    clientErrors: number;
+    serverErrors: number;
+    errorRate: number;
+    averageResponseTimeMs: number;
+    errorsByStatus: Record<string, number>;
+    recentErrors: ApiRecentError[];
 }
 
 export interface ServerHealthSnapshot {
@@ -252,14 +274,14 @@ export interface ServerHealthSnapshot {
     };
     database: {
         status: string;
-        responseTimeMs: number;
+        responseTimeMs: number | null;
         connectionPool: {
             active: number;
             idle: number;
             pending: number;
             max: number;
             usagePercentage: number;
-        };
+        } | null;
     };
     http: {
         requestsSinceStartup: number;
@@ -268,13 +290,7 @@ export interface ServerHealthSnapshot {
         totalErrorsSinceStartup: number;
         activeRequests: number;
         averageResponseTimeMs: number;
-        topApis: {
-            method: string;
-            endpoint: string;
-            requests: number;
-            errors: number;
-            averageResponseTimeMs: number;
-        }[];
+        topApis: ApiEndpointStats[];
         status: string;
     };
     userActivity: {

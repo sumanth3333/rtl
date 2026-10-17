@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     AlertCircle,
     CheckCircle2,
@@ -22,8 +22,9 @@ import {
 } from "@/services/admin/monitoringService";
 import { HealthStatus, RestartRequest, ServerHealthSnapshot } from "@/types/monitoringTypes";
 import { ApiError } from "@/services/api/errorHandler";
-import { StatTile } from "@/components/admin/monitoring/StatTile";
+import { StatTile, StatTone } from "@/components/admin/monitoring/StatTile";
 import { UsageBar } from "@/components/admin/monitoring/UsageBar";
+import { TopApisPanel } from "@/components/admin/monitoring/TopApisPanel";
 
 const HEALTH_POLL_MS = 10_000;
 const RESTART_POLL_MS = 2_000;
@@ -42,6 +43,22 @@ const bannerClassesForStatus = (status: HealthStatus) => {
         return "border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300";
     }
     return "border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300";
+};
+
+const issueClassesForSeverity = (severity: HealthStatus) => {
+    if (severity === "CRITICAL") {
+        return "border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300";
+    }
+    if (severity === "WARNING") {
+        return "border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300";
+    }
+    return "border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 text-gray-600 dark:text-gray-400";
+};
+
+const toneForRate = (rate: number, warnAt: number, critAt: number): StatTone => {
+    if (rate >= critAt) { return "critical"; }
+    if (rate >= warnAt) { return "warning"; }
+    return "good";
 };
 
 const formatUptime = (seconds: number) => {
@@ -75,6 +92,14 @@ export default function ServerHealthPage() {
 
     const restartBusy = restartPhase === "requesting" || restartPhase === "polling";
 
+    // Guards the recursive restart-status poll below so it stops if the admin navigates
+    // away mid-restart, instead of continuing to hit the API from an unmounted page.
+    const unmountedRef = useRef(false);
+    useEffect(() => {
+        unmountedRef.current = false;
+        return () => { unmountedRef.current = true; };
+    }, []);
+
     const loadHealth = useCallback((silent: boolean) => {
         if (!silent) { setLoading(true); }
         return fetchServerHealth()
@@ -95,8 +120,10 @@ export default function ServerHealthPage() {
     }, [loadHealth]);
 
     const pollRestartStatus = useCallback((requestId: string, attempt: number) => {
+        if (unmountedRef.current) { return; }
         fetchRestartRequestStatus(requestId)
             .then((res) => {
+                if (unmountedRef.current) { return; }
                 setRestartResult(res);
                 if (res.status === "PENDING" && attempt < RESTART_POLL_MAX_ATTEMPTS) {
                     setTimeout(() => pollRestartStatus(requestId, attempt + 1), RESTART_POLL_MS);
@@ -106,6 +133,7 @@ export default function ServerHealthPage() {
                 }
             })
             .catch(() => {
+                if (unmountedRef.current) { return; }
                 // Server is likely mid-restart and unreachable - keep polling until it comes back or we hit the cap.
                 if (attempt < RESTART_POLL_MAX_ATTEMPTS) {
                     setTimeout(() => pollRestartStatus(requestId, attempt + 1), RESTART_POLL_MS);
@@ -191,22 +219,44 @@ export default function ServerHealthPage() {
                                 <AlertCircle className="w-5 h-5 shrink-0" />
                             )}
                             <div>
-                                <p className="text-sm font-bold">{health.overall.status} · {health.overall.operationalState}</p>
+                                <p className="text-sm font-bold flex items-center gap-2">
+                                    {health.overall.status} · {health.overall.operationalState}
+                                    {!health.overall.ready && (
+                                        <span className="rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-black/10 dark:bg-white/10">
+                                            Not Ready
+                                        </span>
+                                    )}
+                                </p>
                                 <p className="text-xs opacity-90">{health.overall.summary}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4 text-xs font-medium">
                             <span>Critical: {health.overall.criticalCount}</span>
                             <span>Warning: {health.overall.warningCount}</span>
+                            <span>Unknown: {health.overall.unknownCount}</span>
                             <span>{health.environment} · {health.applicationName}</span>
                         </div>
                     </div>
 
                     <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <StatTile label="Uptime" value={formatUptime(health.server.uptimeSeconds)} icon={Clock} tone="info" />
-                        <StatTile label="DB Response" value={`${health.database.responseTimeMs} ms`} icon={Database} tone={health.database.status === "UP" ? "good" : "critical"} />
                         <StatTile label="Active Requests" value={health.http.activeRequests} icon={Server} tone="neutral" />
+                        <StatTile label="Avg Response" value={`${health.http.averageResponseTimeMs.toFixed(0)} ms`} icon={Server} tone="neutral" />
                         <StatTile label="Active Users" value={health.userActivity.activeUsers} icon={Users} tone="neutral" />
+                        <StatTile label="Requests (startup)" value={health.http.requestsSinceStartup} icon={Server} tone="neutral" />
+                        <StatTile
+                            label="Error Rate"
+                            value={`${health.http.errorPercentageSinceStartup.toFixed(2)}%`}
+                            icon={AlertCircle}
+                            tone={toneForRate(health.http.errorPercentageSinceStartup, 2, 10)}
+                        />
+                        <StatTile
+                            label="Server Errors (5xx)"
+                            value={health.http.serverErrorsSinceStartup}
+                            icon={XCircle}
+                            tone={health.http.serverErrorsSinceStartup > 0 ? "critical" : "good"}
+                        />
+                        <StatTile label="Total Errors" value={health.http.totalErrorsSinceStartup} icon={AlertCircle} tone={health.http.totalErrorsSinceStartup > 0 ? "warning" : "good"} />
                     </section>
 
                     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -219,7 +269,7 @@ export default function ServerHealthPage() {
                         <UsageBar
                             label="Memory"
                             percentage={health.memory.usagePercentage}
-                            detail={`${health.memory.usedMB} / ${health.memory.totalMB} MB`}
+                            detail={`${health.memory.usedMB} / ${health.memory.totalMB} MB · ${health.memory.availableMB} MB free`}
                             status={health.memory.status}
                         />
                         <UsageBar
@@ -231,34 +281,57 @@ export default function ServerHealthPage() {
                         <UsageBar
                             label="JVM Heap"
                             percentage={health.jvm.heapUsagePercentage}
-                            detail={`${health.jvm.heapUsedMB} / ${health.jvm.heapMaxMB} MB · ${health.jvm.threadCount} threads`}
+                            detail={`${health.jvm.heapUsedMB} / ${health.jvm.heapMaxMB} MB · ${health.jvm.threadCount} threads (peak ${health.jvm.peakThreadCount}) · non-heap ${health.jvm.nonHeapUsedMB} MB · GC ${health.jvm.gcCollectionCount}× / ${(health.jvm.gcCollectionTimeMs / 1000).toFixed(1)}s`}
                             status={health.jvm.status}
                         />
                     </section>
 
-                    <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <TopApisPanel apis={health.http.topApis} />
+
+                    <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0e1729] shadow-sm p-4 space-y-3">
-                            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Top APIs</h2>
-                            {health.http.topApis.length === 0 ? (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No requests recorded yet.</p>
+                            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <Database className="w-4 h-4" />
+                                Database
+                            </h2>
+                            <div className="flex items-center justify-between text-xs">
+                                <span className="text-gray-500 dark:text-gray-400">Status</span>
+                                <span className={`font-semibold ${health.database.status === "UP" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                                    {health.database.status}
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                                <span className="text-gray-500 dark:text-gray-400">Response Time</span>
+                                <span className="text-gray-900 dark:text-gray-100 font-medium">
+                                    {health.database.responseTimeMs != null ? `${health.database.responseTimeMs} ms` : "N/A"}
+                                </span>
+                            </div>
+                            {health.database.connectionPool ? (
+                                <>
+                                    <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                                        <div
+                                            className="h-full rounded-full bg-indigo-500 transition-all"
+                                            style={{ width: `${Math.min(100, Math.max(0, health.database.connectionPool.usagePercentage))}%` }}
+                                        />
+                                    </div>
+                                    <dl className="grid grid-cols-2 gap-y-1 text-[11px]">
+                                        <dt className="text-gray-500 dark:text-gray-400">Active / Idle</dt>
+                                        <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">
+                                            {health.database.connectionPool.active} / {health.database.connectionPool.idle}
+                                        </dd>
+                                        <dt className="text-gray-500 dark:text-gray-400">Pending / Max</dt>
+                                        <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">
+                                            {health.database.connectionPool.pending} / {health.database.connectionPool.max}
+                                        </dd>
+                                    </dl>
+                                </>
                             ) : (
-                                <div className="space-y-1.5">
-                                    {health.http.topApis.map((api, i) => (
-                                        <div key={i} className="flex items-center justify-between gap-2 text-xs border-b border-gray-100 dark:border-gray-800 pb-1.5 last:border-0 last:pb-0">
-                                            <span className="font-mono truncate">
-                                                <span className="font-bold text-indigo-600 dark:text-indigo-400">{api.method}</span> {api.endpoint}
-                                            </span>
-                                            <span className="text-gray-500 dark:text-gray-400 shrink-0">
-                                                {api.requests} req · {api.averageResponseTimeMs.toFixed(0)} ms{api.errors > 0 ? ` · ${api.errors} err` : ""}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
+                                <p className="text-[11px] text-gray-500 dark:text-gray-400">Connection pool metrics unavailable.</p>
                             )}
                         </div>
 
                         <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0e1729] shadow-sm p-4 space-y-3">
-                            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Server & Activity</h2>
+                            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Server</h2>
                             <dl className="grid grid-cols-2 gap-y-1.5 text-xs">
                                 <dt className="text-gray-500 dark:text-gray-400">Host</dt>
                                 <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">{health.server.hostname} (pid {health.server.processId})</dd>
@@ -266,24 +339,50 @@ export default function ServerHealthPage() {
                                 <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">{health.server.javaVersion} · {health.server.operatingSystem}</dd>
                                 <dt className="text-gray-500 dark:text-gray-400">Started</dt>
                                 <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">{formatDateTime(health.server.startedAt)}</dd>
-                                <dt className="text-gray-500 dark:text-gray-400">Admins / Owners / Managers / Employees</dt>
-                                <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">
-                                    {health.userActivity.activeAdmins} / {health.userActivity.activeOwners} / {health.userActivity.activeManagers} / {health.userActivity.activeEmployees}
-                                </dd>
+                                <dt className="text-gray-500 dark:text-gray-400">Last restart</dt>
+                                <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">{formatDateTime(health.restart.lastStartedAt)}</dd>
                                 <dt className="text-gray-500 dark:text-gray-400">Last restart status</dt>
                                 <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">{health.restart.lastRestartStatus}</dd>
+                                <dt className="text-gray-500 dark:text-gray-400">Restart in progress</dt>
+                                <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">{health.restart.restartInProgress ? "Yes" : "No"}</dd>
+                            </dl>
+                        </div>
+
+                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0e1729] shadow-sm p-4 space-y-3">
+                            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Active Users</h2>
+                            <dl className="grid grid-cols-2 gap-y-1.5 text-xs">
+                                <dt className="text-gray-500 dark:text-gray-400">Admins</dt>
+                                <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">{health.userActivity.activeAdmins}</dd>
+                                <dt className="text-gray-500 dark:text-gray-400">Owners</dt>
+                                <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">{health.userActivity.activeOwners}</dd>
+                                <dt className="text-gray-500 dark:text-gray-400">Managers</dt>
+                                <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">{health.userActivity.activeManagers}</dd>
+                                <dt className="text-gray-500 dark:text-gray-400">Employees</dt>
+                                <dd className="text-gray-900 dark:text-gray-100 text-right font-medium">{health.userActivity.activeEmployees}</dd>
+                                <dt className="text-gray-700 dark:text-gray-300 font-semibold">Total</dt>
+                                <dd className="text-gray-900 dark:text-gray-100 text-right font-bold">{health.userActivity.activeUsers}</dd>
                             </dl>
                         </div>
                     </section>
 
                     {health.issues.length > 0 && (
-                        <section className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 p-4 space-y-2">
-                            <h2 className="text-sm font-semibold text-amber-800 dark:text-amber-300">Detected Issues</h2>
+                        <section className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0e1729] shadow-sm p-4 space-y-2">
+                            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Detected Issues</h2>
                             {health.issues.map((issue, i) => (
-                                <div key={i} className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
-                                    <AlertCircle className="w-4 h-4 shrink-0" />
-                                    <span className="font-mono text-xs">{issue.code}</span>
-                                    <span>{issue.message}</span>
+                                <div key={i} className={`rounded-lg border px-3 py-2 ${issueClassesForSeverity(issue.severity)}`}>
+                                    <div className="flex items-start gap-2 text-sm">
+                                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                                        <div className="min-w-0 space-y-0.5">
+                                            <p>
+                                                <span className="font-mono text-xs font-semibold mr-1.5">{issue.code}</span>
+                                                <span className="text-[10px] uppercase tracking-wide font-bold opacity-75">{issue.component}</span>
+                                            </p>
+                                            <p>{issue.message}</p>
+                                            {issue.recommendation && (
+                                                <p className="text-xs opacity-80">→ {issue.recommendation}</p>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             ))}
                         </section>

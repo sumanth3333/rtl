@@ -67,6 +67,10 @@ export const API_ROUTES = {
         SUBMIT: "/contact-us/submit",
         MY_REQUESTS: "/contact-us/my-requests",
     },
+    STORE_ADDRESS: {
+        GET: "/admin/address",
+        UPDATE: "/admin/address/update",
+    },
     ADMIN_CONTACT_US: {
         BASE: "/admin/contact-us",
         NEW: "/admin/contact-us/new",

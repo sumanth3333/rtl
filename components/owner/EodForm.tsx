@@ -8,7 +8,7 @@ import { useEmployee } from "@/hooks/useEmployee";
 import { useState, useEffect } from "react";
 import ConfirmationModal from "../ui/modals/ConfirmationModal";
 import SuccessModal from "../ui/modals/SuccessModal";
-import { EodReportByOwner, eodReportSchema } from "@/types/ownerTypes";
+import { EodReportByOwner, eodReportSchema, SubmitSaleOnBehalfOfEmployeeRequest } from "@/types/ownerTypes";
 import { submitEodReport } from "@/services/owner/ownerService";
 
 export default function EodForm({ initialValues, storeName, employeeName, saleDate }: { initialValues: EodReportByOwner, storeName: string, employeeName: string, saleDate: string }) {
@@ -17,7 +17,7 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
     const [confirmClockOut, setConfirmClockOut] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [formData, setFormData] = useState<EodReportByOwner | null>(null);
+    const [formData, setFormData] = useState<SubmitSaleOnBehalfOfEmployeeRequest | null>(null);
 
     const {
         register,
@@ -32,9 +32,12 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
         defaultValues: initialValues,
     });
 
-    const { fields, append, remove } = useFieldArray({
+    // ✅ keyName avoids colliding React Hook Form's own per-row render key with our own
+    // backend expense `id` field
+    const { fields, append, remove, update } = useFieldArray({
         control,
         name: "expenses",
+        keyName: "fieldKey",
     });
 
     useEffect(() => {
@@ -71,26 +74,62 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
     const cashDifference = parseFloat((adjustedActualCash - systemCash).toFixed(2));
     const cardDifference = parseFloat((adjustedActualCard - systemCard).toFixed(2));
 
+    // ✅ A pre-existing expense (fetched from the backend, has a real id) is soft-deleted -
+    // kept in the array with deleteExpense:true so the backend knows which specific row to
+    // remove - rather than dropped outright. A brand-new, never-submitted row can just be
+    // removed locally since nothing exists server-side for it yet.
+    const handleRemoveExpense = (index: number) => {
+        const current = expenses[index];
+        if (current?.id != null) {
+            update(index, { ...current, deleteExpense: true });
+        } else {
+            remove(index);
+        }
+    };
+
     const onSubmit = async (data: EodReportByOwner) => {
         if (!confirmClockOut) {
             alert("⚠️ You must confirm clock-out before submitting.");
             return;
         }
 
-        const formattedData = {
-            ...data,
-            actualCash: parseFloat((data.actualCash ?? 0).toFixed(2)),
+        const payload: SubmitSaleOnBehalfOfEmployeeRequest = {
+            dealerStoreId: data.store.dealerStoreId,
+            saleDate,
             systemCash: parseFloat((data.systemCash ?? 0).toFixed(2)),
-            actualCard: parseFloat((data.actualCard ?? 0).toFixed(2)),
+            systemCard: parseFloat((data.systemCard ?? 0).toFixed(2)),
             creditCard: parseFloat((data.creditCard ?? 0).toFixed(2)),
             debitCard: parseFloat((data.debitCard ?? 0).toFixed(2)),
-            systemCard: parseFloat((data.systemCard ?? 0).toFixed(2)),
-            systemAccessories: parseFloat((data.systemAccessories ?? 0).toFixed(2)),
-            accessories: parseFloat((data.accessories ?? 0).toFixed(2)),
-            saleDate,
+            actualCash: parseFloat((data.actualCash ?? 0).toFixed(2)),
+            actualCard: parseFloat((data.actualCard ?? 0).toFixed(2)),
+            lastTransactionTime: data.lastTransactionTime,
+            expenses: (data.expenses ?? []).map((exp) => ({
+                id: exp.id ?? 0,
+                reason: exp.reason,
+                amount: parseFloat(exp.amount.toFixed(2)),
+                paymentType: exp.paymentType,
+                expenseType: exp.expenseType,
+                deleteExpense: exp.deleteExpense ?? false,
+            })),
+            employeeSales: [
+                {
+                    employeeNtid: data.employee.employeeNtid,
+                    clockinTime: data.clockinTime,
+                    clockoutTime: data.clockoutTime,
+                    salesCreditOnly: false,
+                    boxesSold: data.boxesSold,
+                    systemAccessories: parseFloat((data.systemAccessories ?? 0).toFixed(2)),
+                    accessoriesByEmployee: parseFloat((data.accessories ?? 0).toFixed(2)),
+                    upgrade: data.upgrade,
+                    tabletsSold: data.tabletsSold,
+                    hsiSold: data.hsiSold,
+                    watchesSold: data.watchesSold,
+                    migrations: data.migrations,
+                },
+            ],
         };
 
-        setFormData(formattedData);
+        setFormData(payload);
         setShowConfirm(true);
     };
 
@@ -98,7 +137,7 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
         setShowConfirm(false);
         setLoading(true);
         try {
-            await submitEodReport(formData as EodReportByOwner);
+            await submitEodReport(formData as SubmitSaleOnBehalfOfEmployeeRequest);
             setShowSuccess(true);
             reset();
         } catch (error) {
@@ -154,38 +193,41 @@ export default function EodForm({ initialValues, storeName, employeeName, saleDa
 
                 <div className="mt-6">
                     <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-2">Over / Short Expenses</h3>
-                    <button type="button" onClick={() => append({ amount: 0, expenseType: "Short", paymentType: "Cash", reason: "" })} className="text-blue-600 text-sm mb-4 underline">+ Add Expense</button>
-                    {fields.map((field, index) => (
-                        <div key={field.id} className="grid grid-cols-4 gap-3 mb-3">
-                            <InputField label="Amount" type="number" step="0.01" {...register(`expenses.${index}.amount`, { valueAsNumber: true })} error={errors.expenses?.[index]?.amount?.message} />
-                            <Controller
-                                control={control}
-                                name={`expenses.${index}.expenseType`}
-                                render={({ field }) => (
-                                    <select {...field} className="...">
-                                        <option value="">Select</option>
-                                        <option value="Short">Short</option>
-                                        <option value="Over">Over</option>
-                                    </select>
-                                )}
-                            />
+                    <button type="button" onClick={() => append({ amount: 0, expenseType: "Short", paymentType: "Cash", reason: "", deleteExpense: false })} className="text-blue-600 text-sm mb-4 underline">+ Add Expense</button>
+                    {fields.map((field, index) => {
+                        if (expenses[index]?.deleteExpense) { return null; } // ✅ soft-deleted - hidden, but still included on submit
+                        return (
+                            <div key={field.fieldKey} className="grid grid-cols-4 gap-3 mb-3">
+                                <InputField label="Amount" type="number" step="0.01" {...register(`expenses.${index}.amount`, { valueAsNumber: true })} error={errors.expenses?.[index]?.amount?.message} />
+                                <Controller
+                                    control={control}
+                                    name={`expenses.${index}.expenseType`}
+                                    render={({ field }) => (
+                                        <select {...field} className="...">
+                                            <option value="">Select</option>
+                                            <option value="Short">Short</option>
+                                            <option value="Over">Over</option>
+                                        </select>
+                                    )}
+                                />
 
-                            <Controller
-                                control={control}
-                                name={`expenses.${index}.paymentType`}
-                                render={({ field }) => (
-                                    <select {...field} className="...">
-                                        <option value="">Select</option>
-                                        <option value="Cash">Cash</option>
-                                        <option value="Card">Card</option>
-                                    </select>
-                                )}
-                            />
+                                <Controller
+                                    control={control}
+                                    name={`expenses.${index}.paymentType`}
+                                    render={({ field }) => (
+                                        <select {...field} className="...">
+                                            <option value="">Select</option>
+                                            <option value="Cash">Cash</option>
+                                            <option value="Card">Card</option>
+                                        </select>
+                                    )}
+                                />
 
-                            <InputField label="Reason" type="text" {...register(`expenses.${index}.reason`)} error={errors.expenses?.[index]?.reason?.message} />
-                            <button type="button" onClick={() => remove(index)} className="text-xs text-red-600 underline ml-1 mt-1">Remove</button>
-                        </div>
-                    ))}
+                                <InputField label="Reason" type="text" {...register(`expenses.${index}.reason`)} error={errors.expenses?.[index]?.reason?.message} />
+                                <button type="button" onClick={() => handleRemoveExpense(index)} className="text-xs text-red-600 underline ml-1 mt-1">Remove</button>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 <div className="my-6 flex items-center gap-2">
