@@ -14,6 +14,8 @@ import { DeletedStoreRequest, StoreDeletionPendingRequest } from "@/types/storeD
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import SuccessModal from "@/components/ui/modals/SuccessModal";
 import StoreAddressSection from "@/components/admin/stores/StoreAddressSection";
+import ManualClockInSection from "@/components/ui/ManualClockInSection";
+import { adminManualClockIn } from "@/services/manualClockInService";
 
 const formatDateTime = (value?: string) => {
     if (!value) { return "—"; }
@@ -110,6 +112,8 @@ export default function AdminStoresPage() {
             </div>
 
             <StoreAddressSection />
+
+            <ManualClockInSection submit={adminManualClockIn} />
 
             {/* Pending deletion requests */}
             <section>

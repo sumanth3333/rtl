@@ -5,6 +5,8 @@ import { useOwner } from "@/hooks/useOwner";
 import ClockinsMatrix from "@/components/owner/paycheck/ClockinsMatrix";
 import { getStoreClockins, StoreClockinReport } from "@/services/owner/ownerService";
 import SkeletonTable from "@/components/ui/skeletons/SkeletonTable";
+import ManualClockInSection from "@/components/ui/ManualClockInSection";
+import { companyManualClockIn } from "@/services/manualClockInService";
 
 function getDefaultRange() {
   const end = new Date();
@@ -87,6 +89,8 @@ export default function ClockinsPage() {
           </div>
         </div>
       </div>
+
+      {companyName && <ManualClockInSection companyName={companyName} submit={companyManualClockIn} />}
 
       {storeLoading ? (
         <SkeletonTable rows={5} />

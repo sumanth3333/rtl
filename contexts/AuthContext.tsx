@@ -2,7 +2,7 @@
 
 import { createContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { fetchAuthenticatedUser, logoutAPI } from "@/services/auth/authService";
-import { forceLogoutRedirect } from "@/services/api/apiClient";
+import { forceLogoutRedirect, refreshAccessToken } from "@/services/api/apiClient";
 import { AuthContextType } from "@/types/authTypes";
 import { AUTH_BROADCAST_CHANNEL, AUTH_SYNC_EVENT_KEY, AuthSyncEventType } from "@/constants/authSync";
 
@@ -95,6 +95,21 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
+
+  // ✅ Proactively rotate the access token (30-minute lifetime) a few minutes before it expires,
+  // so a long-open dashboard tab never has to hit a reactive 401-then-refresh round trip -
+  // which, on a hard navigation that lands on a page requiring auth, used to be visible as a
+  // bounce through /auth/login. Silent in-place refresh instead; the reactive 401 path in
+  // apiClient.ts stays as the fallback for anything this timer misses.
+  useEffect(() => {
+    if (!isAuthenticated) { return; }
+    const interval = setInterval(() => {
+      refreshAccessToken().catch(() => {
+        // A real request will hit the reactive 401 path and log out if the session is truly gone.
+      });
+    }, 25 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (typeof window === "undefined") { return; }

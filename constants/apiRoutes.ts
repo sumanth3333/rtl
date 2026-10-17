@@ -71,6 +71,10 @@ export const API_ROUTES = {
         GET: "/admin/address",
         UPDATE: "/admin/address/update",
     },
+    MANUAL_CLOCK_IN: {
+        ADMIN: "/admin/manualClockIn",
+        COMPANY: "/company/manualClockIn",
+    },
     ADMIN_CONTACT_US: {
         BASE: "/admin/contact-us",
         NEW: "/admin/contact-us/new",
