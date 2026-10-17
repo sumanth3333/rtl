@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { getUser, logoutAPI, refreshToken } from "@/services/auth/authService";
+import { fetchAuthenticatedUser, logoutAPI } from "@/services/auth/authService";
 import { forceLogoutRedirect } from "@/services/api/apiClient";
 import { AuthContextType } from "@/types/authTypes";
 import { AUTH_BROADCAST_CHANNEL, AUTH_SYNC_EVENT_KEY, AuthSyncEventType } from "@/constants/authSync";
@@ -61,21 +61,22 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // ✅ Function to fetch user data and update state
+  //
+  // GET /v1/auth/me is called directly (via apiClient, straight to the backend origin) -
+  // it, not the old Next.js-local /api/auth/me shim, because the __Host- prefixed auth
+  // cookies are host-locked to the backend's own origin by design and can never be read by
+  // our Next.js server on a different subdomain. apiClient's response interceptor already
+  // handles the "access token expired, refresh once, retry" case generically for any 401,
+  // so no manual refresh-and-retry orchestration is needed here anymore.
   const fetchUser = useCallback(async () => {
-    let user = await getUser();
-    let normalizedRole = normalizeRole(user?.role);
+    const user = await fetchAuthenticatedUser();
+    const normalizedRole = normalizeRole(user?.role);
 
-    // New tabs can have only refresh token available; restore access token once and retry.
-    if (!user?.loginEmail || !normalizedRole) {
-      const refreshed = await refreshToken();
-      if (refreshed) {
-        user = await getUser();
-        normalizedRole = normalizeRole(user?.role);
-      }
-    }
-
-    if (user?.loginEmail && normalizedRole) {
-      setUsername(user.loginEmail.split("@")[0]);
+    if (user && normalizedRole) {
+      const displayName = user.loginEmail
+        ? user.loginEmail.split("@")[0]
+        : user.employee?.employeeName || user.employee?.employeeNtid || "";
+      setUsername(displayName);
       setRole(normalizedRole);
       setIsAuthenticated(true);
       setIsLoading(false);

@@ -7,6 +7,7 @@ export interface DecodedToken {
 // shape /v1/auth/login already returns for that role, so it never needs its own parsing
 // logic beyond what login's response already has.
 export interface AuthenticatedUserDetails {
+    role?: string;
     loginEmail?: string;
     loginPerson?: string; // OWNER/MANAGER - the company name
     employee?: { employeeNtid: string; employeeName: string };
